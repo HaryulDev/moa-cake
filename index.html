@@ -152,6 +152,8 @@ svg.ic{width:1em;height:1em;vertical-align:-.15em;overflow:visible}
 #game.fluid .r3d .rBomi{width:24%;height:auto;aspect-ratio:200/272}
 .top svg{filter:drop-shadow(0 1.5px 1px rgba(107,42,60,.32))}
 .tw{transform-box:fill-box;transform-origin:center;animation:tw 2.6s ease-in-out infinite}
+.twk{animation:twk 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes twk{50%{opacity:.25;transform:scale(.5)}}
 @keyframes tw{0%,100%{opacity:0;transform:scale(.3) rotate(0)}50%{opacity:1;transform:scale(1) rotate(45deg)}}
 .decoCtl{display:flex;flex-direction:column;gap:6px;width:116px;flex:none}
 .decoCtl input{width:100%;border:2px solid #ffd3e0;border-radius:10px;padding:5px 8px;font-size:16px;color:var(--ink);outline:none}
@@ -175,6 +177,11 @@ svg.ic{width:1em;height:1em;vertical-align:-.15em;overflow:visible}
 .ord li{display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:2px dashed #ffe0ea}
 .ord li svg.ic{font-size:22px}
 .ord li b{font-weight:normal;color:#c0577c;width:46px;flex:none}
+.wantRow{display:flex;gap:8px;align-items:center;font-size:14px}
+.wantPic{width:112px;height:84px;flex:none;background:#fff6f9;border:2px dashed #ffb3c8;border-radius:12px}
+.wantPic svg{width:100%;height:100%;display:block}
+.wantTxt{font-size:12px;line-height:1.5;color:#a5617b;min-width:0}
+.wantTxt svg.ic{font-size:16px}
 .ord .ok{margin-left:auto;color:#3cb371;font-style:normal}
 .ord .no{margin-left:auto;color:#e57373;font-style:normal;font-size:13px}
 .chip{display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid #eee;vertical-align:-3px}
@@ -810,6 +817,9 @@ const ICONS = (() => {
     <path d="M50 6 C60 18 60 30 50 31 C40 30 40 18 50 6Z" fill="#ffb02e"/><path d="M50 16 C55 23 55 29 50 30 C45 29 45 23 50 16Z" fill="#fff07a"/>`;
   I.sprinkle = [['#ff6f9b',20,30,30],['#ffd36e',56,20,-40],['#6fd2c0',72,52,20],['#8aa2ff',30,62,-30],['#c48aff',50,46,70],['#ff9a5a',62,78,10],['#ff6f9b',22,84,60],['#6fd2c0',80,28,80]]
     .map(([c,x,y,a])=>`<rect x="${x-10}" y="${y-3.5}" width="20" height="7" rx="3.5" fill="${c}" transform="rotate(${a} ${x} ${y})"/>`).join('');
+  I.almond = [[34,40,-20],[60,34,25],[46,62,5],[70,62,-35],[28,68,40]].map(([x,y,a]) => `<g transform="translate(${x} ${y}) rotate(${a}) scale(2.6)"><path d="M-6 0 Q-5 -3.6 0 -3.8 Q5.5 -3.4 6.5 0 Q5 3.4 0 3.6 Q-5 3.4 -6 0Z" fill="#f3dcb2" stroke="#c99860" stroke-width=".8"/><path d="M-4 -.4 Q0 -2 4.5 -.2" stroke="#e2bd84" stroke-width=".7" fill="none"/></g>`).join('');
+  I.glitter = `<circle cx="50" cy="50" r="40" fill="#fff6dc" opacity=".55"/>` + [[30,34,'#ffd36e',5],[62,28,'#ffc9de',4],[44,62,'#d9c8ff',4.5],[70,60,'#ffe9a3',5],[26,70,'#ffd36e',3.5],[56,46,'#fff',3],[76,40,'#f6d27a',3.5]].map(([x,y,c,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="#e7b94c" stroke-width="1"/>`).join('')
+    + [[50,22,11],[34,48,8],[72,76,9]].map(([x,y,r])=>`<path d="M${x} ${y-r} Q${x} ${y} ${x+r} ${y} Q${x} ${y} ${x} ${y+r} Q${x} ${y} ${x-r} ${y} Q${x} ${y} ${x} ${y-r}Z" fill="#ffe07a" stroke="#e0a800" stroke-width="1.2"/>`).join('');
   // 재료
   I.flour = `<path d="M24 26 L76 26 L84 92 Q50 98 16 92Z" fill="#f7f1e6" stroke="#c9b79a" stroke-width="3"/>
     <path d="M22 26 Q50 14 78 26 L74 34 Q50 26 26 34Z" fill="#e8dcc6" stroke="#c9b79a" stroke-width="2"/>
@@ -1447,9 +1457,9 @@ const TOPPINGS = [
   {id:'straw',n:'딸기',cat:0},{id:'cherry',n:'체리',cat:0},{id:'blue',n:'블루베리',cat:0},{id:'rasp',n:'라즈베리',cat:0},{id:'kiwi',n:'키위',cat:0},
   {id:'peach',n:'복숭아',cat:0},{id:'banana',n:'바나나',cat:0},{id:'orange',n:'오렌지',cat:0},{id:'grape',n:'포도',cat:0},{id:'mint',n:'민트잎',cat:0},
   {id:'choc',n:'초콜릿',cat:1},{id:'cookie',n:'쿠키',cat:1},{id:'macaron',n:'마카롱',cat:1},{id:'marsh',n:'마시멜로',cat:1},{id:'donut',n:'도넛',cat:1},
-  {id:'stick',n:'초코스틱',cat:1},{id:'candy',n:'사탕',cat:1},{id:'lolli',n:'롤리팝',cat:1},{id:'pearl',n:'진주알',cat:1},
+  {id:'stick',n:'초코스틱',cat:1},{id:'candy',n:'사탕',cat:1},{id:'lolli',n:'롤리팝',cat:1},{id:'pearl',n:'진주알',cat:1},{id:'almond',n:'아몬드',cat:1},
   {id:'candle',n:'초',cat:2},{id:'star',n:'별',cat:2},{id:'flower',n:'꽃',cat:2},{id:'heart',n:'하트',cat:2},{id:'ribbon',n:'리본',cat:2},
-  {id:'crown',n:'왕관',cat:2},{id:'butterfly',n:'나비',cat:2},{id:'sprinkle',n:'스프링클',cat:2}
+  {id:'crown',n:'왕관',cat:2},{id:'butterfly',n:'나비',cat:2},{id:'sprinkle',n:'스프링클',cat:2},{id:'glitter',n:'반짝이',cat:2}
 ];
 const TOP_CATS = ['과일','달콤','장식'];
 const TOP = Object.fromEntries(TOPPINGS.map(t => [t.id, t]));
@@ -1580,7 +1590,7 @@ function samplePts(shape,n){
 }
 
 /* ---------- 케이크 그리기 ---------- */
-function newCake(){ return {ing:{}, pieces:[], flavor:null, flavors:[], mix:0, shape:'round', tiers:1, bake:null, frost:null, cover:0, strokes:[], frostFull:false, dollops:[], decos:[], sprinkles:[[],[],[]], text:''}; }
+function newCake(){ return {ing:{}, pieces:[], flavor:null, flavors:[], mix:0, shape:'round', tiers:1, bake:null, frost:null, cover:0, strokes:[], frostFull:false, dollops:[], decos:[], sprinkles:[[],[],[]], sideSpr:[[],[],[]], sprHist:[], text:''}; }
 const hasFrost = c => !!c.frost && (c.frostFull || c.strokes.length>0 || c.cover>0);
 /* 3D 케이크를 쓸 수 있으면 true (Three.js를 못 불러오면 예전 2D 그림으로 그려요) */
 const use3D = () => !!(window.C3D && C3D.ok) && (typeof G === 'undefined' || !G || !G.recipe || G.recipe === 'cake');
@@ -1599,7 +1609,7 @@ function spongeColor(c){
 }
 function geom(c, cx=CAKE_X, baseY=CAKE_Y, sc=1, only=null){
   const g=[]; let y=baseY;
-  const lift = hasFrost(c) ? 3*sc : 0;
+  const lift = hasFrost(c) ? 7*sc : 0;
   const idx = only==null ? [...Array(c.tiers).keys()] : [only];
   for (const i of idx){ const R=TR[i]*sc, H=TH[i]*sc; g.push({idx:i,cx,R,H,bottom:y,top:y-H,ty:y-H-lift}); y-=H; }
   return g;
@@ -1720,9 +1730,9 @@ function renderCake(c, {cx=CAKE_X, baseY=CAKE_Y, sc=1, plate=true, pick=false, o
     out += `<path d="${D}" transform="${tf(t.top)}" fill="${topF(shade(sp,.06))}"/>`;
     if (frosted){
       out += `<g${maskAttr}>`;
-      for (let y=t.bottom+1; y>t.ty; y-=step) out += `<path d="${D}" transform="${tf(y,1.035)}" fill="${side(fr)}"/>`;
-      out += `<path d="${D}" transform="${tf(t.ty,1.035)}" fill="${topF(fr)}"/>
-        <path d="${D}" transform="${tf(t.ty,1.02)}" fill="none" stroke="${shade(fr,.5)}" stroke-width="${(2.2*sc).toFixed(1)}" vector-effect="non-scaling-stroke" opacity=".7"/>
+      for (let y=t.bottom+1; y>t.ty; y-=step) out += `<path d="${D}" transform="${tf(y,1.075)}" fill="${side(fr)}"/>`;
+      out += `<path d="${D}" transform="${tf(t.ty,1.075)}" fill="${topF(fr)}"/>
+        <path d="${D}" transform="${tf(t.ty,1.06)}" fill="none" stroke="${shade(fr,.5)}" stroke-width="${(2.2*sc).toFixed(1)}" vector-effect="non-scaling-stroke" opacity=".7"/>
         <path d="${D}" transform="${tf(t.ty-1*sc,.7)}" fill="#fff" opacity=".12"/></g>`;
     }
     if (only!=null) return;
@@ -1731,10 +1741,11 @@ function renderCake(c, {cx=CAKE_X, baseY=CAKE_Y, sc=1, plate=true, pick=false, o
       const x=t.cx+d.u*t.R, y=t.bottom+d.v*t.R*K;
       out += d.shell ? shellSVG(x, y, d.s*sc, FROST[d.col].c, d.ang||0) : dollopSVG(x, y, d.s*sc, FROST[d.col].c, d.rot);
     });
-    (c.sprinkles[i]||[]).forEach(s => {
-      const x=t.cx+s.u*t.R, y=t.ty+s.v*t.R*K;
-      out += `<rect x="${(x-3.5*sc).toFixed(1)}" y="${(y-1.2*sc).toFixed(1)}" width="${7*sc}" height="${2.4*sc}" rx="${1.2*sc}" fill="${s.col}" transform="rotate(${s.a} ${x.toFixed(1)} ${y.toFixed(1)})"/>`;
-    });
+    { const fs = frosted ? 1.075 : 1;   // 옆면에 뿌린 스프링클·반짝이
+      ((c.sideSpr||[])[i]||[]).forEach(s => { const vf = frontV(c.shape,s.u); if (vf==null) return;
+        const x=t.cx+s.u*t.R*fs, y=t.bottom-s.h*(t.bottom-t.ty)+vf*t.R*K*fs;
+        out += sprinkleSVG(s, x, y, sc, Math.max(.45, Math.sqrt(1-s.u*s.u))); }); }
+    (c.sprinkles[i]||[]).forEach(s => { out += sprinkleSVG(s, t.cx+s.u*t.R, t.ty+s.v*t.R*K, sc); });
     if (c.text && i===c.tiers-1){
       const surf = frosted && (c.frostFull || c.cover>.5) ? fr : sp;
       const col = lum(surf) < .5 ? '#fff6e8' : '#c2185b';
@@ -1784,7 +1795,7 @@ function hitTier(c,x,y){
 function inSilhouette(c,g,x,y){
   for (const t of g) for (let k=0;k<=6;k++){
     const yy = t.bottom - (t.bottom-t.ty)*k/6;
-    if (inShape(c.shape,(x-t.cx)/(t.R*1.035),(y-yy)/(t.R*K*1.035))) return true;
+    if (inShape(c.shape,(x-t.cx)/(t.R*1.075),(y-yy)/(t.R*K*1.075))) return true;
   }
   return false;
 }
@@ -1901,12 +1912,60 @@ let G = null, SCALE = 1, lastPerson = -1;
 function newOrder(){
   let pi; do { pi = Math.floor(Math.random()*PEOPLE.length); } while (pi===lastPerson);
   lastPerson = pi;
-  const pool = TOPPINGS.map(t=>t.id).filter(id=>id!=='sprinkle').sort(()=>Math.random()-.5);
+  const pool = TOPPINGS.map(t=>t.id).filter(id=>!SCATTER[id]).sort(()=>Math.random()-.5);
   const nTop = Math.random()<.55 ? 2 : 1;
   const tops = pool.slice(0,nTop).map(id => ({id, n: id==='candle' ? 1+Math.floor(Math.random()*5) : id==='crown' ? 1 : 2+Math.floor(Math.random()*5)}));
+  const shape = pick(Object.keys(SHAPES));
+  // 손님이 원하는 놓는 모양: 첫 토핑은 둘레/앞쪽, 둘째 토핑은 가운데/한 줄 (서로 겹치지 않게)
+  tops.forEach((t,k) => { t.lay = t.n===1 ? 'center' : pick(nTop===1 ? Object.keys(LAYOUTS) : k===0 ? ['ring','front'] : ['center','line']);
+    if (nTop===2 && k===1 && t.lay==='line' && tops[0].lay==='front') t.lay = 'center';
+    t.pos = layoutPts(t.lay, t.n, shape); });
   return { person: PEOPLE[pi], occasion: pick(OCCASIONS),
-    flavor: pick(Object.keys(FLAVORS)), shape: pick(Object.keys(SHAPES)), tiers: pick([1,1,2,2,2,3]),
+    flavor: pick(Object.keys(FLAVORS)), shape, tiers: pick([1,1,2,2,2,3]),
     frost: pick(Object.keys(FROST)), tops, extra: Math.random()<.45 ? pick(EXTRAS).id : null };
+}
+/* 토핑 놓는 모양 (맨 윗단 윗면 위의 u,v 자리) */
+const LAYOUTS = {
+  ring:  {n:'가장자리에 빙 둘러', f:n => [...Array(n)].map((_,k) => { const a = -Math.PI/2 + k/n*Math.PI*2; return [Math.cos(a)*.66, Math.sin(a)*.66]; })},
+  front: {n:'앞쪽에 반달 모양으로', f:n => [...Array(n)].map((_,k) => { const a = Math.PI*(.12 + .76*(n===1 ? .5 : k/(n-1))); return [Math.cos(a)*.64, Math.sin(a)*.6]; })},
+  center:{n:'가운데에 모아서', f:n => n===1 ? [[0,0]] : [...Array(n)].map((_,k) => { const a = -Math.PI/2 + k/n*Math.PI*2, r = n<=3 ? .2 : .3; return [Math.cos(a)*r, Math.sin(a)*r]; })},
+  line:  {n:'가운데 한 줄로', f:n => [...Array(n)].map((_,k) => [n===1 ? 0 : -.58 + 1.16*k/(n-1), 0])}
+};
+function layoutPts(lay, n, shape){
+  return LAYOUTS[lay].f(n).map(([u,v]) => { let s = 1; while (s > .3 && !inShape(shape, u*s*1.25, v*s*1.25)) s -= .06; return [+(u*s).toFixed(3), +(v*s).toFixed(3)]; });
+}
+/* 손님이 보여 준 "이렇게 만들어 주세요" 그림 */
+function wantCake(o){
+  const c = newCake();
+  Object.assign(c, {flavor:o.flavor, flavors:[o.flavor], shape:o.shape, tiers:o.tiers, bake:.62, frost:o.frost, cover:1, frostFull:true});
+  o.tops.forEach(t => (t.pos||[]).forEach(([u,v]) => c.decos.push({type:t.id, tier:o.tiers-1, u, v, rot:0})));
+  return c;
+}
+function wantSVG(o){
+  if (o.wantSvg) return o.wantSvg;
+  const c = wantCake(o), g = geom(c, 300, 330, 1), top = g[g.length-1].ty - g[g.length-1].R*K - 40, bot = 330 + TR[0]*K*1.1 + 4;
+  return o.wantSvg = `<svg viewBox="138 ${top.toFixed(0)} 324 ${(bot-top).toFixed(0)}" preserveAspectRatio="xMidYMid meet">${renderCake(c,{cx:300,baseY:330,plate:false})}</svg>`;
+}
+/* 실제 케이크 위에 손님이 원하는 자리를 흐리게 표시 (이미 놓은 자리는 지워져요) */
+function wantSpots(c, o){
+  if (!o || !o.tops) return [];
+  const g = geom(c), t = g[g.length-1], used = new Set(), out = [];
+  o.tops.forEach(tp => (tp.pos||[]).forEach(([u0,v0]) => {
+    let s = 1; while (s > .3 && !inShape(c.shape, u0*s*1.25, v0*s*1.25)) s -= .06;
+    const u = u0*s, v = v0*s;
+    const hit = c.decos.findIndex((d,i) => !used.has(i) && d.type===tp.id && d.tier===t.idx && Math.hypot(d.u-u, d.v-v) < .2);
+    if (hit >= 0){ used.add(hit); return; }
+    out.push({id:tp.id, x:t.cx+u*t.R, y:t.ty+v*t.R*K});
+  }));
+  return out;
+}
+/* 놓은 자리 점수 (0~1): 원하는 자리마다 가장 가까운 같은 토핑까지의 거리 */
+function placeScore(c, o){
+  const t = c.tiers-1; let s = 0, n = 0;
+  o.tops.forEach(tp => (tp.pos||[]).forEach(([u,v]) => { n++;
+    const d = Math.min(9, ...c.decos.filter(x => x.type===tp.id && x.tier===t).map(x => Math.hypot(x.u-u, x.v-v)));
+    s += clamp(1 - (d-.12)/.45, 0, 1); }));
+  return n ? s/n : 1;
 }
 function resetPans(){ G.pans = [...Array(G.cake.tiers)].map(()=>({fill:0,done:false,lift:0,removed:false,flying:false})); }
 /* ---------- 모아 소개 (처음 한 번) ---------- */
@@ -2105,11 +2164,12 @@ function renderCard(){
   const o = G.order;
   const chk = (cond, done) => done ? (cond ? '<i class="ok">✓</i>' : '<i class="no">달라요!</i>') : '';
   const topRows = o.tops.map(t => { const n=c.decos.filter(d=>d.type===t.id).length;
-    return `<li><b>${t===o.tops[0]?'토핑':''}</b>${icon(t.id)} ${TOP[t.id].n} ${t.n}개 <span style="color:#aaa;font-size:13px">(지금 ${n})</span>${n===t.n?'<i class="ok">✓</i>':''}</li>`; }).join('');
+    return `<li><b>${t===o.tops[0]?'토핑':''}</b>${icon(t.id)} ${TOP[t.id].n} ${t.n}개 <span style="color:#aaa;font-size:13px">(지금 ${n})</span>${n===t.n?'<i class="ok">✓</i>':''}</li>`; }).join('')
+;
   const poured = G.pans.some(p=>p.fill>0) || G.step>=2;
   side.innerHTML = `<div class="card">
     <div class="cust"><div class="face" id="custFace">${personSVG(o.person,'happy')}</div><div class="cname">${o.person.name} 손님<br><span style="font-size:13px;color:#b98">${o.person.age} · ${o.occasion}</span></div></div>
-    <div class="bubble" id="bubble">모아야! ${o.occasion}에 쓸 케이크를 부탁해요. 주문서대로 만들어 줄래요?</div>
+    <div class="bubble" id="bubble">${o.tops[0].pos ? `<div class="wantRow"><div class="wantPic" title="손님이 원하는 케이크">${wantSVG(o)}</div><div>모아야! ${o.occasion} 케이크, 이렇게 부탁해요!<div class="wantTxt">${o.tops.map(t => `${icon(t.id)} ${LAYOUTS[t.lay].n}`).join('<br>')}</div></div></div>` : `모아야! ${o.occasion}에 쓸 케이크를 부탁해요. 주문서대로 만들어 줄래요?`}</div>
     <ul class="ord">
       <li><b>맛</b>${icon(FLAVORS[o.flavor].ic)} ${FLAVORS[o.flavor].n}${chk(flavList(c).includes(o.flavor), !!flavList(c).length)}</li>
       ${o.extra?`<li><b>추가</b>${icon(POUR[o.extra].ic)} ${EXTRAS.find(x=>x.id===o.extra).n}도 넣어 주세요${c.ing[o.extra]?'<i class="ok">✓</i>':''}</li>`:''}
@@ -3019,9 +3079,11 @@ function viewDeco(){
   const stage = `<defs><radialGradient id="decoSpot"><stop offset="0" stop-color="#fff8ef" stop-opacity=".85"/><stop offset=".55" stop-color="#ffe6ef" stop-opacity=".35"/><stop offset="1" stop-color="#ffe6ef" stop-opacity="0"/></radialGradient></defs>
     <ellipse cx="300" cy="250" rx="290" ry="200" fill="url(#decoSpot)"/>`;
   const sparks = `<g pointer-events="none">${spark(110,120,9,0)}${spark(500,150,11,.7)}${spark(80,250,6,1.3)}${spark(530,270,7,.4)}${spark(160,60,6,1.8)}${spark(450,70,7,1.1)}</g>`;
-  layer(stage + (use3D() ? '' : renderCake(c,{pick:true})) + sparks);
+  const ghosts = G.mode==='order' ? wantSpots(c, G.order).map(w => `<g opacity=".6"><ellipse cx="${w.x.toFixed(1)}" cy="${w.y.toFixed(1)}" rx="17" ry="8" fill="rgba(255,255,255,.55)" stroke="#ff6f9b" stroke-width="2" stroke-dasharray="4 3"/><g opacity=".6">${iconAt(w.id, w.x, w.y-12, 24, 0)}</g></g>`).join('') : '';
+  layer(stage + (use3D() ? '' : renderCake(c,{pick:true})) + `<g pointer-events="none" class="ghostSpots">${ghosts}</g>` + sparks);
   if (use3D()) show3D();
   setHint((use3D() && !G.stamp ? '빈 곳을 끌면 케이크가 돌아가요 · ' : '') + (G.stamp ? `<b class="who">${TOP[G.stamp].n}</b>선택! 케이크를 누를 때마다 하나씩 올라가요 (크림 위에 누르면 크림 위에 얹혀요 · 다시 누르면 해제)`
+    : G.mode==='order' && !c.decos.length ? '분홍 점선 자리가 손님이 원하는 자리예요. 토핑을 끌어다 놓거나, 한 번 눌러 고른 뒤 콕콕 눌러요'
     : c.decos.length ? '토핑을 한 번 누르면 연달아 놓을 수 있어요. 놓은 토핑은 끌어서 옮기거나 밖으로 빼면 지워져요'
     : '토핑을 케이크 위로 끌어다 놓거나, 한 번 눌러 고른 뒤 케이크를 콕콕 눌러요'));
   setMeter(null);
@@ -3097,7 +3159,8 @@ function bindDeco(){
   $('#msg').oninput = e => { c.text = e.target.value; viewDeco(); };
   $('#msg').onpointerdown = e => e.stopPropagation();
   $('#undo').onclick = () => {
-    if (c.lastSprinkle!=null && (!c.decos.length || c.lastSprinkleAt > (c.decos[c.decos.length-1].at||0))){ c.sprinkles[c.lastSprinkle]=[]; c.lastSprinkle=null; }
+    const sh = c.sprHist && c.sprHist[c.sprHist.length-1];
+    if (sh && (!c.decos.length || sh.at > (c.decos[c.decos.length-1].at||0))){ c.sprHist.pop(); const arr = (sh.side ? c.sideSpr : c.sprinkles)[sh.tier]; arr.splice(arr.length-sh.n, sh.n); }
     else if (c.decos.length) c.decos.pop();
     sfx.pop(); renderView(); renderCard();
   };
@@ -3123,10 +3186,72 @@ function creamUnder(c,x,y){
   });
   return best;
 }
+/* 뿌리는 토핑 (스프링클·반짝이): 누른 자리 둘레에 한 줌씩. 윗면이든 옆면이든 어디든 뿌려져요 */
+const SCATTER = {
+  sprinkle:{n:26, cols:['#ff6f9b','#ffd36e','#6fd2c0','#8aa2ff','#ffffff','#c48aff','#ff9a5a']},
+  glitter:{n:34, cols:['#ffe9a3','#ffd36e','#ffffff','#ffc9de','#d9c8ff','#f6d27a']}
+};
+const FRONT_V = {};
+function frontV(shape, u){   // 모양의 앞쪽 가장자리 (위에서 본 v 값)
+  const key = shape + Math.round(u*50);
+  if (key in FRONT_V) return FRONT_V[key];
+  let v = null; for (let t=1.25; t>=-.2; t-=.01) if (inShape(shape,u,t)){ v = t; break; }
+  return FRONT_V[key] = v;
+}
+function sideHit(c,x,y){
+  const g = geom(c), fs = hasFrost(c) ? 1.075 : 1;
+  for (let i=g.length-1;i>=0;i--){
+    const t=g[i], u=(x-t.cx)/(t.R*fs); if (Math.abs(u) > .97) continue;
+    const vf = frontV(c.shape,u); if (vf==null) continue;
+    const yT = t.ty + vf*t.R*K*fs, yB = t.bottom + vf*t.R*K*fs;
+    if (y >= yT-3 && y <= yB+3) return {tier:i, u, h:clamp((yB-y)/(yB-yT),0,1)};
+  }
+  return null;
+}
+function scatterDeco(type, c, p){
+  const S = SCATTER[type], now = performance.now();
+  if (!c.sideSpr) c.sideSpr = [[],[],[]];
+  if (!c.sprHist) c.sprHist = [];
+  const top = hitTier(c,p.x,p.y), side = top ? null : sideHit(c,p.x,p.y);
+  if (!top && !side){ if (p.x>0&&p.x<600&&p.y>0&&p.y<400) toast('케이크 위나 옆에 뿌려 주세요!'); renderView(); renderCard(); return false; }
+  let n = 0;
+  if (top){
+    const t = geom(c)[top.tier];
+    for (let k=0; k<300 && n<S.n; k++){
+      const a = rnd(0,Math.PI*2), r = Math.sqrt(Math.random())*.42;
+      const u = top.u + Math.cos(a)*r, v = top.v + Math.sin(a)*r*1.2;
+      const h = hitTier(c, t.cx+u*t.R, t.ty+v*t.R*K); if (!h || h.tier!==top.tier) continue;
+      c.sprinkles[top.tier].push({u,v,col:pick(S.cols),a:rnd(0,180),k:type}); n++;
+    }
+    c.sprHist.push({tier:top.tier, side:false, n, at:now});
+  } else {
+    for (let k=0; k<300 && n<Math.round(S.n*.8); k++){
+      const u = side.u + rnd(-.22,.22), h = side.h + rnd(-.35,.35);
+      if (Math.abs(u) > .96 || h < .04 || h > .97 || frontV(c.shape,u)==null) continue;
+      c.sideSpr[side.tier].push({u,h,col:pick(S.cols),a:rnd(0,180),k:type}); n++;
+    }
+    c.sprHist.push({tier:side.tier, side:true, n, at:now});
+  }
+  if (type==='glitter') [0,1,2,3].forEach(i=>beep(1500+i*320,.06,'sine',.035,i*.05));
+  else [0,1,2].forEach(i=>beep(900+i*250,.05,'sine',.04,i*.04));
+  renderView(); renderCard();
+  return true;
+}
+/* 스프링클 한 알 / 반짝이 한 알 */
+function sprinkleSVG(s, x, y, sc, flat=1){
+  if (s.k==='glitter'){
+    const r = (s.a%3===0 ? 5 : 2.4)*sc, f = n => n.toFixed(1);
+    return s.a%3===0
+      ? `<path d="M${f(x)} ${f(y-r)} Q${f(x)} ${f(y)} ${f(x+r)} ${f(y)} Q${f(x)} ${f(y)} ${f(x)} ${f(y+r)} Q${f(x)} ${f(y)} ${f(x-r)} ${f(y)} Q${f(x)} ${f(y)} ${f(x)} ${f(y-r)}Z" fill="#fff" class="twk" style="animation-delay:-${(s.a/60).toFixed(2)}s"/>`
+      : `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${s.col}" stroke="#e0aa3e" stroke-width="${f(.6*sc)}"/><circle cx="${f(x-r*.35)}" cy="${f(y-r*.35)}" r="${f(r*.35)}" fill="#fff"/>`;
+  }
+  return `<rect x="${(x-3.5*sc).toFixed(1)}" y="${(y-1.2*sc).toFixed(1)}" width="${7*sc*flat}" height="${2.4*sc}" rx="${1.2*sc}" fill="${s.col}" transform="rotate(${s.a} ${x.toFixed(1)} ${y.toFixed(1)})"/>`;
+}
 function dropDeco(type, e){
   if (use3D()) return dropDeco3(type, e);
   const c=G.cake, p=svgPt(e);
-  const cream = type!=='sprinkle' && type!=='candle' ? creamUnder(c,p.x,p.y) : null;
+  if (SCATTER[type]) return scatterDeco(type, c, p);
+  const cream = type!=='candle' ? creamUnder(c,p.x,p.y) : null;
   if (cream){
     if (cream.id==null) cream.id = Math.floor(rnd(1,1e9));
     // 눌린 크림 높이만큼 위에 얹어요
@@ -3135,20 +3260,8 @@ function dropDeco(type, e){
   }
   const hit = hitTier(c,p.x,p.y);
   if (!hit){ if (p.x>0&&p.x<600&&p.y>0&&p.y<400) toast('케이크 윗면에 놓아 주세요!'); renderView(); renderCard(); return false; }
-  if (type==='sprinkle'){
-    const g=geom(c), t=g[hit.tier], cols=['#ff6f9b','#ffd36e','#6fd2c0','#8aa2ff','#ffffff','#c48aff','#ff9a5a'];
-    let n=0, tries=0;
-    while (n<45 && tries<2000){ tries++;
-      const u=rnd(-1.05,1.05), v=rnd(-1.05,1.05), x=t.cx+u*t.R, y=t.ty+v*t.R*K;
-      const h=hitTier(c,x,y); if (!h || h.tier!==hit.tier) continue;
-      c.sprinkles[hit.tier].push({u,v,col:pick(cols),a:rnd(0,180)}); n++;
-    }
-    c.lastSprinkle = hit.tier; c.lastSprinkleAt = performance.now();
-    [0,1,2].forEach(i=>beep(900+i*250,.05,'sine',.04,i*.04));
-  } else {
-    c.decos.push({type, tier:hit.tier, u:hit.u, v:hit.v, rot:rnd(-12,12), at:performance.now()});
-    sfx.pop();
-  }
+  c.decos.push({type, tier:hit.tier, u:hit.u, v:hit.v, rot:rnd(-12,12), at:performance.now()});
+  sfx.pop();
   renderView(); renderCard();
   return true;
 }
@@ -3172,6 +3285,7 @@ window.addEventListener('pointerup', e => {
   if (G.drag){ const d=G.drag; d.el.remove(); G.drag=null; d.onDrop(e, Math.hypot(e.clientX-d.sx, e.clientY-d.sy) < 6); }
   if (G.pouring) stopPour();
   if (G.pipe) pipeUpP();
+  if (G.pen) penUpP();
   if (G.unm) unmoldUp();
   if (G.squeeze){ G.squeeze = null; if (G.step===3){ sfx.pop(); renderTray(); viewFrost(); } }
   if (G.spreading && use3D() && G.step===3){ C3D.measure(G.cake); frostHUD(); }
@@ -3234,7 +3348,7 @@ function showRecipes(mode){
 /* ---------- 구움과자 그리기 ---------- */
 const MOLD_POS = [[190,250],[300,250],[410,250],[190,322],[300,322],[410,322]];
 const GLAZE = { choco:{n:'초코',c:'#5a3220'}, white:{n:'화이트',c:'#fff7ec'}, pink:{n:'딸기',c:'#ff9cb8'}, matcha:{n:'말차',c:'#9cc46c'}, sugar:{n:'슈가파우더',c:'#ffffff'} };
-const PTOPS = ['straw','blue','rasp','cherry','choc','pearl','heart','star','flower','mint','sprinkle'];
+const PTOPS = ['straw','blue','rasp','cherry','choc','pearl','heart','star','flower','mint','almond','sprinkle','glitter'];
 function pastryCol(c, b){
   const base = flavorHex(c, '#f3d59b'), gold = mixHex(base, '#c9823b', .42);
   if (b == null) return batterColor(c);
@@ -3246,12 +3360,12 @@ const MAD_PATH = 'M0 22 L-36 0 Q-38 -24 -18 -30 Q0 -36 18 -30 Q38 -24 36 0 Z';
 function glazeSVG(r, pc, x, y, top){
   const g = pc.glaze; if (!g) return '';
   const col = GLAZE[g].c, R = seeded(pc.seed || 3);
-  if (g === 'sugar'){ let s=''; const cy = r === 'muffin' ? top + 4 : y - 4;
+  if (g === 'sugar'){ let s=''; const cy = r === 'muffin' ? top + 4 : r === 'financier' ? y - 7 : y - 4;
     for (let k=0;k<44;k++){ const a=R()*6.28, d=Math.sqrt(R())*26; s += `<circle cx="${(x+Math.cos(a)*d*1.3).toFixed(1)}" cy="${(cy+Math.sin(a)*d*.55).toFixed(1)}" r="${(.8+R()*1.3).toFixed(1)}" fill="#fff" opacity=".92"/>`; } return s; }
   switch (r){
     case 'cookie': return `<path d="${SHAPES[pc.shape]}" transform="translate(${x} ${y-1}) scale(23)" fill="${col}" stroke="${shade(col,-.15)}" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="${SHAPES[pc.shape]}" transform="translate(${x-4} ${y-5}) scale(10)" fill="#fff" opacity=".3"/>`;
-    case 'financier': return `<path d="M${x+2} ${y-17} h34 q8 0 8 8 v18 q0 8 -8 8 h-34 q5 -6 0 -11 q-5 -6 0 -12 q5 -5 0 -11z" fill="${col}"/><path d="M${x+10} ${y-12} h22" stroke="#fff" stroke-width="2.5" opacity=".4" stroke-linecap="round"/>`;
-    case 'madeleine': return `<path d="M${x-36} ${y} Q${x-22} ${y+8} ${x-12} ${y+2} Q${x} ${y+10} ${x+12} ${y+2} Q${x+22} ${y+8} ${x+36} ${y} L${x} ${y+22}Z" fill="${col}"/>`;
+    case 'financier': return `<path d="M${x-39} ${y+5} V${y-12} Q${x-39} ${y-19.5} ${x-32} ${y-19.5} H${x+32} Q${x+39} ${y-19.5} ${x+39} ${y-12} V${y+5} q-4 7 -8 0 q-5 9 -10 0 q-4 5 -9 0 q-5 10 -11 0 q-4 6 -9 0 q-5 8 -10 0 q-4 6 -8 0 q-3 4 -6 0 q-3 6 -7 0Z" fill="${col}" stroke="${shade(col,-.18)}" stroke-width="1"/><path d="M${x-28} ${y-12} Q${x} ${y-16} ${x+20} ${y-12}" stroke="#fff" stroke-width="3" fill="none" opacity=".45" stroke-linecap="round"/>`;
+    case 'madeleine': return `<path d="${MAD_PATH}" transform="translate(${x} ${y-1}) scale(.95)" fill="${col}" stroke="${shade(col,-.18)}" stroke-width="1" vector-effect="non-scaling-stroke"/>` + [0,1,2,3,4,5,6].map(q => { const a = Math.PI*(1.12 + q*.127); return `<path d="M${x} ${y+17} L${(x+Math.cos(a)*28).toFixed(1)} ${(y-4+Math.sin(a)*22).toFixed(1)}" stroke="${shade(col,-.12)}" stroke-width="1.4" opacity=".6"/>`; }).join('') + `<path d="M${x-22} ${y-18} Q${x-6} ${y-27} ${x+12} ${y-22}" stroke="#fff" stroke-width="3" fill="none" opacity=".45" stroke-linecap="round"/>`;
     case 'muffin': return `<path d="M${x-28} ${top+12} Q${x-32} ${top-2} ${x-16} ${top-6} Q${x-8} ${top-18} ${x+4} ${top-12} Q${x+20} ${top-16} ${x+26} ${top-2} Q${x+32} ${top+8} ${x+24} ${top+12} Q${x} ${top+18} ${x-28} ${top+12}Z" fill="${col}" stroke="${shade(col,-.15)}" stroke-width="1"/><path d="M${x-10} ${top-8} q8 -6 16 -2" stroke="#fff" stroke-width="3" fill="none" opacity=".45" stroke-linecap="round"/>`;
   }
   return '';
@@ -3271,12 +3385,23 @@ function pieceSVG(r, c, pc, {b=null, rise=0, inMold=false, deco=false}={}){
       if (b != null){ const R = seeded(pc.seed||5); for (let k=0;k<5;k++) s += `<circle cx="${(x+(R()-.5)*30).toFixed(1)}" cy="${(y+(R()-.5)*26).toFixed(1)}" r="1.4" fill="${dk}" opacity=".6"/>`; }
       break; }
     case 'financier': {
-      const k = inMold && b == null ? .55 + .45*Math.min(f,1) : 1, w = 44*k, h = 20*k;
-      s += `<rect x="${x-w}" y="${y-h+6}" width="${w*2}" height="${h*2}" rx="${7*k}" fill="${dk}"/>
-        <rect x="${x-w}" y="${y-h}" width="${w*2}" height="${h*2}" rx="${7*k}" fill="${col}" stroke="${shade(col,-.3)}" stroke-width="1.2"/>`;
-      if (b != null) s += `<path d="M${x-w+10} ${y} Q${x} ${y-6-rise*6} ${x+w-10} ${y}" stroke="${lt}" stroke-width="${5+rise*3}" fill="none" stroke-linecap="round" opacity=".7"/>
-        <path d="M${x-w+12} ${y+1} Q${x} ${y-4-rise*5} ${x+w-12} ${y+1}" stroke="${dk}" stroke-width="1.2" fill="none" opacity=".5"/>`;
-      top = y-h; break; }
+      if (b == null){   // 틀 안의 날반죽: 칸을 채워 올라와요
+        const k = inMold ? .55 + .45*Math.min(f,1) : 1, w = 40*k, h = 18*k;
+        s += `<rect x="${x-w}" y="${y-h}" width="${w*2}" height="${h*2}" rx="${6*k}" fill="${col}" stroke="${shade(col,-.2)}" stroke-width="1"/>
+          <ellipse cx="${x-8}" cy="${y-4}" rx="${w*.5}" ry="${h*.3}" fill="#fff" opacity=".2"/>`;
+        top = y-h; break; }
+      // 금괴 모양: 넓은 바닥 → 안쪽으로 비스듬한 옆면 → 버터 향 나는 노릇한 윗면, 가운데가 살짝 봉긋하고 갈라진 결
+      const crust = mixHex(col, '#7a3e10', .5), sideC = mixHex(col, '#a0581a', .3), topC = mixHex(col, '#c0742a', .16), dome = 2 + rise*4;
+      s += `${inMold ? '' : `<ellipse cx="${x}" cy="${y+21}" rx="47" ry="5" fill="rgba(70,35,10,.18)"/>`}
+        <path d="M${x-45} ${y+15} Q${x-46} ${y+20} ${x-40} ${y+20} H${x+40} Q${x+46} ${y+20} ${x+45} ${y+15} L${x+39} ${y-13} Q${x+38} ${y-19} ${x+32} ${y-19} H${x-32} Q${x-38} ${y-19} ${x-39} ${y-13}Z" fill="${crust}"/>
+        <path d="M${x-44} ${y+15} Q${x-45} ${y+19} ${x-40} ${y+19} H${x+40} Q${x+45} ${y+19} ${x+44} ${y+15} L${x+38} ${y+4} H${x-38}Z" fill="${sideC}"/>
+        <path d="M${x-44} ${y+16} Q${x-44} ${y+19} ${x-40} ${y+19} H${x+40} Q${x+44} ${y+19} ${x+44} ${y+16}" stroke="${shade(crust,-.25)}" stroke-width="2.4" fill="none" opacity=".7"/>
+        <path d="M${x-38} ${y+4} V${y-12} Q${x-38} ${y-18} ${x-32} ${y-18} H${x+32} Q${x+38} ${y-18} ${x+38} ${y-12} V${y+4} Q${x} ${y+6} ${x-38} ${y+4}Z" fill="${topC}" stroke="${crust}" stroke-width="1.6"/>
+        <path d="M${x-30} ${y-4} Q${x} ${y-10-dome} ${x+30} ${y-4}" stroke="${lt}" stroke-width="${7+rise*2}" fill="none" opacity=".55" stroke-linecap="round"/>
+        <path d="M${x-22} ${y-6} l5 -${(1+dome*.3).toFixed(1)} l6 1.6 l5 -2 l6 1.4 l5 -1.6 l6 1.2 l5 -1" stroke="${shade(col,-.38)}" stroke-width="1.1" fill="none" opacity=".6" stroke-linecap="round"/>
+        <path d="M${x-36} ${y+8} H${x+36}" stroke="#fff" stroke-width="1.4" opacity=".18"/>
+        <ellipse cx="${x-24}" cy="${y-12}" rx="5" ry="1.8" fill="#fff" opacity=".35"/>`;
+      top = y-18; break; }
     case 'madeleine': {
       const k = inMold && b == null ? .55 + .45*Math.min(f,1) : 1;
       s += `<path d="${MAD_PATH}" transform="translate(${x} ${y+5}) scale(${k})" fill="${dk}"/>
@@ -3299,13 +3424,13 @@ function pieceSVG(r, c, pc, {b=null, rise=0, inMold=false, deco=false}={}){
   if (inMold && b == null && f > 1) s += `<ellipse cx="${x+20}" cy="${y+18}" rx="${(16*Math.min(1,(f-1)*6)).toFixed(1)}" ry="5" fill="${batterColor(c)}"/>`;   // 넘친 반죽
   if (deco){
     s += glazeSVG(r, pc, x, y, top);
-    c.decos.filter(d => d.i === pc.idx).forEach(d => { s += iconAt(d.type, x+d.dx, (r==='muffin' ? top+6 : y)+d.dy, 28, d.rot); });
+    s += pdecoSVG(r, pc, c);
   }
   return s;
 }
 function cavitySVG(r, x, y){
   switch (r){
-    case 'financier': return `<rect x="${x-49}" y="${y-25}" width="98" height="50" rx="9" fill="#8c6a2c"/><rect x="${x-46}" y="${y-22}" width="92" height="44" rx="7" fill="#5f4518"/>`;
+    case 'financier': return `<rect x="${x-50}" y="${y-25}" width="100" height="50" rx="9" fill="#8c6a2c"/><rect x="${x-47}" y="${y-22}" width="94" height="44" rx="7" fill="#6d5020"/><rect x="${x-40}" y="${y-17}" width="80" height="34" rx="5" fill="#4e3812"/><path d="M${x-47} ${y-22} L${x-40} ${y-17} M${x+47} ${y-22} L${x+40} ${y-17} M${x-47} ${y+22} L${x-40} ${y+17} M${x+47} ${y+22} L${x+40} ${y+17}" stroke="#a7813a" stroke-width="1.4" opacity=".6"/>`;
     case 'madeleine': return `<path d="${MAD_PATH}" transform="translate(${x} ${y}) scale(1.12)" fill="#5e6873"/><path d="${MAD_PATH}" transform="translate(${x} ${y+1}) scale(1.03)" fill="#46505b"/>`;
     case 'muffin': return `<ellipse cx="${x}" cy="${y-6}" rx="36" ry="11" fill="#3e444c"/>`;
   }
@@ -3336,6 +3461,35 @@ function piecesSVG(c, mode, bakeP=0){
     s += `<ellipse cx="300" cy="300" rx="232" ry="104" fill="#e8dfe4"/><ellipse cx="300" cy="292" rx="226" ry="98" fill="#fff" stroke="#f2c9d6" stroke-width="3"/><ellipse cx="300" cy="292" rx="190" ry="76" fill="none" stroke="#f7dde6" stroke-width="2"/>`;
   }
   c.pieces.forEach((pc, i) => { pc.idx = i; s += pieceSVG(r, c, pc, {b, rise, inMold, deco: !inMold}); });
+  return s;
+}
+/* 과자마다 장식을 올릴 수 있는 윗면 (가운데 cx,cy · 반너비 w · 반높이 h) */
+function muffinTop(pc){ const f = pc.fill == null ? 1 : pc.fill, cupT = pc.y-8, lvl = cupT + 24 - Math.min(f,1.15)*24; return Math.min(lvl, cupT) - (3 + 22*Math.min(1.2, f/.78)); }
+function parea(r, pc){
+  switch (r){
+    case 'financier': return {cx:pc.x, cy:pc.y-7, w:33, h:10, ell:false};
+    case 'madeleine': return {cx:pc.x, cy:pc.y-6, w:27, h:15, ell:true};
+    case 'muffin':    return {cx:pc.x, cy:muffinTop(pc)+7, w:23, h:8, ell:true};
+  }
+  return {cx:pc.x, cy:pc.y, w:21, h:16, ell:true};
+}
+const inArea = (A, dx, dy) => A.ell ? (dx*dx)/(A.w*A.w) + (dy*dy)/(A.h*A.h) <= 1 : Math.abs(dx) <= A.w && Math.abs(dy) <= A.h;
+/* 뿌리는 토핑: 누르면 과자 윗면 전체에 골고루 */
+const PSCATTER = {sprinkle:{n:22}, glitter:{n:26}, almond:{n:9}};
+const PENS = {white:{n:'하양',c:'#ffffff'}, pink:{n:'분홍',c:'#ff7fa6'}, choco:{n:'초코',c:'#5a3220'}, yellow:{n:'노랑',c:'#ffd34d'}, mint:{n:'민트',c:'#7fd8c0'}};
+function almondSVG(x, y, a, sc=1){
+  return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${a.toFixed(0)}) scale(${sc})"><path d="M-6 0 Q-5 -3.6 0 -3.8 Q5.5 -3.4 6.5 0 Q5 3.4 0 3.6 Q-5 3.4 -6 0Z" fill="#f3dcb2" stroke="#c99860" stroke-width=".9"/><path d="M-4 -.4 Q0 -2 4.5 -.2" stroke="#e2bd84" stroke-width=".8" fill="none"/></g>`;
+}
+function pdecoSVG(r, pc, c){
+  const A = parea(r, pc); let s = '';
+  (pc.lines||[]).forEach(L => { if (L.pts.length < 2) return;
+    const d = 'M' + L.pts.map(([dx,dy]) => `${(A.cx+dx).toFixed(1)} ${(A.cy+dy).toFixed(1)}`).join(' L');
+    s += `<path d="${d}" stroke="${shade(L.col,-.3)}" stroke-width="4.2" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".35" transform="translate(0 1)"/>
+      <path d="${d}" stroke="${L.col}" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${d}" stroke="#fff" stroke-width="1" fill="none" stroke-linecap="round" opacity=".45" transform="translate(-.6 -.8)"/>`; });
+  (pc.spr||[]).forEach(q => { const x = A.cx+q.dx, y = A.cy+q.dy;
+    s += q.k === 'almond' ? almondSVG(x, y, q.a) : sprinkleSVG(q, x, y, .75); });
+  c.decos.filter(d => d.i === pc.idx).forEach(d => { s += iconAt(d.type, A.cx+d.dx, A.cy+d.dy, 28, d.rot); });
   return s;
 }
 function pieceAt(p){ let best = null, bd = 50; (G.cake.pieces||[]).forEach((pc,i) => { const d = Math.hypot(p.x-pc.x, (p.y-pc.y)*1.25); if (d < bd){ bd = d; best = i; } }); return best; }
@@ -3414,7 +3568,11 @@ function pipeFrameP(now){
 function pipeUpP(){
   const q = G.pipe; G.pipe = null; if (!q) return;
   const pc = G.cake.pieces[q.i];
-  if (pc.fill >= .12){ pc.done = true; pourQuality(pc.fill) >= 1 ? sfx.ok() : sfx.bad(); toast(pourLabel(pc.fill)); }
+  if (pc.fill >= .12){ pc.done = true;
+    if (pourQuality(pc.fill) >= 1){ G.combo = (G.combo||0) + 1; G.comboBest = Math.max(G.comboBest||0, G.combo); sfx.ok();
+      if (G.combo >= 2){ toast(`${pourLabel(pc.fill)} · 콤보 ${G.combo}!`); FX.burstAt($('#viewWrap'), 8 + G.combo*4); [0,1,2].forEach(k => beep(660+k*220+G.combo*40,.07,'triangle',.05,k*.06)); }
+      else toast(pourLabel(pc.fill)); }
+    else { if ((G.combo||0) >= 2) toast(`${pourLabel(pc.fill)} · 콤보 끊김!`); else toast(pourLabel(pc.fill)); G.combo = 0; sfx.bad(); } }
   $('#fx').innerHTML = '';
   viewShapeP(); renderTray(); renderCard();
 }
@@ -3424,15 +3582,21 @@ function viewDecoP(){
   const c = G.cake;
   layer(piecesSVG(c, 'baked'));
   const n = c.decos.length, g = c.pieces.filter(p => p.glaze).length;
-  setHint(G.ptool ? `과자를 눌러서 ${G.ptool.kind==='glaze' ? GLAZE[G.ptool.id].n+' 코팅' : TOP[G.ptool.id].n}을(를) 올려요! (코팅 ${g}개 · 토핑 ${n}개)` : '위에서 코팅이나 토핑을 고르고 과자를 눌러요');
+  const tl = G.ptool;
+  setHint(!tl ? '아래에서 코팅·토핑·그리기를 고르고 과자를 눌러요'
+    : tl.kind === 'pen' ? (tl.zig ? `과자를 누르면 ${PENS[tl.id].n} 아이싱이 지그재그로 뿌려져요!` : `과자 위를 손가락으로 그려요! ${PENS[tl.id].n} 아이싱 펜 (지그재그도 있어요)`)
+    : tl.kind === 'top' && PSCATTER[tl.id] ? `과자를 누르면 ${TOP[tl.id].n}이(가) 윗면 가득 뿌려져요!`
+    : `과자를 눌러서 ${tl.kind==='glaze' ? GLAZE[tl.id].n+' 코팅' : TOP[tl.id].n}을(를) 올려요! (코팅 ${g}개 · 토핑 ${n}개)`);
   setMeter(null);
 }
 function trayDecoP(){
   const t = G.ptool || {}, tab = G.ptab || 0;
   const items = tab === 0
     ? Object.entries(GLAZE).map(([k,g]) => `<div class="top ${t.kind==='glaze'&&t.id===k?'sel':''}" data-gl="${k}" title="${g.n} 코팅"><span class="gdot ${k}" style="background:${g.c}"></span><small class="gname">${g.n}</small></div>`)
-    : PTOPS.map(k => `<div class="top ${t.kind==='top'&&t.id===k?'sel':''}" data-pt="${k}" title="${TOP[k].n}">${icon(k)}</div>`);
-  return `<div class="topwrap"><div class="tabs"><button class="tab ${tab===0?'on':''}" data-ptab="0">코팅</button><button class="tab ${tab===1?'on':''}" data-ptab="1">토핑</button></div>
+    : tab === 1 ? PTOPS.map(k => `<div class="top ${t.kind==='top'&&t.id===k?'sel':''}" data-pt="${k}" title="${TOP[k].n}">${icon(k)}</div>`)
+    : Object.entries(PENS).map(([k,g]) => `<div class="top ${t.kind==='pen'&&t.id===k&&!t.zig?'sel':''}" data-pen="${k}" title="${g.n} 아이싱 펜"><span class="gdot" style="background:${g.c}"></span><small class="gname">${g.n}</small></div>`)
+      .concat(`<div class="top ${t.zig?'sel':''}" data-zig="1" title="지그재그 드리즐"><svg viewBox="0 0 40 24" width="30" height="20"><path d="M3 6 L10 18 L17 6 L24 18 L31 6 L37 16" stroke="${PENS[t.kind==='pen'?t.id:'white'].c==='#ffffff'?'#c98fa5':PENS[t.kind==='pen'?t.id:'white'].c}" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><small class="gname">지그재그</small></div>`);
+  return `<div class="topwrap"><div class="tabs"><button class="tab ${tab===0?'on':''}" data-ptab="0">코팅</button><button class="tab ${tab===1?'on':''}" data-ptab="1">토핑</button><button class="tab ${tab===2?'on':''}" data-ptab="2">그리기</button></div>
       <div class="topgrid">${items.join('')}</div></div>
     <div class="decoCtl"><button class="tb wide" id="decoUndo">${icon('undo')} 되돌리기</button></div>
     <button class="next" id="next">완성! ▶</button>`;
@@ -3441,26 +3605,55 @@ function bindDecoP(){
   document.querySelectorAll('[data-ptab]').forEach(b => b.onclick = () => { G.ptab = +b.dataset.ptab; sfx.pop(); renderTray(); });
   document.querySelectorAll('[data-gl]').forEach(b => b.onclick = () => { G.ptool = {kind:'glaze', id:b.dataset.gl}; sfx.pop(); renderTray(); viewDecoP(); });
   document.querySelectorAll('[data-pt]').forEach(b => b.onclick = () => { G.ptool = {kind:'top', id:b.dataset.pt}; sfx.pop(); renderTray(); viewDecoP(); });
+  document.querySelectorAll('[data-pen]').forEach(b => b.onclick = () => { G.ptool = {kind:'pen', id:b.dataset.pen}; sfx.pop(); renderTray(); viewDecoP(); });
+  document.querySelectorAll('[data-zig]').forEach(b => b.onclick = () => { const id = G.ptool && G.ptool.kind==='pen' ? G.ptool.id : 'white'; G.ptool = {kind:'pen', id, zig:true}; sfx.pop(); renderTray(); viewDecoP(); });
   $('#decoUndo').onclick = () => { const c = G.cake, hh = G.phist || (G.phist = []); const last = hh.pop(); if (!last) return;
-    if (last.kind === 'top') c.decos.pop(); else c.pieces[last.i].glaze = last.prev; sfx.pop(); viewDecoP(); renderCard(); };
+    if (last.kind === 'top') c.decos.pop();
+    else if (last.kind === 'spr') c.pieces[last.i].spr.splice(-last.n, last.n);
+    else if (last.kind === 'line') c.pieces[last.i].lines.pop();
+    else c.pieces[last.i].glaze = last.prev; sfx.pop(); viewDecoP(); renderCard(); };
   $('#next').onclick = goNext;
 }
 function decoDownP(e){
-  const c = G.cake, p = svgPt(e);
+  const c = G.cake, p = svgPt(e), r = G.recipe;
   if (!G.ptool){ toast('먼저 코팅이나 토핑을 골라요!'); return; }
   const i = pieceAt(p); if (i == null) return;
-  const pc = c.pieces[i], h = G.phist || (G.phist = []);
-  if (G.ptool.kind === 'glaze'){ h.push({kind:'glaze', i, prev:pc.glaze||null}); pc.glaze = G.ptool.id; sfx.pop(); beep(380,.08,'sine',.05); }
+  const pc = c.pieces[i], h = G.phist || (G.phist = []), A = parea(r, pc), t = G.ptool;
+  if (t.kind === 'glaze'){ h.push({kind:'glaze', i, prev:pc.glaze||null}); pc.glaze = t.id; sfx.pop(); beep(380,.08,'sine',.05); }
+  else if (t.kind === 'pen' && t.zig){   // 지그재그 드리즐: 윗면을 가로질러 한 번에
+    const n = 7, pts = [...Array(n+1)].map((_,k) => [-A.w*.9 + A.w*1.8*k/n, (k%2 ? 1 : -1)*A.h*.75]);
+    (pc.lines || (pc.lines = [])).push({col:PENS[t.id].c, pts}); h.push({kind:'line', i});
+    [0,1,2].forEach(k => beep(620+k*140,.05,'triangle',.04,k*.05));
+  }
+  else if (t.kind === 'pen'){
+    const L = {col:PENS[t.id].c, pts:[[clamp(p.x-A.cx,-A.w,A.w), clamp(p.y-A.cy,-A.h,A.h)]]};
+    (pc.lines || (pc.lines = [])).push(L); h.push({kind:'line', i});
+    G.pen = {i, L}; $('#view').setPointerCapture(e.pointerId);
+  }
+  else if (PSCATTER[t.id]){   // 뿌리기: 윗면 전체에 골고루
+    const S = PSCATTER[t.id], arr = pc.spr || (pc.spr = []), cols = (SCATTER[t.id]||{}).cols || ['#fff'];
+    let n = 0;
+    for (let k=0; k<400 && n<S.n; k++){ const dx = rnd(-A.w,A.w)*.95, dy = rnd(-A.h,A.h)*.9;
+      if (!inArea(A, dx, dy)) continue; arr.push({dx, dy, a:rnd(0,180), col:pick(cols), k:t.id}); n++; }
+    h.push({kind:'spr', i, n});
+    if (t.id === 'glitter') [0,1,2,3].forEach(k => beep(1500+k*320,.06,'sine',.035,k*.05)); else [0,1,2].forEach(k => beep(900+k*250,.05,'sine',.04,k*.04));
+  }
   else {
-    const top = G.recipe === 'muffin' ? pc.y - 30 : pc.y;
-    c.decos.push({type:G.ptool.id, i, dx:clamp(p.x-pc.x,-22,22), dy:clamp(p.y-top,-12,12), rot:rnd(-25,25)});
+    const dx = p.x-A.cx, dy = p.y-A.cy, sc = inArea(A, dx, dy) ? 1 : 1/Math.sqrt((dx*dx)/(A.w*A.w)+(dy*dy)/(A.h*A.h));
+    c.decos.push({type:t.id, i, dx:dx*sc*.9, dy:dy*sc*.9, rot:rnd(-25,25)});
     h.push({kind:'top'}); sfx.pop();
   }
   viewDecoP(); renderCard();
 }
+function penUpP(){ const q = G.pen; G.pen = null; if (!q) return; if (q.L.pts.length < 2) q.L.pts.push([q.L.pts[0][0]+1, q.L.pts[0][1]]); sfx.pop(); viewDecoP(); }
 function decoMoveP(e){
   if (!G.ptool){ $('#fx').innerHTML=''; return; }
   const p = svgPt(e);
+  if (G.pen){ const pc = G.cake.pieces[G.pen.i], A = parea(G.recipe, pc), L = G.pen.L, last = L.pts[L.pts.length-1];
+    const dx = clamp(p.x-A.cx,-A.w,A.w), dy = clamp(p.y-A.cy,-A.h,A.h);
+    if (Math.hypot(dx-last[0], dy-last[1]) > 2.5){ L.pts.push([+dx.toFixed(1), +dy.toFixed(1)]); if (Math.random() < .3) beep(rnd(700,900),.03,'sine',.02); viewDecoP(); }
+    $('#fx').innerHTML = `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="6" fill="${L.col}" stroke="#6b2a3c" stroke-width="2"/>`; return; }
+  if (G.ptool.kind === 'pen'){ $('#fx').innerHTML = `<g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(35)"><rect x="-5" y="-34" width="10" height="28" rx="4" fill="${PENS[G.ptool.id].c}" stroke="#6b2a3c" stroke-width="2"/><path d="M-4 -6 L0 2 L4 -6Z" fill="#fff" stroke="#6b2a3c" stroke-width="1.5"/></g>`; return; }
   $('#fx').innerHTML = G.ptool.kind === 'glaze' ? `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="9" fill="${GLAZE[G.ptool.id].c}" stroke="#6b2a3c" stroke-width="2"/>` : iconAt(G.ptool.id, p.x, p.y, 28);
 }
 
@@ -3477,13 +3670,13 @@ function newPastryOrder(rid){
   lastPerson = pi;
   return { person: PEOPLE[pi], occasion: pick(OCCASIONS), recipe: rid,
     flavor: pick(Object.keys(FLAVORS)), shape: pick(Object.keys(SHAPES)), glaze: pick(Object.keys(GLAZE)),
-    top: {id: pick(PTOPS.filter(k => k !== 'sprinkle')), n: 3 + Math.floor(Math.random()*4)} };
+    top: {id: pick(PTOPS.filter(k => !PSCATTER[k])), n: 3 + Math.floor(Math.random()*4)} };
 }
 function cardPastry(){
   const c = G.cake, r = recipe(), cookie = r.kind === 'cookie', made = c.pieces ? c.pieces.length : 0;
   if (G.mode === 'free') return `<div class="card"><div class="cust"><div class="face">${bomiSVG('joy')}</div><div class="cname">모아의 ${r.n}<br><span style="font-size:13px;color:#b98">Lv.${xpInfo().lv} · ${rankOf(save.served)}</span></div></div>
       <div class="bubble">${r.desc}! 맛있게 구워 볼까?</div>
-      <ul class="tips"><li>재료를 그릇으로 끌어다 넣고 섞기</li><li>${cookie?'반죽을 쿠키 틀로 찍기':'틀에 반죽 짜 넣기'}</li><li>오븐에서 알맞게 굽기</li><li>코팅하고 토핑 올리기</li></ul>
+      <ul class="tips"><li>재료를 그릇으로 끌어다 넣고 섞기</li><li>${cookie?'반죽을 쿠키 틀로 찍기':'틀에 반죽 짜 넣기'}</li><li>오븐에서 알맞게 굽기</li><li>코팅·토핑·아이싱 펜으로 꾸미기</li></ul>
       <ul class="ord"><li><b>맛</b>${flavList(c).length?flavorLabel(c):'-'}</li><li><b>개수</b>${made}개</li><li><b>토핑</b>${c.decos.length}개</li></ul></div>`;
   const o = G.order, chk = (cond, done) => done ? (cond ? '<i class="ok">✓</i>' : '<i class="no">달라요!</i>') : '';
   const nTop = c.decos.filter(d => d.type === o.top.id).length, nGl = (c.pieces||[]).filter(p => p.glaze === o.glaze).length;
@@ -3598,7 +3791,10 @@ function scoreCake(c,o){
   rows.push(['크림', c.frost?`${FROST[c.frost].n} ${Math.round(c.cover*100)}%`:'안 발랐어요', (c.frost===o.frost?7:0)+Math.round(8*Math.min(1,c.cover)), 15]);
   let ts=0; const desc=[];
   o.tops.forEach(t => { const n=c.decos.filter(d=>d.type===t.id).length; ts+=Math.max(0,1-Math.abs(n-t.n)/t.n); desc.push(`${TOP[t.id].n} ${n}/${t.n}`); });
-  rows.push(['토핑', desc.join(', '), Math.round(20*ts/o.tops.length), 20]);
+  if (o.tops[0].pos){ const ps = placeScore(c,o);
+    rows.push(['토핑', desc.join(', '), Math.round(12*ts/o.tops.length), 12]);
+    rows.push(['토핑 자리', ps>.85?'원하는 자리에 딱!':ps>.5?'조금 달라요':'자리가 많이 달라요', Math.round(8*ps), 8]); }
+  else rows.push(['토핑', desc.join(', '), Math.round(20*ts/o.tops.length), 20]);
   return {rows, total: rows.reduce((s,r)=>s+r[2],0)};
 }
 function finish(){
@@ -3896,588 +4092,6 @@ $('#splash').addEventListener('click', () => {
   $('#splash').classList.add('hide'); BGM.start(); sfx.ok(); FX.ambient = true; FX.run();
   setTimeout(() => $('#splash').remove(), 600);
 });
-</script>
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
-<script type="module">
-/* =====================================================================
-   3D 케이크 (Three.js) — 크림·장식·완성·타이틀 화면의 케이크를 진짜 3D로 그려요.
-   불러오지 못하면(인터넷 없음 등) 게임은 예전 2D 그림으로 그대로 돌아가요.
-   ===================================================================== */
-import * as THREE from 'three';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-
-const C3D = window.C3D = { ok:false };
-const LITE = matchMedia('(pointer:coarse)').matches && Math.min(screen.width, screen.height) < 600;
-let dirty = true;   // 다시 그릴 일이 있으면 true
-
-const R3 = TR.map(r => r/100), H3 = [.8, .68, .58];
-const Y0 = .71, CREAM = .035, BRUSH3 = .27;
-
-let renderer;
-try { renderer = new THREE.WebGLRenderer({antialias:true, alpha:true}); } catch (e) { console.warn('3D 사용 불가', e); }
-if (renderer) init();
-
-function init(){
-renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-const canvas = renderer.domElement; canvas.className = 'gl3d';
-
-const scene = new THREE.Scene();
-const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), .04).texture;
-const camera = new THREE.PerspectiveCamera(30, 1.5, .1, 100);
-
-scene.add(new THREE.HemisphereLight(0xfff2f6, 0xd9b6c2, .75));
-const sun = new THREE.DirectionalLight(0xfff0e4, 2.3);
-sun.position.set(-4, 8, 5); sun.castShadow = true; sun.shadow.mapSize.set(LITE ? 768 : 1536, LITE ? 768 : 1536); sun.shadow.radius = 5; sun.shadow.bias = -.0005; sun.shadow.normalBias = .02;
-Object.assign(sun.shadow.camera, {left:-3.5, right:3.5, top:4, bottom:-3.5, near:1, far:20});
-scene.add(sun);
-const rim = new THREE.DirectionalLight(0xffd3e4, 1.1); rim.position.set(5, 3, -6); scene.add(rim);
-const fill = new THREE.DirectionalLight(0xfff3ec, .85); fill.position.set(3, 2.5, 8); scene.add(fill);
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.ShadowMaterial({opacity:.2}));
-ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
-
-const root = new THREE.Group(); scene.add(root);          // 돌림판 (케이크 + 받침이 같이 돌아요)
-const parts = {stand:new THREE.Group(), tiers:new THREE.Group(), dollops:new THREE.Group(), decos:new THREE.Group(), sprinkles:new THREE.Group(), text:new THREE.Group()};
-Object.values(parts).forEach(g => root.add(g));
-
-/* ---------- 공용 도구 ---------- */
-const col = h => new THREE.Color(h);
-const MC = {};
-const phys = (key, o) => MC[key] || (MC[key] = new THREE.MeshPhysicalMaterial(o));
-const std = (key, o) => MC[key] || (MC[key] = new THREE.MeshStandardMaterial(o));
-const mesh = (geo, mat, f) => { const m = new THREE.Mesh(geo, mat); m.castShadow = m.receiveShadow = true; f && f(m); return m; };
-const lathe = (pts, seg=48) => new THREE.LatheGeometry(pts.map(([x,y]) => new THREE.Vector2(x,y)), seg);
-const texOf = (cv, srgb=true) => { const t = new THREE.CanvasTexture(cv); t.flipY = false; if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
-function mkCanvas(w, h, draw){ const c = document.createElement('canvas'); c.width = w; c.height = h; draw && draw(c.getContext('2d'), w, h); return c; }
-
-// 크림 결(스패출러 자국) 범프
-const creamBump = (() => { const t = new THREE.CanvasTexture(mkCanvas(512, 256, (g, w, h) => {
-  g.fillStyle = '#808080'; g.fillRect(0, 0, w, h);
-  for (let i=0;i<1100;i++){ g.fillStyle = Math.random()<.5 ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.07)'; g.fillRect(Math.random()*w, Math.random()*h, 30+Math.random()*150, 1+Math.random()*3); }
-})); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 1); return t; })();
-
-/* ---------- 모양 데이터 (윤곽 점 · 바깥 법선 · 둘레 비율) ---------- */
-const SHP = {};
-function shapeData(shape){
-  if (SHP[shape]) return SHP[shape];
-  const N = 160; let pts = samplePts(shape, N).map(p => [p[0], p[1]]);
-  let A = 0; for (let i=0;i<N;i++){ const [x0,y0]=pts[i], [x1,y1]=pts[(i+1)%N]; A += x0*y1 - x1*y0; }
-  if (A < 0){ pts.reverse(); A = -A; }
-  const en = pts.map((p,i) => { const q = pts[(i+1)%N], dx = q[0]-p[0], dy = q[1]-p[1], l = Math.hypot(dx,dy)||1; return [dy/l, -dx/l]; });
-  const nrm = pts.map((_,i) => { const a = en[(i+N-1)%N], b = en[i], x = a[0]+b[0], y = a[1]+b[1], l = Math.hypot(x,y)||1; return [x/l, y/l]; });
-  const cum = [0]; let L = 0; for (let i=0;i<N;i++){ const p = pts[i], q = pts[(i+1)%N]; L += Math.hypot(q[0]-p[0], q[1]-p[1]); cum.push(L); }
-  return SHP[shape] = {pts, nrm, cum:cum.map(v => v/L), L, area:A/2, N};
-}
-function nearestIdx(sd, u, v){ let b = 0, bd = 1e9; sd.pts.forEach(([x,y],i) => { const d = (x-u)**2 + (y-v)**2; if (d < bd){ bd = d; b = i; } }); return b; }
-
-const GC = {};
-function sideGeo(shape, R, h0, h1){
-  const k = `s${shape}${R}${h0}${h1}`; if (GC[k]) return GC[k];
-  const sd = shapeData(shape), N = sd.N, pos = [], nor = [], uv = [], idx = [];
-  for (let i=0;i<=N;i++){ const j = i%N, [u,v] = sd.pts[j], n = sd.nrm[j];
-    pos.push(u*R, h0, v*R, u*R, h1, v*R); nor.push(n[0],0,n[1], n[0],0,n[1]); uv.push(sd.cum[i], 0, sd.cum[i], 1); }
-  for (let i=0;i<N;i++){ const a = i*2; idx.push(a, a+1, a+2, a+1, a+3, a+2); }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx);
-  return GC[k] = g;
-}
-function topGeo(shape, R){
-  const k = `t${shape}${R}`; if (GC[k]) return GC[k];
-  const sd = shapeData(shape);
-  const g = new THREE.ShapeGeometry(new THREE.Shape(sd.pts.map(([u,v]) => new THREE.Vector2(u*R, -v*R))));
-  g.rotateX(-Math.PI/2);
-  const p = g.attributes.position, uv = g.attributes.uv;
-  for (let i=0;i<p.count;i++) uv.setXY(i, p.getX(i)/R/2.3 + .5, p.getZ(i)/R/2.3 + .5);
-  return GC[k] = g;
-}
-function rimGeo(shape, R, y, r){
-  const k = `r${shape}${R}${y}${r}`; if (GC[k]) return GC[k];
-  const sd = shapeData(shape);
-  const curve = new THREE.CatmullRomCurve3(sd.pts.map(([u,v],i) => new THREE.Vector3(u*R - sd.nrm[i][0]*r*.55, y, v*R - sd.nrm[i][1]*r*.55)), true);
-  const g = new THREE.TubeGeometry(curve, 240, r, 10, true), uv = g.attributes.uv;
-  for (let i=0;i<uv.count;i++) uv.setY(i, .985);
-  return GC[k] = g;
-}
-
-/* ---------- 케이크 받침 (금테 도자기 스탠드) ---------- */
-(() => {
-  const porcelain = phys('porc', {color:0xfdf6fa, roughness:.22, clearcoat:1, clearcoatRoughness:.08});
-  const gold = std('gold', {color:0xe2b45e, metalness:1, roughness:.28});
-  parts.stand.add(mesh(lathe([[0,0],[.8,0],[.84,.04],[.78,.08],[.38,.13],[.17,.24],[.12,.44],[.17,.5],[.12,.56],[.24,.61],[1.92,.64],[2.02,.68],[2.0,.72],[1.84,.72],[0,.71]], 96), porcelain));
-  parts.stand.add(mesh(new THREE.TorusGeometry(2.0, .025, 12, 128), gold, m => { m.rotation.x = Math.PI/2; m.position.y = .705; }));
-  parts.stand.add(mesh(new THREE.TorusGeometry(.82, .022, 12, 96), gold, m => { m.rotation.x = Math.PI/2; m.position.y = .045; }));
-  // 레이스 받침지
-  const doily = mkCanvas(512, 512, (g, w) => {
-    g.translate(w/2, w/2); g.fillStyle = '#fff';
-    for (let k=0;k<48;k++){ const a = k/48*Math.PI*2; g.beginPath(); g.arc(Math.cos(a)*226, Math.sin(a)*226, 22, 0, 7); g.fill(); }
-    g.beginPath(); g.arc(0, 0, 228, 0, 7); g.fill();
-    g.globalCompositeOperation = 'destination-out';
-    for (let ring=0; ring<3; ring++){ const rr = 236 - ring*26, n = 48 - ring*8;
-      for (let k=0;k<n;k++){ const a = (k+ring*.5)/n*Math.PI*2; g.beginPath(); g.ellipse(Math.cos(a)*rr, Math.sin(a)*rr, 5-ring, 3.4-ring*.6, a, 0, 7); g.fill(); } }
-  });
-  const dm = std('doily', {map:texOf(doily), alphaTest:.5, roughness:.9, side:THREE.DoubleSide});
-  parts.stand.add(mesh(new THREE.PlaneGeometry(3.6, 3.6), dm, m => { m.rotation.x = -Math.PI/2; m.position.y = Y0 + .004; m.castShadow = false; }));
-})();
-
-/* ---------- 스펀지 질감 (작은 기공 + 가운데 크림 층) ---------- */
-const spongeMaps = {};
-function spongeMat(hex){
-  if (spongeMaps[hex]) return spongeMaps[hex];
-  const cv = mkCanvas(512, 128, (g, w, h) => {
-    g.fillStyle = hex; g.fillRect(0, 0, w, h);
-    for (let i=0;i<1600;i++){ g.fillStyle = Math.random()<.5 ? shade(hex,-.18) : shade(hex,.14); g.globalAlpha = .45; g.beginPath(); g.ellipse(Math.random()*w, Math.random()*h, 1+Math.random()*2.2, .8+Math.random()*1.4, 0, 0, 7); g.fill(); }
-    g.globalAlpha = 1; g.fillStyle = '#fff3e2'; g.fillRect(0, h*.45, w, h*.1);
-    g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(0, h*.46, w, h*.025);
-    const grd = g.createLinearGradient(0, 0, 0, h); grd.addColorStop(0, 'rgba(90,40,10,.25)'); grd.addColorStop(.12, 'rgba(0,0,0,0)'); grd.addColorStop(.85, 'rgba(0,0,0,0)'); grd.addColorStop(1, 'rgba(90,40,10,.3)');
-    g.fillStyle = grd; g.fillRect(0, 0, w, h);
-  });
-  const t = texOf(cv); t.wrapS = THREE.RepeatWrapping; t.repeat.set(2, 1);
-  return spongeMaps[hex] = {side:new THREE.MeshStandardMaterial({map:t, roughness:.85, side:THREE.DoubleSide}),
-    top:new THREE.MeshStandardMaterial({color:shade(hex,-.1), roughness:.8, bumpMap:creamBump, bumpScale:2})};
-}
-
-/* ---------- 크림 바르기: 단마다 윗면·옆면 '바른 자리' 그림 ---------- */
-const blackCv = (w, h) => mkCanvas(w, h, (g) => { g.fillStyle = "#000"; g.fillRect(0, 0, w, h); });
-function newPaint(){ return {top:blackCv(256, 256), side:blackCv(512, 128)}; }
-C3D.resetPaint = c => { c.paint = [0,1,2].map(newPaint); c.paintN = 0; };
-function paintTex(cv){ if (!cv._tex){ cv._tex = texOf(cv, false); } return cv._tex; }
-function dab(cv, x, y, rx, ry, wrap){
-  const g = cv.getContext('2d');
-  const draw = xx => { const grd = g.createRadialGradient(0, 0, 0, 0, 0, 1); grd.addColorStop(0, 'rgba(255,255,255,1)'); grd.addColorStop(.65, 'rgba(255,255,255,.9)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
-    g.save(); g.translate(xx, y); g.scale(rx, ry); g.fillStyle = grd; g.beginPath(); g.arc(0, 0, 1, 0, 7); g.fill(); g.restore(); };
-  draw(x); if (wrap){ if (x - rx < 0) draw(x + cv.width); if (x + rx > cv.width) draw(x - cv.width); }
-  cv._tex && (cv._tex.needsUpdate = true); dirty = true;
-}
-function tierBase(i){ let y = Y0; for (let k=0;k<i;k++) y += H3[k]; return y; }
-function topY(c, i){ return tierBase(i) + H3[i] + (hasFrost(c) ? CREAM : 0); }
-/* 맞은 자리에 크림을 발라요 (part: top/side/rim, uv: 0~1) */
-C3D.paintHit = (c, hit) => {
-  if (!c.paint) C3D.resetPaint(c);
-  const i = hit.tier, R = R3[i]*1.03, sd = shapeData(c.shape), P = c.paint[i], H = H3[i] + CREAM;
-  const sideDab = (U, V) => dab(P.side, U*512, V*128, BRUSH3/(sd.L*R)*512, BRUSH3/H*128, true);
-  const topDab = (U, V) => dab(P.top, U*256, V*256, BRUSH3/(2.3*R3[i])*256, BRUSH3/(2.3*R3[i])*256);
-  if (hit.part === 'top'){
-    topDab(hit.uv.x, hit.uv.y);
-    const u = (hit.uv.x-.5)*2.3, v = (hit.uv.y-.5)*2.3, j = nearestIdx(sd, u, v), [pu,pv] = sd.pts[j];
-    if (Math.hypot(pu-u, pv-v)*R3[i] < BRUSH3) sideDab(sd.cum[j], 1);
-  } else {
-    sideDab(hit.uv.x, hit.part==='rim' ? 1 : hit.uv.y);
-    if (hit.part==='rim' || hit.uv.y > .8){ const j = Math.round(hit.uv.x*sd.N)%sd.N, [pu,pv] = sd.pts[j]; topDab(pu/2.3+.5, pv/2.3+.5); }
-  }
-  if (++c.paintN % 5 === 0) C3D.measure(c);
-};
-// 바른 넓이 비율 (위층에 가려진 윗면은 빼고 계산)
-const maskCache = {}, probe = mkCanvas(64, 64);
-function topMask(c, i){
-  const k = `${c.shape}${c.tiers}${i}`; if (maskCache[k]) return maskCache[k];
-  const m = [];
-  for (let y=0;y<64;y++) for (let x=0;x<64;x++){ const u = ((x+.5)/64-.5)*2.3, v = ((y+.5)/64-.5)*2.3;
-    if (!inShape(c.shape, u, v)) continue;
-    if (i < c.tiers-1){ const s = R3[i]/R3[i+1]; if (inShape(c.shape, u*s*1.05, v*s*1.05)) continue; }
-    m.push(y*64+x); }
-  return maskCache[k] = m;
-}
-C3D.measure = c => {
-  if (!c.paint) return c.cover || 0;
-  const sd = shapeData(c.shape), g = probe.getContext('2d', {willReadFrequently:true});
-  let got = 0, all = 0;
-  for (let i=0;i<c.tiers;i++){
-    const P = c.paint[i], R = R3[i], cell = (2.3*R/64)**2;
-    g.clearRect(0, 0, 64, 64); g.drawImage(P.top, 0, 0, 64, 64);
-    const d = g.getImageData(0, 0, 64, 64).data, m = topMask(c, i);
-    let n = 0; m.forEach(k => { if (d[k*4+1] > 110) n++; });
-    got += n*cell; all += m.length*cell;
-    g.clearRect(0, 0, 64, 16); g.drawImage(P.side, 0, 0, 64, 16);
-    const s = g.getImageData(0, 0, 64, 16).data; let ns = 0; for (let k=0;k<64*16;k++) if (s[k*4+1] > 110) ns++;
-    const area = sd.L*R*H3[i]; got += area*ns/(64*16); all += area;
-  }
-  const was = c.cover;
-  c.cover = all ? got/all : 0;
-  if (was < .93 && c.cover >= .93){ c.frostFull = true; c.cover = 1; sfx.ok(); toast('크림을 매끈하게 발랐어요!'); C3D.sync(c, ['tiers']); }
-  return c.cover;
-};
-
-/* ---------- 단 (스펀지 + 크림) ---------- */
-const pickables = [];      // 클릭으로 맞힐 수 있는 것들
-function buildTiers(c){
-  const sp = spongeColor(c), sm = spongeMat(sp), fr = c.frost ? FROST[c.frost].c : null;
-  for (let i=0;i<c.tiers;i++){
-    const R = R3[i], H = H3[i], b = tierBase(i);
-    const side = mesh(sideGeo(c.shape, R, 0, H), sm.side, m => m.position.y = b); side.userData = {tier:i, part:'side', sponge:true};
-    const top = mesh(topGeo(c.shape, R), sm.top, m => m.position.y = b + H); top.userData = {tier:i, part:'top', sponge:true};
-    parts.tiers.add(side, top); pickables.push(side, top);
-    if (!c.frost) continue;
-    if (!c.paint) C3D.resetPaint(c);
-    const full = c.frostFull, P = c.paint[i];
-    const base = {color:col(fr), roughness:.5, sheen:.25, sheenColor:col(shade(fr,.35)), bumpMap:creamBump, bumpScale:.8, side:THREE.DoubleSide};
-    const mTop = new THREE.MeshPhysicalMaterial(Object.assign({}, base, full ? {} : {alphaMap:paintTex(P.top), alphaTest:.38}));
-    const mSide = new THREE.MeshPhysicalMaterial(Object.assign({}, base, full ? {} : {alphaMap:paintTex(P.side), alphaTest:.38}));
-    const R2 = R*1.03;
-    const cs = mesh(sideGeo(c.shape, R2, 0, H + CREAM*.4), mSide, m => m.position.y = b); cs.userData = {tier:i, part:'side'};
-    const ct = mesh(topGeo(c.shape, R2), mTop, m => m.position.y = b + H + CREAM); ct.userData = {tier:i, part:'top'};
-    const cr = mesh(rimGeo(c.shape, R2, H + CREAM*.45, CREAM*.75), mSide, m => m.position.y = b); cr.userData = {tier:i, part:'rim'};
-    parts.tiers.add(cs, ct, cr); pickables.push(cs, ct, cr);
-  }
-}
-
-/* ---------- 짤주머니 크림: 별깍지 로제트 · 조개 모양 ---------- */
-const rosGeo = (() => { const pts = []; for (let i=0;i<=28;i++){ const t = i/28; pts.push([.24*Math.pow(1-t,.55)*(1+.25*Math.sin(Math.PI*t)), .4*t]); }
-  const g = lathe(pts, 72), p = g.attributes.position;
-  for (let i=0;i<p.count;i++){ const x = p.getX(i), y = p.getY(i), z = p.getZ(i), a = Math.atan2(z,x), k = 1 + .17*Math.cos(8*a + y*16); p.setX(i, x*k); p.setZ(i, z*k); }
-  g.computeVertexNormals(); return g; })();
-const shellGeo = (() => { const g = rosGeo.clone(), p = g.attributes.position;
-  for (let i=0;i<p.count;i++){ const x = p.getX(i), y = p.getY(i); p.setX(i, x*1.25 + (x>0 ? x*.55*(1-y/.4) : 0)); p.setY(i, y*.62); }
-  g.computeVertexNormals(); return g; })();
-const creamMat = k => phys('cream'+k, {color:col(FROST[k].c), roughness:.45, sheen:.25, sheenColor:col(shade(FROST[k].c,.35))});
-function buildDollops(c){
-  const pressed = new Set(c.decos.filter(d => d.cream).map(d => d.cream)), sd = shapeData(c.shape);
-  c.dollops.forEach((d, n) => {
-    const R = R3[d.tier];
-    if (d.base){
-      const j = nearestIdx(sd, d.u/1.03, d.v/1.03), [nu, nv] = sd.nrm[j], tx = -nv, tz = nu;
-      const m = mesh(shellGeo, creamMat(d.col), m => {
-        m.position.set(sd.pts[j][0]*R*1.03 + nu*.03, tierBase(d.tier) - .005, sd.pts[j][1]*R*1.03 + nv*.03);
-        m.rotation.y = Math.atan2(-tz, tx) + (d.flip ? Math.PI : 0); m.scale.setScalar(.42*Math.min(1.1,d.s)); });
-      parts.dollops.add(m);
-    } else {
-      const m = mesh(rosGeo, creamMat(d.col), m => {
-        m.position.set(d.u*R, topY(c, d.tier) - .01, d.v*R); m.rotation.y = (d.rot||0)*.1 + n;
-        const s = .78*d.s; m.scale.set(s, s*(d.id!=null && pressed.has(d.id) ? .45 : 1), s); });
-      m.userData = {dollop:n}; parts.dollops.add(m);
-    }
-  });
-}
-C3D.dollopTop = (c, d) => topY(c, d.tier) - .01 + .4*.78*d.s*.45;
-
-/* ---------- 토핑 3D 모형 (바닥 y=0, 크기 약 0.3) ---------- */
-const sphG = new THREE.SphereGeometry(1, 28, 20), cylG = new THREE.CylinderGeometry(1, 1, 1, 40), capG = new THREE.CapsuleGeometry(.5, 1, 4, 10);
-function canvasDisc(draw){ return texOf(mkCanvas(256, 256, (g, w) => { g.translate(w/2, w/2); draw(g, w/2); })); }
-const TEX = {};
-/* 과일 단면 그림 (진짜 과일처럼: 껍질 · 과육 결 · 씨) */
-const rndSeeded = (s => () => { s = (s*16807) % 2147483647; return (s-1)/2147483646; })(12345);
-const sliceTex = {
-  kiwi: () => canvasDisc((g, r) => {
-    g.fillStyle = '#6b4a22'; g.beginPath(); g.arc(0,0,r,0,7); g.fill();                         // 털 있는 갈색 껍질
-    for (let k=0;k<160;k++){ const a = rndSeeded()*7, rr = r*(.95+rndSeeded()*.05); g.fillStyle = 'rgba(160,120,70,.6)'; g.fillRect(Math.cos(a)*rr, Math.sin(a)*rr, 2, 2); }
-    const grd = g.createRadialGradient(0,0,r*.12,0,0,r*.93); grd.addColorStop(0,'#f6f0c8'); grd.addColorStop(.22,'#d8e88a'); grd.addColorStop(.34,'#8cc63f'); grd.addColorStop(.8,'#6fb52c'); grd.addColorStop(1,'#5a9c22');
-    g.fillStyle = grd; g.beginPath(); g.arc(0,0,r*.93,0,7); g.fill();
-    for (let k=0;k<90;k++){ const a = k/90*Math.PI*2 + rndSeeded()*.03; g.strokeStyle = `rgba(230,250,190,${.18+rndSeeded()*.2})`; g.lineWidth = 1.4;   // 과육 결
-      g.beginPath(); g.moveTo(Math.cos(a)*r*.27, Math.sin(a)*r*.27); g.lineTo(Math.cos(a)*r*.9, Math.sin(a)*r*.9); g.stroke(); }
-    g.fillStyle = '#fbf6df'; g.beginPath(); g.ellipse(0, 0, r*.2, r*.15, .3, 0, 7); g.fill();                            // 흰 심
-    for (let ring=0; ring<2; ring++) for (let k=0;k<38;k++){ const a = k/38*Math.PI*2 + ring*.08, rr = r*(.29 + ring*.05 + rndSeeded()*.03);  // 까만 씨 두 줄
-      g.fillStyle = '#16100a'; g.beginPath(); g.ellipse(Math.cos(a)*rr, Math.sin(a)*rr, 4.2, 1.9, a, 0, 7); g.fill(); }
-  }),
-  orange: () => canvasDisc((g, r) => {
-    g.fillStyle = '#f07c10'; g.beginPath(); g.arc(0,0,r,0,7); g.fill();                         // 껍질 + 작은 기름샘
-    for (let k=0;k<120;k++){ const a = rndSeeded()*7, rr = r*(.93+rndSeeded()*.06); g.fillStyle = 'rgba(255,190,90,.7)'; g.beginPath(); g.arc(Math.cos(a)*rr, Math.sin(a)*rr, 1.3, 0, 7); g.fill(); }
-    g.fillStyle = '#fff1dc'; g.beginPath(); g.arc(0,0,r*.9,0,7); g.fill();                       // 흰 속껍질
-    for (let k=0;k<11;k++){ const a0 = k/11*Math.PI*2+.035, a1 = (k+1)/11*Math.PI*2-.035, am = (a0+a1)/2;
-      const grd = g.createRadialGradient(0,0,r*.08,0,0,r*.84); grd.addColorStop(0,'#ffcf6e'); grd.addColorStop(.6,'#ffaa2e'); grd.addColorStop(1,'#ff8c14');
-      g.fillStyle = grd; g.beginPath(); g.moveTo(Math.cos(am)*r*.1, Math.sin(am)*r*.1); g.arc(0,0,r*.84,a0,a1); g.closePath(); g.fill();
-      for (let j=0;j<10;j++){ const aa = a0 + (a1-a0)*(j+.5)/10, r0 = r*(.25+rndSeeded()*.2); g.strokeStyle = 'rgba(255,230,160,.55)'; g.lineWidth = 1.6;   // 알갱이 결
-        g.beginPath(); g.moveTo(Math.cos(aa)*r0, Math.sin(aa)*r0); g.lineTo(Math.cos(aa)*(r0+r*.18), Math.sin(aa)*(r0+r*.18)); g.stroke(); } }
-    g.fillStyle = '#fff4e0'; g.beginPath(); g.arc(0,0,r*.07,0,7); g.fill();
-  }),
-  banana: () => canvasDisc((g, r) => {
-    const grd = g.createRadialGradient(0,0,0,0,0,r); grd.addColorStop(0,'#fff7d6'); grd.addColorStop(.7,'#fbefc0'); grd.addColorStop(.93,'#f2dd98'); grd.addColorStop(1,'#d9bf6e');
-    g.fillStyle = grd; g.beginPath(); g.arc(0,0,r,0,7); g.fill();
-    for (let k=0;k<40;k++){ const a = k/40*Math.PI*2; g.strokeStyle = 'rgba(220,190,120,.25)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(Math.cos(a)*r*.2, Math.sin(a)*r*.2); g.lineTo(Math.cos(a)*r*.9, Math.sin(a)*r*.9); g.stroke(); }
-    g.strokeStyle = 'rgba(150,110,50,.55)'; g.lineWidth = 2.2;                                     // 가운데 별 모양 씨줄
-    for (let k=0;k<3;k++){ const a = k/3*Math.PI*2 + .3; g.beginPath(); g.moveTo(0,0); g.lineTo(Math.cos(a)*r*.2, Math.sin(a)*r*.2); g.stroke();
-      g.fillStyle = '#5a3e1e'; g.beginPath(); g.arc(Math.cos(a)*r*.13, Math.sin(a)*r*.13, 3.2, 0, 7); g.fill(); }
-  }),
-  mintLeaf: () => texOf(mkCanvas(128, 256, (g, w, h) => {
-    const grd = g.createLinearGradient(0,0,w,0); grd.addColorStop(0,'#3f9a45'); grd.addColorStop(.5,'#5fbd5a'); grd.addColorStop(1,'#3a8e40');
-    g.fillStyle = grd; g.fillRect(0,0,w,h);
-    g.strokeStyle = 'rgba(200,245,190,.75)'; g.lineWidth = 3; g.beginPath(); g.moveTo(w/2, h); g.lineTo(w/2, 8); g.stroke();   // 가운데 잎맥
-    g.lineWidth = 1.6; for (let k=1;k<7;k++){ const y = h - k*h/7.5; g.beginPath(); g.moveTo(w/2, y); g.quadraticCurveTo(w*.3, y-14, 6, y-30); g.moveTo(w/2, y); g.quadraticCurveTo(w*.7, y-14, w-6, y-30); g.stroke(); }
-  })),
-  lolli: () => canvasDisc((g, r) => { g.fillStyle = '#fff'; g.beginPath(); g.arc(0,0,r,0,7); g.fill(); g.strokeStyle = '#ff5c8a'; g.lineWidth = r*.16; g.beginPath();
-    for (let t=0;t<6*Math.PI;t+=.05){ const rr = r*t/(6*Math.PI); g.lineTo(Math.cos(t)*rr, Math.sin(t)*rr); } g.stroke(); }),
-};
-const slice = (kind, r, h, rimCol, rough=.5) => { const g = new THREE.Group(), t = TEX[kind] || (TEX[kind] = sliceTex[kind]());
-  const face = phys('sf'+kind, {map:t, roughness:.42, clearcoat:.25, clearcoatRoughness:.3}), side = phys('ss'+kind, {color:col(rimCol), roughness:rough});
-  g.add(mesh(new THREE.CylinderGeometry(1, 1, 1, 48), [side, face, face], m => { m.scale.set(r, h, r); m.position.y = h/2; })); return g; };
-// 세로 높이에 따라 색이 바뀌는 열매 (아래→위)
-function gradeColors(geo, stops){
-  const p = geo.attributes.position, c = [], ys = []; for (let i=0;i<p.count;i++) ys.push(p.getY(i));
-  const lo = Math.min(...ys), hi = Math.max(...ys);
-  for (let i=0;i<p.count;i++){ const t = (ys[i]-lo)/(hi-lo||1); let k = 0; while (k < stops.length-2 && t > stops[k+1][0]) k++;
-    const [t0,c0] = stops[k], [t1,c1] = stops[k+1], f = Math.min(1, Math.max(0, (t-t0)/(t1-t0||1))), C = col(c0).lerp(col(c1), f); c.push(C.r, C.g, C.b); }
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(c, 3)); return geo;
-}
-function leafGeo(len, wid, bend){
-  const s = new THREE.Shape(); s.moveTo(0, 0); s.bezierCurveTo(wid, len*.25, wid*.9, len*.75, 0, len); s.bezierCurveTo(-wid*.9, len*.75, -wid, len*.25, 0, 0);
-  const g = new THREE.ShapeGeometry(s, 10), p = g.attributes.position, uv = g.attributes.uv;
-  for (let i=0;i<p.count;i++){ const x = p.getX(i), y = p.getY(i); uv.setXY(i, x/(2*wid)+.5, y/len); p.setZ(i, bend*(x*x/(wid*wid))*wid - bend*.6*(y/len)*(y/len)*len*.3); }
-  g.computeVertexNormals(); return g;
-}
-function strawberry(s=1){
-  const g = new THREE.Group();
-  // 끝은 짙은 빨강, 꼭지 쪽 어깨는 살짝 밝게 (진짜 딸기처럼)
-  const body = gradeColors(lathe([[0,0],[.05,.015],[.11,.06],[.16,.14],[.19,.23],[.205,.31],[.19,.38],[.13,.43],[0,.445]], 48),
-    [[0,'#9e0a22'],[.35,'#d4142f'],[.8,'#ee2a3c'],[1,'#ff9a8a']]);
-  g.add(mesh(body, phys('berryV', {color:0xffffff, vertexColors:true, roughness:.22, clearcoat:1, clearcoatRoughness:.1, sheen:.4, sheenColor:col(0xff8090)})));
-  const pit = new THREE.SphereGeometry(.0085, 8, 6), seedM = std('seed2', {color:0xf2cf5a, roughness:.35}), pitM = std('pit', {color:0x8a0a1c, roughness:.6});
-  const seeds = new THREE.InstancedMesh(new THREE.SphereGeometry(.0065, 6, 4), seedM, 70), pits = new THREE.InstancedMesh(pit, pitM, 70), M = new THREE.Matrix4(); let n = 0;
-  [.07,.12,.165,.19,.203,.19,.15].forEach((rr, row) => { const cnt = Math.round(5 + rr*40); for (let k=0;k<cnt && n<70;k++){ const a = k/cnt*Math.PI*2 + row*.45, y = .445*(row+1)/8.2;
-    M.makeTranslation(Math.cos(a)*rr*.975, y, Math.sin(a)*rr*.975); pits.setMatrixAt(n, M); M.makeTranslation(Math.cos(a)*rr*.995, y, Math.sin(a)*rr*.995); seeds.setMatrixAt(n, M); n++; } });
-  seeds.count = pits.count = n; g.add(pits, seeds);
-  const leafM = phys('leaf2', {color:0x3e9f48, roughness:.45, clearcoat:.3, side:THREE.DoubleSide});
-  for (let k=0;k<8;k++){ const a = k/8*Math.PI*2, lf = new THREE.Mesh(leafGeo(.13, .035, .5), leafM);
-    lf.rotation.set(-Math.PI/2 + .35, 0, 0); const holder = new THREE.Group(); holder.add(lf); holder.rotation.y = -a + Math.PI/2; holder.position.y = .44; g.add(holder); }
-  const stem = new THREE.Mesh(new THREE.CylinderGeometry(.012, .018, .07, 8), std('stemG', {color:0x5a8a2a})); stem.position.y = .47; g.add(stem);
-  g.rotation.x = Math.PI; g.position.y = .445;
-  const w = new THREE.Group(); w.add(g); w.scale.setScalar(.27*s); return w;
-}
-const MODELS = {
-  straw: () => strawberry(),
-  // 체리: 꼭지 쪽이 살짝 들어간 동그란 열매 + 휘어진 꼭지 + 작은 잎
-  cherry: () => { const g = new THREE.Group();
-    const body = gradeColors(lathe([[0,0],[.05,.006],[.085,.03],[.1,.07],[.1,.11],[.086,.15],[.05,.172],[.016,.168],[0,.158]], 40), [[0,'#5e0614'],[.6,'#9c0d24'],[1,'#b8162e']]);
-    g.add(mesh(body, phys('cherryV', {color:0xffffff, vertexColors:true, roughness:.12, clearcoat:1, clearcoatRoughness:.05})));
-    const stem = new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(0,.16,0), new THREE.Vector3(.008,.24,0), new THREE.Vector3(.04,.32,.01), new THREE.Vector3(.09,.37,.02)]), 16, .007, 6);
-    g.add(mesh(stem, std('stemC', {color:0x6a7a2a, roughness:.7})));
-    const lf = new THREE.Mesh(leafGeo(.1, .028, .4), phys('leafC', {map:TEX.mint || (TEX.mint = sliceTex.mintLeaf()), roughness:.5, side:THREE.DoubleSide}));
-    lf.position.set(.06, .35, .015); lf.rotation.set(0, 0, -1.1); g.add(lf); return g; },
-  // 블루베리: 하얀 분이 살짝 낀 짙은 남색 + 꼭지의 별 모양 왕관
-  blue: () => { const g = new THREE.Group(), m = phys('blue2', {color:0x334a8a, roughness:.55, sheen:1, sheenColor:col(0xc8d4f4), sheenRoughness:.45});
-    const crownM = std('crown2', {color:0x1b2246, roughness:.8});
-    [[0,0],[.1,.04],[-.06,.09]].forEach(([x,z]) => { g.add(mesh(sphG, m, s => { s.scale.set(.068, .06, .068); s.position.set(x, .058, z); }));
-      for (let k=0;k<5;k++){ const a = k/5*Math.PI*2; g.add(mesh(new THREE.ConeGeometry(.007, .022, 5), crownM, c => { c.position.set(x + Math.cos(a)*.016, .116, z + Math.sin(a)*.016); c.rotation.set(Math.sin(a)*.8, 0, -Math.cos(a)*.8); })); }
-      g.add(mesh(new THREE.CircleGeometry(.014, 10), crownM, c => { c.rotation.x = -Math.PI/2; c.position.set(x, .118, z); })); }); return g; },
-  // 산딸기: 작은 알갱이마다 색과 크기가 조금씩 다르게
-  rasp: () => { const g = new THREE.Group(), im = new THREE.InstancedMesh(new THREE.SphereGeometry(.03, 12, 8), phys('rasp2', {color:0xffffff, roughness:.3, clearcoat:.7, sheen:.5, sheenColor:col(0xffb0c0)}), 60);
-    const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), S = new THREE.Vector3(), P = new THREE.Vector3(); let n = 0;
-    for (let row=0; row<6; row++){ const y = .025 + row*.038, r = .098*Math.sin(Math.PI*(.2+row*.135)), cnt = Math.max(4, Math.round(r*95));
-      for (let k=0;k<cnt && n<60;k++){ const a = k/cnt*Math.PI*2 + row*.5; P.set(Math.cos(a)*r, y, Math.sin(a)*r); S.setScalar(.85 + rndSeeded()*.3); M.compose(P, Q, S); im.setMatrixAt(n, M);
-        im.setColorAt(n, col(['#b0103a','#c8174a','#d92055','#a50c33'][n%4])); n++; } }
-    im.count = n; im.castShadow = true; g.add(im); return g; },
-  kiwi: () => { const t = TEX.kiwi || (TEX.kiwi = sliceTex.kiwi()), g = new THREE.Group();
-    const skin = std('kiwiSkin', {color:0x6e4e26, roughness:1, bumpMap:creamBump, bumpScale:6});
-    const face = phys('kiwiFace', {map:t, roughness:.4, clearcoat:.3, clearcoatRoughness:.3});
-    g.add(mesh(new THREE.SphereGeometry(1, 28, 16, 0, Math.PI*2, 0, Math.PI/2), skin, m => m.rotation.x = -Math.PI/2));   // 둥근 겉(뒤쪽)
-    g.add(mesh(new THREE.CircleGeometry(.985, 40), face, m => m.position.z = .002));                                      // 자른 단면(앞쪽)
-    g.scale.set(.12, .115, .1); g.rotation.x = -1.1; g.position.set(0, .06, 0);
-    const w = new THREE.Group(); w.add(g); return w; },
-  orange: () => { const g = slice('orange', .17, .035, '#f07c10', .45); g.rotation.set(.75, 0, 0); g.position.set(0, .13, -.04); const w = new THREE.Group(); w.add(g); return w; },
-  banana: () => { const g = slice('banana', .12, .045, '#f2e4ae', .6); g.rotation.set(.6, 0, 0); g.position.set(0, .09, -.03); const w = new THREE.Group(); w.add(g); return w; },
-  // 복숭아 조각: 과육은 노란 주황, 껍질 쪽은 붉은 빛
-  peach: () => { const s = new THREE.Shape(); s.absarc(0, 0, .16, Math.PI*.15, Math.PI*.85, false); s.absarc(0, -.05, .1, Math.PI*.8, Math.PI*.2, true);
-    const flesh = phys('peachF', {color:0xffb75e, roughness:.3, clearcoat:.8, clearcoatRoughness:.15}), skin = phys('peachS', {color:0xe4552e, roughness:.55, sheen:.8, sheenColor:col(0xffc0a0)});
-    const g = new THREE.Group(); g.add(mesh(new THREE.ExtrudeGeometry(s, {depth:.05, bevelEnabled:true, bevelSize:.01, bevelThickness:.01, bevelSegments:3, curveSegments:24}), [flesh, skin], m => { m.rotation.x = -Math.PI/2; m.position.set(0, .012, .06); })); return g; },
-  // 포도: 살짝 길쭉한 알 + 하얀 분 + 꼭지
-  grape: () => { const g = new THREE.Group(), m = phys('grape2', {color:0x4a1f5e, roughness:.32, clearcoat:.6, sheen:.9, sheenColor:col(0xd8cce8), sheenRoughness:.5});
-    [[0,0,0],[.12,.02,.4],[.05,.1,-.3]].forEach(([x,z,r]) => { g.add(mesh(sphG, m, s => { s.scale.set(.072, .088, .072); s.position.set(x, .085, z); s.rotation.z = r; }));
-      g.add(mesh(new THREE.CylinderGeometry(.006, .01, .03, 6), std('stemG2', {color:0x7a6a3a}), c => c.position.set(x, .18, z))); }); return g; },
-  // 민트잎: 잎맥이 있는 진짜 잎 모양 세 장
-  mint: () => { const g = new THREE.Group(), m = phys('mint2', {map:TEX.mint || (TEX.mint = sliceTex.mintLeaf()), roughness:.45, clearcoat:.35, side:THREE.DoubleSide});
-    [[0, .2],[2.1, .3],[4.2, .25]].forEach(([a, tilt]) => { const lf = new THREE.Mesh(leafGeo(.17, .05, .45), m); lf.castShadow = true;
-      lf.rotation.set(-Math.PI/2 + tilt, 0, 0); const holder = new THREE.Group(); holder.add(lf); holder.rotation.y = a; holder.position.y = .03; g.add(holder); }); return g; },
-  choc: () => { const s = new THREE.Shape(); const w = .11; s.moveTo(-w, -w); s.lineTo(w, -w); s.lineTo(w, w); s.lineTo(-w, w); s.lineTo(-w, -w);
-    const g = new THREE.Group(); g.add(mesh(new THREE.ExtrudeGeometry(s, {depth:.04, bevelEnabled:true, bevelSize:.015, bevelThickness:.015, bevelSegments:3}), phys('choc', {color:0x4a2412, roughness:.3, clearcoat:.4}), m => { m.rotation.set(-1.15, 0, 0); m.position.set(0, .12, 0); })); return g; },
-  cookie: () => { const g = new THREE.Group(); g.add(mesh(cylG, std('cookie', {color:0xd39a55, roughness:.85, bumpMap:creamBump, bumpScale:4}), m => { m.scale.set(.15, .045, .15); m.position.y = .03; }));
-    const chip = std('chip', {color:0x3a1d0c, roughness:.5}); for (let k=0;k<7;k++){ const a = k*2.4, r = .03 + (k%3)*.035; g.add(mesh(sphG, chip, m => { m.scale.set(.022, .015, .02); m.position.set(Math.cos(a)*r, .056, Math.sin(a)*r); })); }
-    g.rotation.x = -.35; g.position.y = .05; const w = new THREE.Group(); w.add(g); return w; },
-  macaron: () => { const g = new THREE.Group(), sh = phys('mac', {color:0xffa8c4, roughness:.55, sheen:.3}), fi = phys('macf', {color:0xfff6ef, roughness:.6});
-    g.add(mesh(sphG, sh, m => { m.scale.set(.13, .05, .13); m.position.y = .045; }), mesh(cylG, fi, m => { m.scale.set(.112, .035, .112); m.position.y = .09; }), mesh(sphG, sh, m => { m.scale.set(.13, .055, .13); m.position.y = .13; }));
-    g.add(mesh(new THREE.TorusGeometry(.12, .014, 8, 40), sh, m => { m.rotation.x = Math.PI/2; m.position.y = .07; }), mesh(new THREE.TorusGeometry(.12, .014, 8, 40), sh, m => { m.rotation.x = Math.PI/2; m.position.y = .108; }));
-    return g; },
-  marsh: () => { const g = new THREE.Group(); g.add(mesh(lathe([[0,0],[.07,0],[.09,.02],[.095,.06],[.09,.1],[.07,.12],[0,.12]], 32), std('marsh', {color:0xfff0f4, roughness:.95}))); return g; },
-  donut: () => { const g = new THREE.Group(); g.add(mesh(new THREE.TorusGeometry(.1, .05, 16, 40), std('dough', {color:0xd9944f, roughness:.7}), m => { m.rotation.x = Math.PI/2; m.position.y = .05; }));
-    g.add(mesh(new THREE.TorusGeometry(.1, .052, 16, 40), phys('glazeP', {color:0xff8fb8, roughness:.15, clearcoat:1}), m => { m.rotation.x = Math.PI/2; m.scale.set(1, 1, .55); m.position.y = .075; }));
-    const cols = [0xffffff, 0x6fd2c0, 0xffd36e, 0x8aa2ff]; for (let k=0;k<14;k++){ const a = k/14*Math.PI*2, r = .1 + Math.sin(k*3)*.025;
-      g.add(mesh(capG, std('spr'+cols[k%4], {color:cols[k%4], roughness:.4}), m => { m.scale.set(.012, .022, .012); m.position.set(Math.cos(a)*r, .104, Math.sin(a)*r); m.rotation.set(Math.PI/2, 0, a*3); })); }
-    return g; },
-  stick: () => { const g = new THREE.Group(), s = new THREE.Group();
-    s.add(mesh(cylG, phys('pocky', {color:0x4a2412, roughness:.35, clearcoat:.4}), m => { m.scale.set(.02, .36, .02); m.position.y = .18; }), mesh(cylG, std('biscuit', {color:0xe6b877, roughness:.8}), m => { m.scale.set(.018, .1, .018); m.position.y = .41; }));
-    s.rotation.z = .45; g.add(s); return g; },
-  candy: () => { const g = new THREE.Group(), m = phys('candy', {color:0xff6f9b, roughness:.1, clearcoat:1, transparent:true, opacity:.95});
-    g.add(mesh(sphG, m, s => { s.scale.set(.07, .065, .065); s.position.y = .065; }));
-    [-1, 1].forEach(sg => g.add(mesh(new THREE.ConeGeometry(.055, .08, 12), phys('wrap', {color:0xffe3ec, roughness:.2, clearcoat:1}), c => { c.rotation.z = sg*Math.PI/2; c.position.set(sg*.1, .065, 0); })));
-    return g; },
-  lolli: () => { const g = new THREE.Group(), t = TEX.lolli || (TEX.lolli = sliceTex.lolli()), face = phys('lolf', {map:t, roughness:.1, clearcoat:1});
-    g.add(mesh(cylG, std('lstick', {color:0xffffff, roughness:.5}), m => { m.scale.set(.012, .3, .012); m.position.y = .15; }));
-    g.add(mesh(cylG, [phys('lols', {color:0xff9ab8, roughness:.2, clearcoat:1}), face, face], m => { m.scale.set(.13, .035, .13); m.rotation.x = Math.PI/2; m.position.y = .4; })); return g; },
-  pearl: () => { const g = new THREE.Group(), m = phys('pearl', {color:0xffffff, roughness:.12, clearcoat:1, iridescence:.7, iridescenceIOR:1.5});
-    [[0,0],[.07,.02],[.02,.07],[-.05,.04]].forEach(([x,z]) => g.add(mesh(sphG, m, s => { s.scale.setScalar(.035); s.position.set(x, .035, z); }))); return g; },
-  candle: (d, idx) => { const g = new THREE.Group(), cols = ['#8fd3ff','#ffb3c8','#b8f0a8','#ffe28a','#d8b7ff'], cc = cols[idx % cols.length];
-    const tex = TEX['c'+cc] || (TEX['c'+cc] = (() => { const t = texOf(mkCanvas(64, 256, (g, w, h) => { g.fillStyle = cc; g.fillRect(0,0,w,h); g.strokeStyle = '#fff'; g.lineWidth = 9;
-      for (let y=-80;y<h+80;y+=36){ g.beginPath(); g.moveTo(0, y); g.lineTo(w, y+40); g.stroke(); } })); return t; })());
-    g.add(mesh(cylG, phys('cdl'+cc, {map:tex, roughness:.4, clearcoat:.5}), m => { m.scale.set(.03, .34, .03); m.position.y = .17; }));
-    g.add(mesh(cylG, std('wick', {color:0x333333}), m => { m.scale.set(.004, .04, .004); m.position.y = .36; }));
-    const fl = new THREE.Mesh(lathe([[0,0],[.022,.02],[.024,.05],[.012,.085],[0,.11]], 16), new THREE.MeshBasicMaterial({color:0xffc24a}));
-    fl.position.y = .365; fl.userData.flame = true; g.add(fl);
-    const glow = new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(), color:0xffd27a, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, opacity:.85}));
-    glow.scale.setScalar(.22); glow.position.y = .41; g.add(glow); return g; },
-  star: () => { const s = new THREE.Shape(); for (let i=0;i<10;i++){ const a = Math.PI/2 + i*Math.PI/5, r = i%2 ? .055 : .13; i ? s.lineTo(Math.cos(a)*r, Math.sin(a)*r) : s.moveTo(Math.cos(a)*r, Math.sin(a)*r); }
-    const g = new THREE.Group(), gold = std('goldS', {color:0xffcf4d, metalness:1, roughness:.22});
-    g.add(mesh(new THREE.ExtrudeGeometry(s, {depth:.03, bevelEnabled:true, bevelSize:.012, bevelThickness:.012, bevelSegments:2}), gold, m => m.position.set(0, .28, -.015)));
-    g.add(mesh(cylG, gold, m => { m.scale.set(.008, .18, .008); m.position.y = .09; })); return g; },
-  flower: () => { const g = new THREE.Group(), pm = phys('petal', {color:0xffc2d6, roughness:.5, sheen:.8, sheenColor:col(0xffffff), side:THREE.DoubleSide});
-    for (let k=0;k<5;k++){ const a = k/5*Math.PI*2; g.add(mesh(sphG, pm, m => { m.scale.set(.075, .018, .05); m.position.set(Math.cos(a)*.065, .04, Math.sin(a)*.065); m.rotation.set(0, -a, .35); })); }
-    g.add(mesh(sphG, phys('pcen', {color:0xffd84d, roughness:.6}), m => { m.scale.set(.035, .025, .035); m.position.y = .055; })); return g; },
-  heart: () => { const s = new THREE.Shape(); s.moveTo(0, -.12); s.bezierCurveTo(-.17, .0, -.12, .14, 0, .07); s.bezierCurveTo(.12, .14, .17, 0, 0, -.12);
-    const g = new THREE.Group(), m = phys('heartM', {color:0xff3d6e, roughness:.15, clearcoat:1});
-    g.add(mesh(new THREE.ExtrudeGeometry(s, {depth:.04, bevelEnabled:true, bevelSize:.015, bevelThickness:.015, bevelSegments:3}), m, h => h.position.set(0, .26, -.02)));
-    g.add(mesh(cylG, std('hstick', {color:0xffffff}), c => { c.scale.set(.008, .16, .008); c.position.y = .08; })); return g; },
-  ribbon: () => { const g = new THREE.Group(), m = phys('satin', {color:0xff6f9b, roughness:.35, sheen:1, sheenColor:col(0xffd0e0), side:THREE.DoubleSide});
-    [-1, 1].forEach(sg => { g.add(mesh(new THREE.TorusGeometry(.06, .018, 10, 24), m, t => { t.scale.set(1.2, .8, .6); t.position.set(sg*.07, .1, 0); t.rotation.z = sg*.3; }));
-      g.add(mesh(new THREE.BoxGeometry(.035, .12, .01), m, b => { b.position.set(sg*.04, .04, .01); b.rotation.z = sg*.5; })); });
-    g.add(mesh(sphG, m, k => { k.scale.set(.03, .028, .025); k.position.y = .1; })); return g; },
-  crown: () => { const g = new THREE.Group(), gold = std('goldC', {color:0xffcf4d, metalness:1, roughness:.22, side:THREE.DoubleSide});
-    g.add(mesh(new THREE.CylinderGeometry(.11, .1, .07, 32, 1, true), gold, m => m.position.y = .035));
-    for (let k=0;k<6;k++){ const a = k/6*Math.PI*2; g.add(mesh(new THREE.ConeGeometry(.03, .08, 8), gold, c => c.position.set(Math.cos(a)*.105, .11, Math.sin(a)*.105)));
-      g.add(mesh(sphG, phys('jewel'+k%3, {color:[0xff3d6e,0x4fb3ff,0x5fd35f][k%3], roughness:.05, clearcoat:1}), j => { j.scale.setScalar(.014); j.position.set(Math.cos(a)*.108, .035, Math.sin(a)*.108); })); }
-    return g; },
-  butterfly: () => { const g = new THREE.Group(), wm = phys('wing', {color:0x8fc8ff, roughness:.3, transparent:true, opacity:.85, side:THREE.DoubleSide, iridescence:.6});
-    [-1, 1].forEach(sg => { const s = new THREE.Shape(); s.moveTo(0, 0); s.bezierCurveTo(.05, .14, .18, .14, .15, .02); s.bezierCurveTo(.16, -.08, .05, -.1, 0, 0);
-      const w = mesh(new THREE.ShapeGeometry(s), wm, m => { m.rotation.set(-Math.PI/2 + .2, sg>0 ? .55 : Math.PI - .55, 0); m.position.y = .1; }); w.scale.x = 1; g.add(w); });
-    g.add(mesh(capG, std('bbody', {color:0x3a2a4a}), b => { b.scale.set(.02, .1, .02); b.rotation.x = Math.PI/2; b.position.y = .1; })); return g; },
-};
-let glowT; function glowTex(){ return glowT || (glowT = texOf(mkCanvas(64, 64, (g, w) => { const grd = g.createRadialGradient(32,32,0,32,32,32); grd.addColorStop(0,'rgba(255,240,180,1)'); grd.addColorStop(.4,'rgba(255,200,90,.5)'); grd.addColorStop(1,'rgba(255,180,60,0)'); g.fillStyle = grd; g.fillRect(0,0,w,w); }))); }
-
-function buildDecos(c){
-  c.decos.forEach((d, idx) => {
-    const make = MODELS[d.type]; if (!make) return;
-    const R = R3[d.tier], m = make(d, idx);
-    let y = topY(c, d.tier) - .005;
-    if (d.cream){ const cr = c.dollops.find(o => o.id === d.cream); if (cr) y = C3D.dollopTop(c, cr); }
-    m.position.set(d.u*R, y, d.v*R); m.rotation.y = (d.rot||0)*Math.PI/180*3; m.scale.setScalar(1.6);
-    m.traverse(o => { if (o.isMesh){ o.castShadow = true; o.userData.deco = idx; } });
-    parts.decos.add(m);
-  });
-}
-function buildSprinkles(c){
-  const cols = {}; c.sprinkles.forEach((list, i) => list.forEach(s => (cols[s.col] = cols[s.col] || []).push([i, s])));
-  const M = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), sc = new THREE.Vector3(.028, .05, .028);
-  for (const k in cols){ const L = cols[k], im = new THREE.InstancedMesh(capG, std('sp'+k, {color:col(k), roughness:.35}), L.length);
-    L.forEach(([i, s], n) => { e.set(Math.PI/2, s.a*Math.PI/180, 0); q.setFromEuler(e); M.compose(new THREE.Vector3(s.u*R3[i], topY(c, i) + .012, s.v*R3[i]), q, sc); im.setMatrixAt(n, M); });
-    im.castShadow = true; parts.sprinkles.add(im); }
-}
-function buildText(c){
-  if (!c.text) return;
-  const i = c.tiers-1, R = R3[i], fr = hasFrost(c) && (c.frostFull || c.cover>.5) ? FROST[c.frost].c : spongeColor(c);
-  const dark = lum(fr) < .5, cv = mkCanvas(1024, 256, (g, w, h) => {
-    g.font = `150px Jua, 'Malgun Gothic', sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
-    let fs = 150; while (g.measureText(c.text).width > w*.92 && fs > 40){ fs -= 8; g.font = `${fs}px Jua, 'Malgun Gothic', sans-serif`; }
-    g.lineJoin = 'round'; g.lineWidth = fs*.16; g.strokeStyle = dark ? '#5a2a10' : '#ffffff'; g.strokeText(c.text, w/2, h/2+6);
-    g.fillStyle = dark ? '#fff6e8' : '#d81b60'; g.fillText(c.text, w/2, h/2);
-    g.fillStyle = 'rgba(255,255,255,.55)'; g.font = `${fs}px Jua, 'Malgun Gothic', sans-serif`; g.save(); g.globalCompositeOperation = 'source-atop'; g.fillRect(0, h/2 - fs*.42, w, fs*.16); g.restore(); });
-  const t = texOf(cv); t.flipY = true;
-  const p = new THREE.Mesh(new THREE.PlaneGeometry(1.6*R, .4*R), new THREE.MeshPhysicalMaterial({map:t, transparent:true, alphaTest:.2, roughness:.2, clearcoat:1}));
-  p.rotation.x = -Math.PI/2; p.position.set(0, topY(c, i) + .004, R*.05); p.receiveShadow = true; parts.text.add(p);
-}
-
-/* ---------- 다시 그리기 (바뀐 부분만) ---------- */
-let current = null;
-C3D.sync = (c, which = ['tiers','dollops','decos','sprinkles','text']) => {
-  current = c;
-  which.forEach(k => { const g = parts[k]; while (g.children.length){ const o = g.children.pop(); if (o.isInstancedMesh) o.dispose(); } });
-  if (which.includes('tiers')){ pickables.length = 0; buildTiers(c); }
-  if (which.includes('dollops')) buildDollops(c);
-  if (which.includes('decos')) buildDecos(c);
-  if (which.includes('sprinkles')) buildSprinkles(c);
-  if (which.includes('text')) buildText(c);
-  frame(); dirty = true;
-};
-// 크림을 처음 바르기 시작하면 크림 층을 보이게
-C3D.showCream = c => parts.tiers.children.forEach(m => { if (!m.userData.sponge) m.visible = true; });
-
-/* ---------- 카메라 · 화면 붙이기 ---------- */
-let host = null, kind = 'play', yaw = 0, auto = false, ro = null;
-function frame(){
-  const c = current; if (!c) return;
-  const top = tierBase(c.tiers-1) + H3[c.tiers-1] + .35;
-  const aspect = camera.aspect, fitW = 4.4, fitH = top + .3;
-  const vfov = camera.fov*Math.PI/180, dW = fitW/2/Math.tan(vfov/2)/aspect, dH = fitH/2/Math.tan(vfov/2)*1.15;
-  const dist = Math.max(dW, dH) * (kind==='title' ? 1.12 : kind==='result' ? 1.05 : 1.22) + 1.2;
-  const el = kind==='play' ? .5 : .42, ty = top*.45 + (kind==='play' ? .05 : 0);
-  camera.position.set(0, ty + Math.sin(el)*dist, Math.cos(el)*dist); camera.lookAt(0, ty, 0);
-}
-function size(){
-  if (!host) return;
-  const w = host.clientWidth || 600, h = host.clientHeight || 400;
-  renderer.setPixelRatio(Math.min(LITE ? 1.5 : 2.5, (devicePixelRatio||1) * (typeof SCALE==='number' && SCALE>1 ? SCALE : 1)));
-  dirty = true;
-  renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix(); frame();
-}
-C3D.mount = (el, c, k = 'play') => {
-  if (host !== el){ el.appendChild(canvas); host = el; ro && ro.disconnect(); ro = new ResizeObserver(size); ro.observe(el); }
-  kind = k; auto = k !== 'play'; if (k !== 'play') yaw = -.5;
-  size(); C3D.sync(c);
-  renderer.setAnimationLoop(loop);
-};
-C3D.unmount = () => { renderer.setAnimationLoop(null); canvas.remove(); host = null; ro && ro.disconnect(); ro = null; };
-C3D.host = () => host;
-C3D.turn = d => { yaw += d; dirty = true; };
-function loop(t){
-  if (!host || !host.isConnected){ C3D.unmount(); return; }
-  if (auto){ yaw += .005; dirty = true; }
-  root.rotation.y = yaw;
-  let flames = false;
-  parts.decos.traverse(o => { if (o.userData.flame){ flames = true; const f = 1 + Math.sin(t*.025 + o.id)*.08 + Math.sin(t*.041)*.05; o.scale.set(1/f, f, 1/f); } });
-  if (!dirty && !flames) return;      // 바뀐 게 없으면 그리지 않아요 (배터리·끊김 절약)
-  dirty = false;
-  renderer.render(scene, camera);
-}
-/* 작은 케이크 사진 (타이틀 진열장용) */
-C3D.snapshot = (c, w, h) => {
-  const keep = {host, kind, yaw, cur:current};
-  renderer.setPixelRatio(1); renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix();
-  kind = 'result'; yaw = -.5; root.rotation.y = yaw; C3D.sync(c);
-  renderer.render(scene, camera); const url = canvas.toDataURL('image/png');
-  kind = keep.kind; yaw = keep.yaw; if (keep.cur) C3D.sync(keep.cur); size();
-  return url;
-};
-/* 과일 아이콘 사진: 3D 과일 모형 하나만 투명 배경에 찍어요 (토핑 칸·재료 칸 아이콘으로 써요) */
-C3D.iconShot = (type, px = 160) => {
-  const make = MODELS[type]; if (!make) return null;
-  const groups = Object.values(parts), vis = groups.map(g => g.visible);
-  groups.forEach(g => g.visible = false); ground.visible = false;
-  const m = make({}, 0); m.scale.setScalar(1.6); root.add(m); root.rotation.y = -.4; root.updateMatrixWorld(true);
-  const box = new THREE.Box3().setFromObject(m), ctr = box.getCenter(new THREE.Vector3()), rad = box.getBoundingSphere(new THREE.Sphere()).radius;
-  const cam = new THREE.PerspectiveCamera(30, 1, .01, 50), dist = rad/Math.sin(15*Math.PI/180)*.8;
-  cam.position.set(ctr.x, ctr.y + dist*.5, ctr.z + dist*.87); cam.lookAt(ctr);
-  const ex = renderer.toneMappingExposure; renderer.toneMappingExposure = .88;   // 아이콘은 색을 조금 더 진하게
-  renderer.setPixelRatio(1); renderer.setSize(px, px, false); renderer.render(scene, cam);
-  const url = canvas.toDataURL('image/png'); renderer.toneMappingExposure = ex;
-  root.remove(m); groups.forEach((g, i) => g.visible = vis[i]); ground.visible = true; root.rotation.y = yaw; size(); dirty = true;
-  return url;
-};
-
-/* ---------- 누른 자리 찾기 ---------- */
-const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
-function setRay(e){ const r = canvas.getBoundingClientRect(); ndc.set((e.clientX - r.left)/r.width*2 - 1, -(e.clientY - r.top)/r.height*2 + 1); ray.setFromCamera(ndc, camera); }
-// 케이크(단) 위 → {tier, part, uv, u, v, y}
-C3D.hit = e => {
-  setRay(e); const h = ray.intersectObjects(pickables, false)[0]; if (!h) return null;
-  const p = root.worldToLocal(h.point.clone()), d = h.object.userData;
-  return {tier:d.tier, part:d.part, uv:h.uv, u:p.x/R3[d.tier], v:p.z/R3[d.tier], y:p.y, local:p};
-};
-// 놓아 둔 토핑 / 짠 크림
-C3D.hitDeco = e => { setRay(e); const h = ray.intersectObjects(parts.decos.children, true)[0]; return h ? h.object.userData.deco : null; };
-C3D.hitDollop = e => { setRay(e); const h = ray.intersectObjects(parts.dollops.children, false)[0]; return h ? h.object.userData.dollop : null; };
-// 각 단 아래 둘레 근처면 그 자리 (조개 크림용)
-C3D.baseHit = (e, c) => {
-  setRay(e); const sd = shapeData(c.shape); let best = null, bd = .22;
-  for (let i=0;i<c.tiers;i++){
-    const plane = new THREE.Plane(new THREE.Vector3(0,1,0), -tierBase(i)), pt = new THREE.Vector3();
-    const local = ray.ray.clone(); local.applyMatrix4(new THREE.Matrix4().copy(root.matrixWorld).invert());
-    if (!local.intersectPlane(plane, pt)) continue;
-    const j = nearestIdx(sd, pt.x/R3[i], pt.z/R3[i]), [u, v] = sd.pts[j], dd = Math.hypot(u*R3[i] - pt.x, v*R3[i] - pt.z);
-    if (dd < bd){ bd = dd; best = {tier:i, u:u*1.03, v:v*1.03, base:true, shell:true, j}; }
-  }
-  return best;
-};
-C3D.overCake = e => { setRay(e); return ray.intersectObjects(root.children, true).length > 0; };
-
-C3D.ok = true;
-window.on3DReady && window.on3DReady();
-}
 </script>
 </body>
 </html>
