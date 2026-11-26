@@ -440,6 +440,45 @@ body{background:#2b1620 radial-gradient(1100px 700px at 50% 42%,#5d2c40 0,#2b162
 #game.fluid .card .ord li{padding:3px 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #game.fluid .card .ord li span{font-size:11px}
 #game.fluid .card .pat{margin-top:6px;font-size:12px}
+/* 휴대폰 한 화면 배치: 머리말 한 줄 · 레시피 작은 표시줄(눌러서 손님 말 보기) · 촘촘한 도구 칸 */
+#game.fluid #hdr{flex-wrap:nowrap;gap:6px;padding:6px 8px;padding-top:max(6px,env(safe-area-inset-top,0px));align-items:center}
+#game.fluid #hdr .logo>span:not(.logoFace){display:none}
+#game.fluid .logoFace{width:32px;height:32px}
+#game.fluid #steps{order:0;width:auto;flex:1 1 auto;min-width:0;gap:3px}
+#game.fluid #steps span{font-size:11px;padding:3px 7px}
+#game.fluid #hdr .coins{font-size:13px;padding:2px 8px;flex:none}
+#game.fluid #hdr .snd{width:30px;height:30px;flex:none}
+#game.fluid #hdr .home{font-size:0;padding:4px 6px;flex:none}
+#game.fluid #hdr .home svg.ic{font-size:16px}
+#game.fluid #side{margin:6px 8px 0}
+#game.fluid .card::before{display:none}
+#game.fluid .card{padding:6px 10px;border-radius:12px;cursor:pointer}
+#game.fluid .card .cust{align-items:center;gap:8px}
+#game.fluid .card .cust .face{width:38px;height:40px;animation:none}
+#game.fluid .card .cname{font-size:14px;margin-left:0;text-align:left;line-height:1.2}
+#game.fluid .card .cname br{display:none}
+#game.fluid .card .cname span{margin-left:6px}
+#game.fluid .card .cust::after{content:"눌러서 손님 말 보기 ▾";margin-left:auto;font-size:11px;color:#b98;white-space:nowrap}
+#game.fluid #side.open .card .cust::after{content:"접기 ▴"}
+#game.fluid .card .bubble{display:none}
+#game.fluid #side.open .card .bubble{display:block}
+#game.fluid .card .ord{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 0;font-size:12px}
+#game.fluid .card .ord li{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border:1px solid #f1cfda;border-radius:10px;background:rgba(255,245,248,.85);max-width:100%}
+#game.fluid .card .ord li b{font-size:10px;width:auto;color:#b98;font-weight:normal}
+#game.fluid .card .ord li b:empty{display:none}
+#game.fluid .card .ord li svg.ic{font-size:14px}
+#game.fluid .card .ord li .ok,#game.fluid .card .ord li .no{font-size:11px;margin-left:2px}
+#game.fluid .card .pat{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:11px}
+#game.fluid .card .pat .bar{flex:1;height:7px;margin:0}
+#game.fluid #work{margin:6px 8px max(10px,env(safe-area-inset-bottom,0px))}
+#game.fluid #bomi{width:44px;height:50px}
+#game.fluid #tray{margin-top:6px;padding:8px;gap:6px}
+#game.fluid .row{display:grid;grid-template-columns:26px repeat(auto-fill,minmax(36px,1fr));gap:3px;align-items:center}
+#game.fluid .row .sep{display:none}
+#game.fluid .row>b{width:26px;font-size:12px}
+#game.fluid .tb.sm{width:auto;height:44px}
+#game.fluid .tb small{font-size:9.5px;letter-spacing:-.5px}
+#game.fluid .next{padding:9px;font-size:17px}
 </style>
 </head>
 <body>
@@ -1949,6 +1988,8 @@ function layer(html){ $('#layer').innerHTML = html; }
 })();
 
 /* ---------- 손님 카드 ---------- */
+/* 휴대폰: 레시피 표시줄을 누르면 손님 말풍선을 펼치고 접어요 */
+$('#side').addEventListener('click', () => { if ($('#game').classList.contains('fluid')) $('#side').classList.toggle('open'); });
 function renderCard(){
   const side = $('#side'), c = G.cake;
   if (G.mode==='free'){
