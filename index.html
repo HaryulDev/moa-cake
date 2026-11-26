@@ -2086,6 +2086,7 @@ function moundSVG(x,y,w,h,col,seed,sparkle){
   return s;
 }
 /* 볼에 담긴 재료 하나 (L: 현재 높이, grow: 붓는 중 0→1, fade/flat: 섞으면 흐려지고 납작해져요) */
+const FRUIT_SPOTS = [[-26,-3,-18],[2,6,12],[28,-2,-8]];   // 과일 3개가 놓이는 자리 [가로, 세로, 기울기]
 function blobSVG(b,L,grow=1,fade=1,flat=1){
   if (fade<=0.01 || grow<=0.01) return '';
   const k=clamp(L.rx/150,.5,1), x=300+b.u*L.rx, y=L.sy+b.v*L.ry, km=clamp(L.rx/150,.8,1.05);
@@ -2093,12 +2094,13 @@ function blobSVG(b,L,grow=1,fade=1,flat=1){
   switch (b.kind){
     case 'powder': s = moundSVG(x, y, 44*km*Math.sqrt(grow), 40*km*grow*flat, b.col, b.seed, b.sparkle); break;
     case 'liquid': s = `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${(k*grow).toFixed(2)})"><ellipse rx="38" ry="9.5" fill="${b.col}" opacity=".92"/><path d="M-24 -2 Q0 -7 26 -1" stroke="#fff" stroke-width="1.6" fill="none" opacity=".65"/></g>`; break;
-    case 'egg': s = `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${(k*1.7).toFixed(2)})"><path d="M-22 1 Q-26 -7 -12 -9 Q-2 -14 10 -9 Q24 -8 21 1 Q22 8 6 8 Q-12 10 -22 1Z" fill="#fffbf0" opacity=".92" stroke="#efe6cf" stroke-width=".6"/>
+    case 'egg': s = `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${(k*2.25).toFixed(2)})"><path d="M-22 1 Q-26 -7 -12 -9 Q-2 -14 10 -9 Q24 -8 21 1 Q22 8 6 8 Q-12 10 -22 1Z" fill="#fffbf0" opacity=".92" stroke="#efe6cf" stroke-width=".6"/>
         <ellipse cx="1" cy="-3" rx="9" ry="7" fill="#ffbb1c"/><ellipse cx="1" cy="-1" rx="9" ry="5" fill="#f2a510" opacity=".35"/><ellipse cx="-2" cy="-6" rx="3.4" ry="2" fill="#fff5c4"/></g>`; break;
     case 'drop': s = `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${(k*1.8).toFixed(2)})"><ellipse cx="2" cy="4" rx="17" ry="4.5" fill="#fff0a0" opacity=".8"/>
         <path d="M-12 -4 l7 -6 h18 l-7 6z" fill="#fff4b0"/><rect x="-12" y="-4" width="18" height="11" fill="#ffe27a"/><path d="M6 -4 l7 -6 v11 l-7 6z" fill="#efc955"/><path d="M-10 -2 h10" stroke="#fff" stroke-width="1.5" opacity=".7"/></g>`; break;
     case 'drops': s = `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${(k*1.5).toFixed(2)})">${[[-8,0,5],[4,-3,4],[10,3,3.5],[-1,4,3]].map(([dx,dy,r])=>`<ellipse cx="${dx}" cy="${dy}" rx="${r*grow}" ry="${r*.45*grow}" fill="${b.col}" opacity=".9"/>`).join('')}</g>`; break;
-    case 'fruit': s = `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${(k*1.45).toFixed(2)})"><path d="M-26 0 Q-24 -9 -6 -9 Q16 -12 25 -3 Q28 7 6 8 Q-20 10 -26 0Z" fill="${b.col}" opacity=".9"/>${iconAt(b.ic||'straw',-8,-4,17,-20)}${iconAt(b.ic||'straw',10,-6,15,30)}</g>`; break;
+    case 'fruit': if (grow < .999) return ''; { const kf = Math.max(.9, k); s = FRUIT_SPOTS.map(([dx,dy,r]) => { const fx = x+dx*kf*1.3, fy = y+dy*kf*1.3;
+        return `<ellipse cx="${fx.toFixed(1)}" cy="${(fy+12*k).toFixed(1)}" rx="${(17*k).toFixed(1)}" ry="${(4.5*k).toFixed(1)}" fill="rgba(90,40,20,.2)"/>${iconAt(b.ic||'straw', fx, fy, 42*kf, r)}`; }).join(''); } break;
   }
   return `<g opacity="${fade.toFixed(2)}">${s}</g>`;
 }
@@ -2251,13 +2253,13 @@ function dropSVG(x,y,r,stretch,col){
   return `<path transform="translate(${x.toFixed(1)} ${y.toFixed(1)})" d="M0 ${(-r*2.4*stretch).toFixed(1)} C${r*.9} ${(-r*1.1).toFixed(1)} ${r} 0 0 ${r} C${-r} 0 ${-r*.9} ${(-r*1.1).toFixed(1)} 0 ${(-r*2.4*stretch).toFixed(1)}Z" fill="${col}" stroke="${shade(col,-.2)}" stroke-width=".6"/><circle cx="${(x-r*.35).toFixed(1)}" cy="${(y-r*.3).toFixed(1)}" r="${(r*.3).toFixed(1)}" fill="#fff" opacity=".7"/>`;
 }
 /* 재료 넣기 애니메이션 — back: 볼 유리 뒤(떨어지는 재료·물줄기), front: 용기 */
-const LAND = {drop:.47, egg:.62, fruit:.36, liquid:.4, powder:.42, drops:.46};
+const LAND = {drop:.47, egg:.62, fruit:.42, liquid:.4, powder:.42, drops:.46};
 function pourProg(it,t){
   switch (it.kind){
     case 'powder': return ease((t-.42)/.42);
     case 'liquid': return ease((t-(it.thick?.46:.4))/(it.thick?.32:.38));
     case 'drops':  return ease((t-.46)/.35);
-    case 'fruit':  return ease((t-.36)/.38);
+    case 'fruit':  return ease((t-.55)/.4);
     case 'drop':   return ease((t-.47)/.08);
     case 'egg':    return ease((t-.62)/.12);
   }
@@ -2314,23 +2316,34 @@ function animSVG(a,t){
     const fall = clamp((t-.3)/.17,0,1), x=lerp(lerp(470,bx+20,inT),bx,fall), y=t<.3?lerp(20,60,inT):lerp(60,by-6,fall*fall);
     if (t<.48) back += iconAt(it.ic, x, y, 74, fall*25);
   } else if (it.kind==='fruit'){
-    for (let q=0;q<3;q++){ const ts=.2+q*.12, d=(t-ts)/.16; if (d<0||d>1) continue;
-      back += iconAt(it.ic, bx+(q-1)*32*k, lerp(30,by-6,d*d), 50, d*200); }
+    // 하나씩 떨어져(중력 가속) 빙글 돌다가, 반죽에 닿으면 통통 튀고 출렁이며 자리를 잡아요
+    const g = 1500, y0 = 16, k = Math.max(.9, clamp(L.rx/150,.5,1));
+    FRUIT_SPOTS.forEach(([dx,dy,r], q) => {
+      const s = (t - (.16 + q*.11))*ANIM_MS/1000; if (s < 0) return;
+      const tx = bx + dx*k*1.3, ty = by + dy*k*1.3, sx = tx + (q-1)*18, fallT = Math.sqrt(2*Math.max(20, ty-y0)/g);
+      let x, y, rot;
+      if (s < fallT){ const f = s/fallT; x = lerp(sx, tx, f); y = y0 + .5*g*s*s; rot = r + (1-f)*(q%2 ? 260 : -260); }
+      else {
+        const tl = s - fallT; x = tx; y = ty - 16*k*Math.abs(Math.sin(tl*Math.PI/.24))*Math.exp(-tl*6.5); rot = r + Math.sin(tl*16)*10*Math.exp(-tl*5);
+        if (tl < .35){ const qq = tl/.35; back += `<ellipse cx="${tx.toFixed(1)}" cy="${(ty+10*k).toFixed(1)}" rx="${((10+qq*30)*k).toFixed(1)}" ry="${((10+qq*30)*k*.27).toFixed(1)}" fill="none" stroke="#fff" stroke-width="${(2.6*(1-qq)).toFixed(2)}" opacity="${(1-qq).toFixed(2)}"/>`; }
+      }
+      back += `<ellipse cx="${x.toFixed(1)}" cy="${(ty+12*k).toFixed(1)}" rx="${(14*k*Math.min(1, .4 + y/ty*.6)).toFixed(1)}" ry="${(4*k).toFixed(1)}" fill="rgba(90,40,20,.15)"/>` + iconAt(it.ic, x, y, 42*k, rot);
+    });
   } else if (it.kind==='egg'){
     const ex=lerp(470,bx+12,inT), ey=lerp(20,84,inT);
     if (t<.45){
       const sh = t>.28 ? Math.sin(t*120)*12 : 0;
-      front += iconAt('egg', ex, ey, 68, sh);
+      front += iconAt('egg', ex, ey, 86, sh);
       if (t>.36) front += `<path d="M${ex-15} ${ey-3} l7 6 l8 -7 l7 7 l8 -6" stroke="#8a6a4a" stroke-width="2.2" fill="none"/>`;
     } else {
       const op = 1-ease((t-.78)/.16), sp = ease((t-.45)/.12)*22;
-      const half = dir => `<g transform="translate(${ex+dir*sp*1.4} ${ey-6}) rotate(${dir*35*ease((t-.45)/.12)}) scale(1.45)" opacity="${op}"><path d="M-15 0 A15 19 0 0 1 15 0 L9 -4 L3 2 L-3 -4 L-9 2Z" transform="${dir<0?'':'scale(1 -1)'}" fill="#fbeedd" stroke="#d9c3a5" stroke-width="1.5"/></g>`;
+      const half = dir => `<g transform="translate(${ex+dir*sp*1.4} ${ey-6}) rotate(${dir*35*ease((t-.45)/.12)}) scale(1.85)" opacity="${op}"><path d="M-15 0 A15 19 0 0 1 15 0 L9 -4 L3 2 L-3 -4 L-9 2Z" transform="${dir<0?'':'scale(1 -1)'}" fill="#fbeedd" stroke="#d9c3a5" stroke-width="1.5"/></g>`;
       front += half(-1) + half(1);
       const d = clamp((t-.47)/.15,0,1), yy = lerp(ey+4, by-3, d*d), yx = lerp(ex,bx,d);
       if (t<.62){
-        const sx=ex, sy=ey+3, w1=4.5, w2=17;
+        const sx=ex, sy=ey+4, w1=6, w2=22;
         back += `<path d="M${sx-w1} ${sy} C${sx-w1} ${(sy+yy)/2} ${yx-w2} ${yy-12} ${yx-w2} ${yy} A${w2} ${w2*.8} 0 0 0 ${yx+w2} ${yy} C${yx+w2} ${yy-12} ${sx+w1} ${(sy+yy)/2} ${sx+w1} ${sy}Z" fill="#fffdf2" opacity=".85" stroke="#efe6cf" stroke-width=".8"/>`;
-        back += `<circle cx="${yx}" cy="${yy}" r="10" fill="#ffc22e"/><circle cx="${yx-3}" cy="${yy-3}" r="3" fill="#fff3b0"/>`;
+        back += `<circle cx="${yx}" cy="${yy}" r="13" fill="#ffc22e"/><circle cx="${yx-4}" cy="${yy-4}" r="4" fill="#fff3b0"/>`;
       }
     }
   }
@@ -2398,9 +2411,13 @@ function mixMove(e){
     }
   }
   if (!G.mixing){ drawMixFrame(whisk, false); return; }
-  const d = Math.hypot(p.x-G.last.x, p.y-G.last.y); G.last = p;
+  const d = Math.hypot(p.x-G.last.x, p.y-G.last.y);
+  // 그릇 가운데를 기준으로 손가락이 돈 각도만큼 소용돌이도 같은 방향으로 돌아요 (반죽 표면이 납작한 타원이라 세로를 펴서 계산)
+  const CY0 = 236, a0 = Math.atan2((G.last.y-CY0)/.3, G.last.x-300), a1 = Math.atan2((p.y-CY0)/.3, p.x-300);
+  let da = a1 - a0; if (da > Math.PI) da -= 2*Math.PI; if (da < -Math.PI) da += 2*Math.PI;
+  G.last = p;
   const was = c.mix;
-  c.mix = Math.min(1, c.mix + d/2600); G.swirl += d*.7;
+  c.mix = Math.min(1, c.mix + d/2600); G.swirl += da*180/Math.PI;
   if (Math.random()<.04) beep(rnd(300,420),.05,'triangle',.02);
   drawMixFrame(whisk, true);
   if (was<1 && c.mix>=1){ sfx.ok(); toast('반죽 완성!'); renderTray(); }
@@ -3568,55 +3585,121 @@ C3D.dollopTop = (c, d) => topY(c, d.tier) - .01 + .4*.78*d.s*.45;
 const sphG = new THREE.SphereGeometry(1, 28, 20), cylG = new THREE.CylinderGeometry(1, 1, 1, 40), capG = new THREE.CapsuleGeometry(.5, 1, 4, 10);
 function canvasDisc(draw){ return texOf(mkCanvas(256, 256, (g, w) => { g.translate(w/2, w/2); draw(g, w/2); })); }
 const TEX = {};
+/* 과일 단면 그림 (진짜 과일처럼: 껍질 · 과육 결 · 씨) */
+const rndSeeded = (s => () => { s = (s*16807) % 2147483647; return (s-1)/2147483646; })(12345);
 const sliceTex = {
-  kiwi: () => canvasDisc((g, r) => { const grd = g.createRadialGradient(0,0,0,0,0,r); grd.addColorStop(0,'#fffbe0'); grd.addColorStop(.22,'#f4f3b0'); grd.addColorStop(.3,'#9fd34a'); grd.addColorStop(.9,'#6cb12a'); grd.addColorStop(.95,'#c9d98a'); grd.addColorStop(1,'#7a5a2a');
+  kiwi: () => canvasDisc((g, r) => {
+    g.fillStyle = '#6b4a22'; g.beginPath(); g.arc(0,0,r,0,7); g.fill();                         // 털 있는 갈색 껍질
+    for (let k=0;k<160;k++){ const a = rndSeeded()*7, rr = r*(.95+rndSeeded()*.05); g.fillStyle = 'rgba(160,120,70,.6)'; g.fillRect(Math.cos(a)*rr, Math.sin(a)*rr, 2, 2); }
+    const grd = g.createRadialGradient(0,0,r*.12,0,0,r*.93); grd.addColorStop(0,'#f6f0c8'); grd.addColorStop(.22,'#d8e88a'); grd.addColorStop(.34,'#8cc63f'); grd.addColorStop(.8,'#6fb52c'); grd.addColorStop(1,'#5a9c22');
+    g.fillStyle = grd; g.beginPath(); g.arc(0,0,r*.93,0,7); g.fill();
+    for (let k=0;k<90;k++){ const a = k/90*Math.PI*2 + rndSeeded()*.03; g.strokeStyle = `rgba(230,250,190,${.18+rndSeeded()*.2})`; g.lineWidth = 1.4;   // 과육 결
+      g.beginPath(); g.moveTo(Math.cos(a)*r*.27, Math.sin(a)*r*.27); g.lineTo(Math.cos(a)*r*.9, Math.sin(a)*r*.9); g.stroke(); }
+    g.fillStyle = '#fbf6df'; g.beginPath(); g.ellipse(0, 0, r*.2, r*.15, .3, 0, 7); g.fill();                            // 흰 심
+    for (let ring=0; ring<2; ring++) for (let k=0;k<38;k++){ const a = k/38*Math.PI*2 + ring*.08, rr = r*(.29 + ring*.05 + rndSeeded()*.03);  // 까만 씨 두 줄
+      g.fillStyle = '#16100a'; g.beginPath(); g.ellipse(Math.cos(a)*rr, Math.sin(a)*rr, 4.2, 1.9, a, 0, 7); g.fill(); }
+  }),
+  orange: () => canvasDisc((g, r) => {
+    g.fillStyle = '#f07c10'; g.beginPath(); g.arc(0,0,r,0,7); g.fill();                         // 껍질 + 작은 기름샘
+    for (let k=0;k<120;k++){ const a = rndSeeded()*7, rr = r*(.93+rndSeeded()*.06); g.fillStyle = 'rgba(255,190,90,.7)'; g.beginPath(); g.arc(Math.cos(a)*rr, Math.sin(a)*rr, 1.3, 0, 7); g.fill(); }
+    g.fillStyle = '#fff1dc'; g.beginPath(); g.arc(0,0,r*.9,0,7); g.fill();                       // 흰 속껍질
+    for (let k=0;k<11;k++){ const a0 = k/11*Math.PI*2+.035, a1 = (k+1)/11*Math.PI*2-.035, am = (a0+a1)/2;
+      const grd = g.createRadialGradient(0,0,r*.08,0,0,r*.84); grd.addColorStop(0,'#ffcf6e'); grd.addColorStop(.6,'#ffaa2e'); grd.addColorStop(1,'#ff8c14');
+      g.fillStyle = grd; g.beginPath(); g.moveTo(Math.cos(am)*r*.1, Math.sin(am)*r*.1); g.arc(0,0,r*.84,a0,a1); g.closePath(); g.fill();
+      for (let j=0;j<10;j++){ const aa = a0 + (a1-a0)*(j+.5)/10, r0 = r*(.25+rndSeeded()*.2); g.strokeStyle = 'rgba(255,230,160,.55)'; g.lineWidth = 1.6;   // 알갱이 결
+        g.beginPath(); g.moveTo(Math.cos(aa)*r0, Math.sin(aa)*r0); g.lineTo(Math.cos(aa)*(r0+r*.18), Math.sin(aa)*(r0+r*.18)); g.stroke(); } }
+    g.fillStyle = '#fff4e0'; g.beginPath(); g.arc(0,0,r*.07,0,7); g.fill();
+  }),
+  banana: () => canvasDisc((g, r) => {
+    const grd = g.createRadialGradient(0,0,0,0,0,r); grd.addColorStop(0,'#fff7d6'); grd.addColorStop(.7,'#fbefc0'); grd.addColorStop(.93,'#f2dd98'); grd.addColorStop(1,'#d9bf6e');
     g.fillStyle = grd; g.beginPath(); g.arc(0,0,r,0,7); g.fill();
-    for (let k=0;k<44;k++){ const a = k/44*Math.PI*2, rr = r*(.33+Math.random()*.06); g.fillStyle = '#1b1208'; g.beginPath(); g.ellipse(Math.cos(a)*rr, Math.sin(a)*rr, 5, 2.4, a, 0, 7); g.fill(); }
-    for (let k=0;k<60;k++){ const a = k/60*Math.PI*2; g.strokeStyle = 'rgba(255,255,255,.25)'; g.lineWidth = 2; g.beginPath(); g.moveTo(Math.cos(a)*r*.3, Math.sin(a)*r*.3); g.lineTo(Math.cos(a)*r*.85, Math.sin(a)*r*.85); g.stroke(); } }),
-  orange: () => canvasDisc((g, r) => { g.fillStyle = '#ff9a1f'; g.beginPath(); g.arc(0,0,r,0,7); g.fill(); g.fillStyle = '#fff3d8'; g.beginPath(); g.arc(0,0,r*.9,0,7); g.fill();
-    for (let k=0;k<10;k++){ const a0 = k/10*Math.PI*2+.03, a1 = (k+1)/10*Math.PI*2-.03; const grd = g.createRadialGradient(0,0,r*.1,0,0,r*.85); grd.addColorStop(0,'#ffd27a'); grd.addColorStop(1,'#ff9d1c');
-      g.fillStyle = grd; g.beginPath(); g.moveTo(Math.cos((a0+a1)/2)*r*.1, Math.sin((a0+a1)/2)*r*.1); g.arc(0,0,r*.84,a0,a1); g.closePath(); g.fill(); } }),
-  banana: () => canvasDisc((g, r) => { const grd = g.createRadialGradient(0,0,0,0,0,r); grd.addColorStop(0,'#fff4c8'); grd.addColorStop(.85,'#f6e7a6'); grd.addColorStop(1,'#d9c07a');
-    g.fillStyle = grd; g.beginPath(); g.arc(0,0,r,0,7); g.fill(); for (let k=0;k<3;k++){ const a = k/3*Math.PI*2; g.fillStyle = '#8a6a3a'; g.beginPath(); g.arc(Math.cos(a)*r*.14, Math.sin(a)*r*.14, 5, 0, 7); g.fill(); } }),
+    for (let k=0;k<40;k++){ const a = k/40*Math.PI*2; g.strokeStyle = 'rgba(220,190,120,.25)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(Math.cos(a)*r*.2, Math.sin(a)*r*.2); g.lineTo(Math.cos(a)*r*.9, Math.sin(a)*r*.9); g.stroke(); }
+    g.strokeStyle = 'rgba(150,110,50,.55)'; g.lineWidth = 2.2;                                     // 가운데 별 모양 씨줄
+    for (let k=0;k<3;k++){ const a = k/3*Math.PI*2 + .3; g.beginPath(); g.moveTo(0,0); g.lineTo(Math.cos(a)*r*.2, Math.sin(a)*r*.2); g.stroke();
+      g.fillStyle = '#5a3e1e'; g.beginPath(); g.arc(Math.cos(a)*r*.13, Math.sin(a)*r*.13, 3.2, 0, 7); g.fill(); }
+  }),
+  mintLeaf: () => texOf(mkCanvas(128, 256, (g, w, h) => {
+    const grd = g.createLinearGradient(0,0,w,0); grd.addColorStop(0,'#3f9a45'); grd.addColorStop(.5,'#5fbd5a'); grd.addColorStop(1,'#3a8e40');
+    g.fillStyle = grd; g.fillRect(0,0,w,h);
+    g.strokeStyle = 'rgba(200,245,190,.75)'; g.lineWidth = 3; g.beginPath(); g.moveTo(w/2, h); g.lineTo(w/2, 8); g.stroke();   // 가운데 잎맥
+    g.lineWidth = 1.6; for (let k=1;k<7;k++){ const y = h - k*h/7.5; g.beginPath(); g.moveTo(w/2, y); g.quadraticCurveTo(w*.3, y-14, 6, y-30); g.moveTo(w/2, y); g.quadraticCurveTo(w*.7, y-14, w-6, y-30); g.stroke(); }
+  })),
   lolli: () => canvasDisc((g, r) => { g.fillStyle = '#fff'; g.beginPath(); g.arc(0,0,r,0,7); g.fill(); g.strokeStyle = '#ff5c8a'; g.lineWidth = r*.16; g.beginPath();
     for (let t=0;t<6*Math.PI;t+=.05){ const rr = r*t/(6*Math.PI); g.lineTo(Math.cos(t)*rr, Math.sin(t)*rr); } g.stroke(); }),
 };
-const slice = (kind, r, h, rimCol) => { const g = new THREE.Group(), t = TEX[kind] || (TEX[kind] = sliceTex[kind]());
-  const face = phys('sf'+kind, {map:t, roughness:.35, clearcoat:.6}), side = phys('ss'+kind, {color:col(rimCol), roughness:.5});
-  g.add(mesh(cylG, [side, face, face], m => { m.scale.set(r, h, r); m.position.y = h/2; })); return g; };
+const slice = (kind, r, h, rimCol, rough=.5) => { const g = new THREE.Group(), t = TEX[kind] || (TEX[kind] = sliceTex[kind]());
+  const face = phys('sf'+kind, {map:t, roughness:.28, clearcoat:.7, clearcoatRoughness:.15}), side = phys('ss'+kind, {color:col(rimCol), roughness:rough});
+  g.add(mesh(new THREE.CylinderGeometry(1, 1, 1, 48), [side, face, face], m => { m.scale.set(r, h, r); m.position.y = h/2; })); return g; };
+// 세로 높이에 따라 색이 바뀌는 열매 (아래→위)
+function gradeColors(geo, stops){
+  const p = geo.attributes.position, c = [], ys = []; for (let i=0;i<p.count;i++) ys.push(p.getY(i));
+  const lo = Math.min(...ys), hi = Math.max(...ys);
+  for (let i=0;i<p.count;i++){ const t = (ys[i]-lo)/(hi-lo||1); let k = 0; while (k < stops.length-2 && t > stops[k+1][0]) k++;
+    const [t0,c0] = stops[k], [t1,c1] = stops[k+1], f = Math.min(1, Math.max(0, (t-t0)/(t1-t0||1))), C = col(c0).lerp(col(c1), f); c.push(C.r, C.g, C.b); }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(c, 3)); return geo;
+}
+function leafGeo(len, wid, bend){
+  const s = new THREE.Shape(); s.moveTo(0, 0); s.bezierCurveTo(wid, len*.25, wid*.9, len*.75, 0, len); s.bezierCurveTo(-wid*.9, len*.75, -wid, len*.25, 0, 0);
+  const g = new THREE.ShapeGeometry(s, 10), p = g.attributes.position, uv = g.attributes.uv;
+  for (let i=0;i<p.count;i++){ const x = p.getX(i), y = p.getY(i); uv.setXY(i, x/(2*wid)+.5, y/len); p.setZ(i, bend*(x*x/(wid*wid))*wid - bend*.6*(y/len)*(y/len)*len*.3); }
+  g.computeVertexNormals(); return g;
+}
 function strawberry(s=1){
   const g = new THREE.Group();
-  const body = lathe([[0,0],[.07,.03],[.13,.09],[.17,.17],[.195,.25],[.2,.32],[.18,.38],[.12,.43],[0,.44]], 40);
-  g.add(mesh(body, phys('berry', {color:0xd8142f, roughness:.28, clearcoat:.9, clearcoatRoughness:.12})));
-  const seeds = new THREE.InstancedMesh(new THREE.SphereGeometry(.013, 6, 4), std('seed', {color:0xf4d36a, roughness:.4}), 54); const M = new THREE.Matrix4(); let n = 0;
-  [.07,.13,.17,.195,.2,.18].forEach((rr, row) => { for (let k=0;k<9;k++){ const a = k/9*Math.PI*2 + row*.35; M.makeTranslation(Math.cos(a)*rr*.98, .44*(row+1)/7.2, Math.sin(a)*rr*.98); seeds.setMatrixAt(n++, M); } });
-  g.add(seeds);
-  const leaf = std('leaf', {color:0x3e9f48, roughness:.5});
-  for (let k=0;k<7;k++){ const a = k/7*Math.PI*2; g.add(mesh(sphG, leaf, m => { m.scale.set(.11, .016, .04); m.position.set(Math.cos(a)*.1, .445, Math.sin(a)*.1); m.rotation.set(0, -a, .25); })); }
-  g.rotation.x = Math.PI; g.position.y = .44;
-  const w = new THREE.Group(); w.add(g); w.scale.setScalar(.52*s); return w;
+  // 끝은 짙은 빨강, 꼭지 쪽 어깨는 살짝 밝게 (진짜 딸기처럼)
+  const body = gradeColors(lathe([[0,0],[.05,.015],[.11,.06],[.16,.14],[.19,.23],[.205,.31],[.19,.38],[.13,.43],[0,.445]], 48),
+    [[0,'#9e0a22'],[.35,'#d4142f'],[.8,'#ee2a3c'],[1,'#ff9a8a']]);
+  g.add(mesh(body, phys('berryV', {color:0xffffff, vertexColors:true, roughness:.22, clearcoat:1, clearcoatRoughness:.1, sheen:.4, sheenColor:col(0xff8090)})));
+  const pit = new THREE.SphereGeometry(.0085, 8, 6), seedM = std('seed2', {color:0xf2cf5a, roughness:.35}), pitM = std('pit', {color:0x8a0a1c, roughness:.6});
+  const seeds = new THREE.InstancedMesh(new THREE.SphereGeometry(.0065, 6, 4), seedM, 70), pits = new THREE.InstancedMesh(pit, pitM, 70), M = new THREE.Matrix4(); let n = 0;
+  [.07,.12,.165,.19,.203,.19,.15].forEach((rr, row) => { const cnt = Math.round(5 + rr*40); for (let k=0;k<cnt && n<70;k++){ const a = k/cnt*Math.PI*2 + row*.45, y = .445*(row+1)/8.2;
+    M.makeTranslation(Math.cos(a)*rr*.975, y, Math.sin(a)*rr*.975); pits.setMatrixAt(n, M); M.makeTranslation(Math.cos(a)*rr*.995, y, Math.sin(a)*rr*.995); seeds.setMatrixAt(n, M); n++; } });
+  seeds.count = pits.count = n; g.add(pits, seeds);
+  const leafM = phys('leaf2', {color:0x3e9f48, roughness:.45, clearcoat:.3, side:THREE.DoubleSide});
+  for (let k=0;k<8;k++){ const a = k/8*Math.PI*2, lf = new THREE.Mesh(leafGeo(.13, .035, .5), leafM);
+    lf.rotation.set(-Math.PI/2 + .35, 0, 0); const holder = new THREE.Group(); holder.add(lf); holder.rotation.y = -a + Math.PI/2; holder.position.y = .44; g.add(holder); }
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(.012, .018, .07, 8), std('stemG', {color:0x5a8a2a})); stem.position.y = .47; g.add(stem);
+  g.rotation.x = Math.PI; g.position.y = .445;
+  const w = new THREE.Group(); w.add(g); w.scale.setScalar(.42*s); return w;
 }
 const MODELS = {
   straw: () => strawberry(),
-  cherry: () => { const g = new THREE.Group(); g.add(mesh(sphG, phys('cherry', {color:0xa00c24, roughness:.15, clearcoat:1}), m => { m.scale.set(.1, .095, .1); m.position.y = .095; }));
-    const stem = new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(new THREE.Vector3(0,.18,0), new THREE.Vector3(.01,.3,0), new THREE.Vector3(.07,.38,.02)), 12, .008, 6);
-    g.add(mesh(stem, std('stem', {color:0x6b8a2a, roughness:.6}))); return g; },
-  blue: () => { const g = new THREE.Group(), m = phys('blue', {color:0x2b3570, roughness:.4, sheen:1, sheenColor:col(0x9aa8e0)});
-    [[0,0],[.1,.04],[-.06,.09]].forEach(([x,z]) => { g.add(mesh(sphG, m, s => { s.scale.setScalar(.065); s.position.set(x, .062, z); }));
-      g.add(mesh(new THREE.TorusGeometry(.018, .007, 6, 12), std('crown', {color:0x1a1f45}), t => { t.rotation.x = Math.PI/2; t.position.set(x, .125, z); })); }); return g; },
-  rasp: () => { const g = new THREE.Group(), im = new THREE.InstancedMesh(new THREE.SphereGeometry(.034, 12, 8), phys('rasp', {color:0xc81d48, roughness:.3, clearcoat:.6, sheen:.4, sheenColor:col(0xff9ab0)}), 40);
-    const M = new THREE.Matrix4(); let n = 0; for (let row=0; row<5; row++){ const y = .03 + row*.045, r = .1*Math.sin(Math.PI*(.25+row*.16)), cnt = Math.max(3, Math.round(r*90));
-      for (let k=0;k<cnt && n<40;k++){ const a = k/cnt*Math.PI*2 + row; M.makeTranslation(Math.cos(a)*r, y, Math.sin(a)*r); im.setMatrixAt(n++, M); } }
+  // 체리: 꼭지 쪽이 살짝 들어간 동그란 열매 + 휘어진 꼭지 + 작은 잎
+  cherry: () => { const g = new THREE.Group();
+    const body = gradeColors(lathe([[0,0],[.05,.006],[.085,.03],[.1,.07],[.1,.11],[.086,.15],[.05,.172],[.016,.168],[0,.158]], 40), [[0,'#5e0614'],[.6,'#9c0d24'],[1,'#b8162e']]);
+    g.add(mesh(body, phys('cherryV', {color:0xffffff, vertexColors:true, roughness:.12, clearcoat:1, clearcoatRoughness:.05})));
+    const stem = new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(0,.16,0), new THREE.Vector3(.008,.24,0), new THREE.Vector3(.04,.32,.01), new THREE.Vector3(.09,.37,.02)]), 16, .007, 6);
+    g.add(mesh(stem, std('stemC', {color:0x6a7a2a, roughness:.7})));
+    const lf = new THREE.Mesh(leafGeo(.1, .028, .4), phys('leafC', {map:TEX.mint || (TEX.mint = sliceTex.mintLeaf()), roughness:.5, side:THREE.DoubleSide}));
+    lf.position.set(.06, .35, .015); lf.rotation.set(0, 0, -1.1); g.add(lf); return g; },
+  // 블루베리: 하얀 분이 살짝 낀 짙은 남색 + 꼭지의 별 모양 왕관
+  blue: () => { const g = new THREE.Group(), m = phys('blue2', {color:0x334a8a, roughness:.55, sheen:1, sheenColor:col(0xc8d4f4), sheenRoughness:.45});
+    const crownM = std('crown2', {color:0x1b2246, roughness:.8});
+    [[0,0],[.1,.04],[-.06,.09]].forEach(([x,z]) => { g.add(mesh(sphG, m, s => { s.scale.set(.068, .06, .068); s.position.set(x, .058, z); }));
+      for (let k=0;k<5;k++){ const a = k/5*Math.PI*2; g.add(mesh(new THREE.ConeGeometry(.007, .022, 5), crownM, c => { c.position.set(x + Math.cos(a)*.016, .116, z + Math.sin(a)*.016); c.rotation.set(Math.sin(a)*.8, 0, -Math.cos(a)*.8); })); }
+      g.add(mesh(new THREE.CircleGeometry(.014, 10), crownM, c => { c.rotation.x = -Math.PI/2; c.position.set(x, .118, z); })); }); return g; },
+  // 산딸기: 작은 알갱이마다 색과 크기가 조금씩 다르게
+  rasp: () => { const g = new THREE.Group(), im = new THREE.InstancedMesh(new THREE.SphereGeometry(.03, 12, 8), phys('rasp2', {color:0xffffff, roughness:.3, clearcoat:.7, sheen:.5, sheenColor:col(0xffb0c0)}), 60);
+    const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), S = new THREE.Vector3(), P = new THREE.Vector3(); let n = 0;
+    for (let row=0; row<6; row++){ const y = .025 + row*.038, r = .098*Math.sin(Math.PI*(.2+row*.135)), cnt = Math.max(4, Math.round(r*95));
+      for (let k=0;k<cnt && n<60;k++){ const a = k/cnt*Math.PI*2 + row*.5; P.set(Math.cos(a)*r, y, Math.sin(a)*r); S.setScalar(.85 + rndSeeded()*.3); M.compose(P, Q, S); im.setMatrixAt(n, M);
+        im.setColorAt(n, col(['#b0103a','#c8174a','#d92055','#a50c33'][n%4])); n++; } }
     im.count = n; im.castShadow = true; g.add(im); return g; },
-  kiwi: () => slice('kiwi', .15, .035, '#7a6a2a'),
-  orange: () => slice('orange', .15, .035, '#ff8a10'),
-  banana: () => slice('banana', .11, .04, '#e9d79a'),
+  kiwi: () => { const g = slice('kiwi', .17, .035, '#6b4a22', .95); g.rotation.set(.75, 0, 0); g.position.set(0, .13, -.04); const w = new THREE.Group(); w.add(g); return w; },
+  orange: () => { const g = slice('orange', .17, .035, '#f07c10', .45); g.rotation.set(.75, 0, 0); g.position.set(0, .13, -.04); const w = new THREE.Group(); w.add(g); return w; },
+  banana: () => { const g = slice('banana', .12, .045, '#f2e4ae', .6); g.rotation.set(.6, 0, 0); g.position.set(0, .09, -.03); const w = new THREE.Group(); w.add(g); return w; },
+  // 복숭아 조각: 과육은 노란 주황, 껍질 쪽은 붉은 빛
   peach: () => { const s = new THREE.Shape(); s.absarc(0, 0, .16, Math.PI*.15, Math.PI*.85, false); s.absarc(0, -.05, .1, Math.PI*.8, Math.PI*.2, true);
-    const g = new THREE.Group(); g.add(mesh(new THREE.ExtrudeGeometry(s, {depth:.05, bevelEnabled:true, bevelSize:.012, bevelThickness:.012, bevelSegments:3}), phys('peach', {color:0xffb45a, roughness:.3, clearcoat:.8}), m => { m.rotation.x = -Math.PI/2; m.position.set(0, .012, .06); })); return g; },
-  grape: () => { const g = new THREE.Group(), m = phys('grape', {color:0x5e2a74, roughness:.25, clearcoat:.7, sheen:.6, sheenColor:col(0xd9c8ec)});
-    [[0,0],[.12,.02],[.05,.1]].forEach(([x,z]) => g.add(mesh(sphG, m, s => { s.scale.set(.075, .085, .075); s.position.set(x, .085, z); }))); return g; },
-  mint: () => { const g = new THREE.Group(), m = phys('mint', {color:0x47a84f, roughness:.4, clearcoat:.4, side:THREE.DoubleSide});
-    [-.5, .6, 1.8].forEach((a, k) => g.add(mesh(sphG, m, s => { s.scale.set(.12, .014, .055); s.position.set(Math.cos(a)*.08, .03 + k*.01, Math.sin(a)*.08); s.rotation.set(.15, -a, .35); }))); return g; },
+    const flesh = phys('peachF', {color:0xffb75e, roughness:.3, clearcoat:.8, clearcoatRoughness:.15}), skin = phys('peachS', {color:0xe4552e, roughness:.55, sheen:.8, sheenColor:col(0xffc0a0)});
+    const g = new THREE.Group(); g.add(mesh(new THREE.ExtrudeGeometry(s, {depth:.05, bevelEnabled:true, bevelSize:.01, bevelThickness:.01, bevelSegments:3, curveSegments:24}), [flesh, skin], m => { m.rotation.x = -Math.PI/2; m.position.set(0, .012, .06); })); return g; },
+  // 포도: 살짝 길쭉한 알 + 하얀 분 + 꼭지
+  grape: () => { const g = new THREE.Group(), m = phys('grape2', {color:0x4a1f5e, roughness:.32, clearcoat:.6, sheen:.9, sheenColor:col(0xd8cce8), sheenRoughness:.5});
+    [[0,0,0],[.12,.02,.4],[.05,.1,-.3]].forEach(([x,z,r]) => { g.add(mesh(sphG, m, s => { s.scale.set(.072, .088, .072); s.position.set(x, .085, z); s.rotation.z = r; }));
+      g.add(mesh(new THREE.CylinderGeometry(.006, .01, .03, 6), std('stemG2', {color:0x7a6a3a}), c => c.position.set(x, .18, z))); }); return g; },
+  // 민트잎: 잎맥이 있는 진짜 잎 모양 세 장
+  mint: () => { const g = new THREE.Group(), m = phys('mint2', {map:TEX.mint || (TEX.mint = sliceTex.mintLeaf()), roughness:.45, clearcoat:.35, side:THREE.DoubleSide});
+    [[0, .2],[2.1, .3],[4.2, .25]].forEach(([a, tilt]) => { const lf = new THREE.Mesh(leafGeo(.17, .05, .45), m); lf.castShadow = true;
+      lf.rotation.set(-Math.PI/2 + tilt, 0, 0); const holder = new THREE.Group(); holder.add(lf); holder.rotation.y = a; holder.position.y = .03; g.add(holder); }); return g; },
   choc: () => { const s = new THREE.Shape(); const w = .11; s.moveTo(-w, -w); s.lineTo(w, -w); s.lineTo(w, w); s.lineTo(-w, w); s.lineTo(-w, -w);
     const g = new THREE.Group(); g.add(mesh(new THREE.ExtrudeGeometry(s, {depth:.04, bevelEnabled:true, bevelSize:.015, bevelThickness:.015, bevelSegments:3}), phys('choc', {color:0x4a2412, roughness:.3, clearcoat:.4}), m => { m.rotation.set(-1.15, 0, 0); m.position.set(0, .12, 0); })); return g; },
   cookie: () => { const g = new THREE.Group(); g.add(mesh(cylG, std('cookie', {color:0xd39a55, roughness:.85, bumpMap:creamBump, bumpScale:4}), m => { m.scale.set(.15, .045, .15); m.position.y = .03; }));
