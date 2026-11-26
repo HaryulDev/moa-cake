@@ -1756,8 +1756,9 @@ function panLayout(c){
   let x=300-total/2;
   return Rs.map((Ro,i)=>{ const cx=x+Ro; x+=2*Ro+gap; return {i,cx,R:TR[i]*s,s,H:TH[i]*s/.8,bottom:PAN_Y}; });
 }
-function pourQuality(f){ if (f>=.5 && f<=.72) return 1; const d=f<.5?.5-f:f-.72; return Math.max(0,1-d/.3); }
-function pourLabel(f){ return f<.35?'반죽이 너무 적어요':f<.5?'조금 적어요':f<=.72?'딱 알맞아요!':f<=1?'조금 많아요':'넘쳐 버렸어요!'; }
+const FILL_LO = .65, FILL_HI = .88, FILL_GOAL = .78;   // 알맞은 반죽 양 (틀 높이에 대한 비율)
+function pourQuality(f){ if (f>=FILL_LO && f<=FILL_HI) return 1; const d=f<FILL_LO?FILL_LO-f:f-FILL_HI; return Math.max(0,1-d/.3); }
+function pourLabel(f){ return f<.45?'반죽이 너무 적어요':f<FILL_LO?'조금 적어요':f<=FILL_HI?'딱 알맞아요!':f<=1?'조금 많아요':'넘쳐 버렸어요!'; }
 /* 틀 테두리: 양옆 세로선 + 바닥 앞쪽 곡선 (뒤쪽 바닥은 가려지니 그리지 않아요) */
 function panEdges(p, rim, tf, D, P, i, bottom = p.bottom){
   const pts = samplePts(G.cake.shape, 90), xs = pts.map(q => q[0]), R = p.R*1.06, W = 3;
@@ -1793,8 +1794,8 @@ function pansSVG(c, mode, bakeP=0){
     }
     let f = st.fill;
     // 오븐: 반죽이 부풀어 오르며 가운데가 봉긋해지고, 겉면이 노릇노릇 → 타면 새까맣게
-    const rise = mode==='oven' ? ease(bakeP*1.5) : 0;
-    if (mode==='oven') f = Math.min(1.02, f + (Math.max(.82,f+.25)-f)*rise);
+    const rise = mode==='oven' ? ease(Math.min(1, bakeP*1.45)) : 0;
+    if (mode==='oven') f = Math.min(1.04, f + (Math.max(.9,f+.2)-f)*rise);
     const level = p.bottom - Math.min(f,1)*p.H, rim = p.bottom-p.H;
     let surf = bat;
     if (mode==='oven'){
@@ -1818,13 +1819,18 @@ function pansSVG(c, mode, bakeP=0){
           const top = level - domeH*.6, w = p.R*.5;
           out += `<path d="M${p.cx-w} ${top} l${w*.35} ${-4*p.s} l${w*.3} ${6*p.s} l${w*.4} ${-5*p.s} l${w*.45} ${4*p.s} l${w*.5} ${-3*p.s}" stroke="#000" stroke-width="${2.2*p.s}" fill="none" opacity="${Math.min(.8,(bakeP-.82)*5)}"/>`;
         } else out += `<ellipse cx="${p.cx-p.R*.2}" cy="${level-domeH*.75}" rx="${p.R*.25}" ry="${p.R*K*.12}" fill="#fff" opacity="${(.25*(1-rise*.5)).toFixed(2)}"/>`;
+        if (bakeP < .5){ // 익기 시작하면 반죽 윗면에 작은 기포가 보글보글 올라왔다 터져요
+          const R = seeded(37+i*11), tm = performance.now()/1000, fadeB = 1 - bakeP/.5;
+          for (let k=0;k<7;k++){ const bx = p.cx + (R()*2-1)*p.R*.42, by = level - domeH*.86 + (R()*2-1)*p.R*K*.22, ph = (tm*.9 + R()) % 1;
+            out += `<circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${((1.2+3.2*ph)*Math.max(.8,p.s)).toFixed(2)}" fill="none" stroke="${shade(surf,.35)}" stroke-width="1.2" opacity="${((1-ph)*.8*fadeB).toFixed(2)}"/>`; }
+        }
       } else out += `<path d="${D}" transform="${tf(level-1,.6)}" fill="${shade(surf,.18)}" opacity=".5"/>`;
     }
     out += above;
     out += `<path d="${RING}" fill-rule="evenodd" transform="${tf(rim,1.06)}" fill="#f4f7fb" stroke="#56606d" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
     out += panEdges(p, rim, tf, D, P, i);
     if (mode==='pour'){
-      const gy = p.bottom - .6*p.H, ok = f >= .5 && f <= .72;
+      const gy = p.bottom - FILL_GOAL*p.H, ok = f >= FILL_LO && f <= FILL_HI;
       out += `<path d="${D}" transform="${tf(gy,.985)}" fill="none" stroke="#fff" stroke-width="4.5" stroke-dasharray="7 5" vector-effect="non-scaling-stroke" opacity=".8"/>
         <path d="${D}" transform="${tf(gy,.985)}" fill="none" stroke="${ok ? '#2fb36a' : '#ff4f86'}" stroke-width="2.4" stroke-dasharray="7 5" vector-effect="non-scaling-stroke"/>
         <g transform="translate(${(p.cx - 23*Math.max(.7,p.s)).toFixed(1)} ${(gy + p.R*K*.985).toFixed(1)})"><rect x="0" y="-9" width="${(46*Math.max(.7,p.s)).toFixed(1)}" height="18" rx="9" fill="${ok ? '#2fb36a' : '#ff4f86'}" stroke="#fff" stroke-width="1.5"/>
@@ -2502,7 +2508,7 @@ function viewPour(){
   const c=G.cake, L=panLayout(c);
   let s = pansSVG(c,'pour');
   const cur = curPan();
-  const used = G.pans.reduce((a,p)=>a+Math.min(p.fill,1.1),0), amount = Math.max(0, 1-used/(c.tiers*.95));
+  const used = G.pans.reduce((a,p)=>a+Math.min(p.fill,1.1),0), amount = Math.max(0, 1-used/(c.tiers*1.05));
   const F = G.flow, fp = F.head>0 ? F.pan : cur;
   if (fp>=0){
     const p=L[fp], st=G.pans[fp], bat=batterColor(c), time=performance.now()/1000;
@@ -2526,7 +2532,7 @@ function viewPour(){
   const st = cur>=0 ? G.pans[cur] : null;
   const started = G.pans.some(p=>p.fill>0);
   setHint(cur<0 ? '반죽을 다 부었어요! 오븐으로 ▶' : !started ? '틀 모양·단수를 고르고, 화면을 꾹 누르고 있으면 반죽이 부어져요' : '분홍 점선까지 채우고 손을 떼요!');
-  if (st) setMeter('반죽 양', st.fill, [.5,.72]); else setMeter(null);
+  if (st) setMeter('반죽 양', st.fill, [FILL_LO,FILL_HI]); else setMeter(null);
 }
 function trayPour(){
   const c=G.cake, locked=G.pans.some(p=>p.fill>0), allDone=curPan()<0;
@@ -2603,7 +2609,9 @@ function ovenSVG(inner){
     <g clip-path="url(#ovenClip)">
       <rect x="160" y="290" width="280" height="4" fill="#9a7d86"/>
       <g id="ovenPans" transform="translate(300 276) scale(.54) translate(-300 -${PAN_Y})">${inner}</g>
-      <path d="M170 305 q15 -8 30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0" stroke="#ff6a2b" stroke-width="5" fill="none" opacity=".9"/>
+      <path id="ovenCoil" d="M170 305 q15 -8 30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0" stroke="#8a4a3a" stroke-width="5" fill="none" opacity=".9"/>
+      <g id="heatWave" opacity="0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round">
+        <path d="M200 300 q8 -20 0 -40 t0 -40 t0 -40"/><path d="M300 300 q8 -20 0 -40 t0 -40 t0 -40"/><path d="M400 300 q8 -20 0 -40 t0 -40 t0 -40"/></g>
       <g id="smoke" opacity="0">${iconAt('smoke',250,170,80)}${iconAt('smoke',340,150,100)}<rect x="160" y="112" width="280" height="200" fill="#2a2a2a" opacity=".35"/></g></g>
     <rect x="160" y="112" width="280" height="200" rx="16" fill="#fff" opacity=".08"/>
     <rect x="130" y="380" width="40" height="10" rx="4" fill="#e57c9f"/><rect x="430" y="380" width="40" height="10" rx="4" fill="#e57c9f"/>`;
@@ -2611,7 +2619,7 @@ function ovenSVG(inner){
 function viewBake(){
   const c=G.cake;
   if (G.phase==='baking'){
-    layer(ovenSVG(pansSVG(c,'oven',G.baking.p)));
+    layer(ovenSVG(pansSVG(c,'oven',G.baking.p))); const b=G.baking; ovenSlide(b.out!=null ? 1-b.out : b.ins, performance.now());
     setHint('바늘이 <b style="color:#3cb371">초록 칸</b>에 왔을 때 꺼내요!'); setMeter(null);
     return;
   }
@@ -2650,16 +2658,24 @@ function bindBake(){
   if ($('#next')) $('#next').onclick = goNext;
 }
 function startBake(){
-  G.phase='baking'; G.baking = {p:0, t:performance.now(), lastTick:0};
+  G.phase='baking'; G.baking = {p:0, t:performance.now(), lastTick:0, ins:0};
   renderView(); renderTray();
   beep(180,.4,'sawtooth',.03);
   requestAnimationFrame(bakeFrame);
 }
 function bakeFrame(now){
   if (!G || G.phase!=='baking' || !G.baking) return;
-  const b = G.baking;
-  b.p += (now-b.t)/BAKE_MS; b.t = now;
-  if (b.p >= 1){ b.p = 1; stopBake(); return; }
+  const b = G.baking, dt = Math.min(50, now-b.t); b.t = now;
+  if (b.out != null){   // 꺼내는 중: 틀이 앞으로 쑥 밀려 나와요
+    b.out = Math.min(1, b.out + dt/450); ovenSlide(1-b.out, now);
+    if (b.out >= 1){ G.baking = null; G.phase='unmold'; renderView(); renderTray(); }
+    else requestAnimationFrame(bakeFrame);
+    return;
+  }
+  if (b.ins < 1){ b.ins = Math.min(1, b.ins + dt/650); ovenSlide(b.ins, now); requestAnimationFrame(bakeFrame); return; }   // 넣는 중
+  b.p += dt/BAKE_MS;
+  if (b.p >= 1){ b.p = 1; stopBake(); requestAnimationFrame(bakeFrame); return; }
+  ovenHeat(b.p, now);
   const n=$('#needle'); if (n) n.style.left = (b.p*100)+'%';
   const op=$('#ovenPans'); if (op) op.innerHTML = pansSVG(G.cake,'oven',b.p);
   const sm=$('#smoke'); if (sm){ sm.setAttribute('opacity', b.p>.76 ? Math.min(1,(b.p-.76)*4) : 0); sm.setAttribute('transform', `translate(0 ${(-((now/30)%20)).toFixed(1)})`); }
@@ -2668,11 +2684,24 @@ function bakeFrame(now){
   requestAnimationFrame(bakeFrame);
 }
 function stopBake(){
-  if (G.phase!=='baking') return;
-  G.cake.bake = G.baking.p; G.baking = null; G.phase='unmold';
+  if (G.phase!=='baking' || !G.baking || G.baking.out != null || G.baking.ins < 1) return;
+  G.cake.bake = G.baking.p; G.baking.out = 0;
   bakeQuality(G.cake.bake)>=1 ? sfx.ok() : sfx.bad();
-  toast(bakeLabel(G.cake.bake));
-  renderView(); renderTray();
+  toast(bakeLabel(G.cake.bake)); sfx.swoosh();
+  const t = $('#takeOut'); if (t) t.disabled = true;   // 굽는 루프가 그대로 이어서 꺼내는 모습을 그려요
+}
+/* 오븐 속 틀 위치: 0이면 오븐 앞 아래, 1이면 오븐 선반 위 */
+function ovenSlide(k, now){
+  const op = $('#ovenPans'); if (!op) return;
+  const e = ease(k), y = 276 + (1-e)*150, sc = .54 + (1-e)*.22;
+  op.setAttribute('transform', `translate(300 ${y.toFixed(1)}) scale(${sc.toFixed(3)}) translate(-300 -${PAN_Y})`);
+  ovenHeat(G.baking ? G.baking.p : 0, now, k);
+}
+/* 열선이 점점 빨갛게 달아오르고, 아지랑이가 일렁여요 */
+function ovenHeat(p, now, k=1){
+  const heat = Math.min(1, p*3) * k;
+  const coil = $('#ovenCoil'); if (coil) coil.setAttribute('stroke', mixHex('#8a4a3a', '#ff5a1f', heat*(.85+.15*Math.sin(now/180))));
+  const hw = $('#heatWave'); if (hw){ hw.setAttribute('opacity', (heat*.18).toFixed(3)); hw.setAttribute('transform', `translate(${(Math.sin(now/260)*4).toFixed(1)} ${(-((now/40)%40)).toFixed(1)})`); }
 }
 function unmoldDown(e){
   if (G.phase!=='unmold') return;
