@@ -228,6 +228,10 @@ table.sc td:last-child{text-align:right;color:#d24d7a;white-space:nowrap}
    ===================================================================== */
 :root{--ol:#6b2a3c;--ol2:#8f4a5e;--rose:#ff7aa2;--rose2:#ffa8c4;--gold:#ffcf4a;--gold2:#fff1a8;--wood1:#f7d6ab;--wood2:#e9b67e;--wood3:#9a5f33;--paper:#fffdf6}
 body{background:#2b1620 radial-gradient(1100px 700px at 50% 42%,#5d2c40 0,#2b1620 72%)}
+/* 휴대폰: 상태 표시줄 · 화면 아래 남는 곳까지 분홍 바탕 (PC용 어두운 바탕이 비치지 않게) */
+html[data-device="phone"],html[data-device="phone"] body,html.fluid,html.fluid body{background:#ffd6e3}
+@media (pointer:coarse) and (max-width:700px){html,body{background:#ffd6e3}}
+html.fluid #stage{bottom:auto;height:100%;min-height:100dvh}
 #game{box-shadow:0 0 0 4px var(--ol),0 0 0 10px #ffb3c9,0 0 0 14px var(--ol),0 30px 70px rgba(0,0,0,.55)}
 /* 위쪽 머리말 */
 #hdr{background:radial-gradient(rgba(255,255,255,.16) 2px,transparent 2.6px) 0 0/18px 18px,linear-gradient(#ffa4c1,#ff7aa2 62%,#f0628f);
@@ -3803,7 +3807,7 @@ function fit(){
   // 휴대폰 세로·좁은 창은 '흐르는 배치'(실제 크기, 위→아래), 그 밖에는 960×600 화면을 비율 그대로 꽉 차게
   const fluid = device==='phone' ? (h > w*1.05 || w < 700) : (w < 760 || h > w*1.15);
   const g = $('#game'), was = g.classList.contains('fluid');
-  g.classList.toggle('fluid', fluid);
+  g.classList.toggle('fluid', fluid); document.documentElement.classList.toggle('fluid', fluid);
   if (fluid){
     SCALE = 1; g.style.transform = '';
   } else {
