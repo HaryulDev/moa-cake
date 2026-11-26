@@ -3,7 +3,7 @@
      인터넷이 없으면 저장해 둔 것을 써요.
    - 3D 라이브러리(Three.js)와 글꼴은 "저장된 것 먼저": 한 번 받으면 다음부터 휴대폰에서 바로 열려요.
    파일 목록이나 이 파일을 바꿀 때는 VERSION을 올려 주세요. */
-const VERSION = 'moa-v8';
+const VERSION = 'moa-v9';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-180.png', 'icons/icon-maskable-512.png'];
 const CDN = /^https:\/\/(cdn\.jsdelivr\.net|fonts\.googleapis\.com|fonts\.gstatic\.com)\//;
