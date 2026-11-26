@@ -2177,7 +2177,7 @@ function viewMix(){
       <ellipse id="mxTop" cx="300" cy="${L.sy.toFixed(1)}" rx="${L.rx.toFixed(1)}" ry="${L.ry.toFixed(1)}" fill="${col}"/>
       <ellipse id="mxRim" cx="300" cy="${L.sy.toFixed(1)}" rx="${(L.rx-2).toFixed(1)}" ry="${(L.ry-1.5).toFixed(1)}" fill="none" stroke="${shade(col,.35)}" stroke-width="2" opacity=".6"/>
       <g id="mxSwirl" data-base="translate(300 ${L.sy.toFixed(1)}) scale(${sc.toFixed(2)} ${(sc*.27).toFixed(3)})" transform="translate(300 ${L.sy.toFixed(1)}) scale(${sc.toFixed(2)} ${(sc*.27).toFixed(3)}) rotate(${G.swirl%360})" fill="none" stroke="${shade(col,-.14)}" stroke-width="7" stroke-linecap="round" opacity="${Math.min(.8,c.mix*2)}">
-        <path d="M-60 0A60 60 0 0 1 60 0"/><path d="M-110 20A110 110 0 0 0 100 -30"/><path d="M-25 -10A25 25 0 0 1 25 5"/></g>`;
+        <path d="M-60 0A60 60 0 0 1 60 0"/><path d="M-105 0A105 105 0 0 0 105 0"/><path d="M0 -26A26 26 0 0 1 0 26"/><path d="M84 0A84 84 0 0 1 0 84" opacity=".7"/></g>`;
     s += `<g id="mxBlobs" data-sy="${L.sy.toFixed(1)}" opacity="${fade.toFixed(3)}" transform="${mixFlat(L.sy, flat)}">`;
     [...G.bowl].sort((p,q)=>p.v-q.v).forEach(b => { s += blobSVG(b,L,1,1,1); });
     anims.forEach(a => { if (a.prog>0) s += blobSVG(a.blob,L,a.prog,1,1); });
@@ -2201,7 +2201,7 @@ function spinBlobs(){
   const bl = document.getElementById('mxBlobs'); if (!bl) return;
   const sy = +bl.dataset.sy, a = ((G && G.swirl)||0)*.55*Math.PI/180, ca = Math.cos(a), sa = Math.sin(a);
   for (const g of bl.children){ const x = +g.dataset.x, y = +g.dataset.y; if (isNaN(x)) continue;
-    const dx = x-300, dy = (y-sy)/.3, nx = 300 + dx*ca - dy*sa, ny = sy + (dx*sa + dy*ca)*.3;
+    const dx = x-300, dy = (y-sy)/.27, nx = 300 + dx*ca - dy*sa, ny = sy + (dx*sa + dy*ca)*.27;
     g.setAttribute('transform', `translate(${(nx-x).toFixed(1)} ${(ny-y).toFixed(1)})`); }
 }
 function mixUpdate(c, L, fade, flat){
