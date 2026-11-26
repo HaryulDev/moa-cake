@@ -1754,12 +1754,13 @@ function panLayout(c){
 function pourQuality(f){ if (f>=.5 && f<=.72) return 1; const d=f<.5?.5-f:f-.72; return Math.max(0,1-d/.3); }
 function pourLabel(f){ return f<.35?'반죽이 너무 적어요':f<.5?'조금 적어요':f<=.72?'딱 알맞아요!':f<=1?'조금 많아요':'넘쳐 버렸어요!'; }
 /* 틀 테두리: 양옆 세로선 + 바닥 앞쪽 곡선 (뒤쪽 바닥은 가려지니 그리지 않아요) */
-function panEdges(p, rim, tf, D, P, i){
-  const pts = samplePts(G.cake.shape, 90), xs = pts.map(q => q[0]), R = p.R*1.06;
+function panEdges(p, rim, tf, D, P, i, bottom = p.bottom){
+  const pts = samplePts(G.cake.shape, 90), xs = pts.map(q => q[0]), R = p.R*1.06, W = 3;
   const xl = p.cx + Math.min(...xs)*R, xr = p.cx + Math.max(...xs)*R;
-  return `<clipPath id="${P}bf${i}"><rect x="${p.cx-p.R*2}" y="${p.bottom}" width="${p.R*4}" height="${p.R*2}"/></clipPath>
-    <path d="${D}" transform="${tf(p.bottom,1.06)}" fill="none" stroke="#56606d" stroke-width="2" vector-effect="non-scaling-stroke" clip-path="url(#${P}bf${i})"/>
-    <path d="M${xl.toFixed(1)} ${rim.toFixed(1)} V${p.bottom.toFixed(1)} M${xr.toFixed(1)} ${rim.toFixed(1)} V${p.bottom.toFixed(1)}" stroke="#56606d" stroke-width="2"/>`;
+  return `<clipPath id="${P}bf${i}"><rect x="${p.cx-p.R*2}" y="${bottom}" width="${p.R*4}" height="${p.R*2}"/></clipPath>
+    <path d="${D}" transform="${tf(bottom,1.06)}" fill="none" stroke="#4a5360" stroke-width="${W}" vector-effect="non-scaling-stroke" clip-path="url(#${P}bf${i})"/>
+    <path d="M${xl.toFixed(1)} ${rim.toFixed(1)} V${bottom.toFixed(1)} M${xr.toFixed(1)} ${rim.toFixed(1)} V${bottom.toFixed(1)}" stroke="#4a5360" stroke-width="${W}" stroke-linecap="round"/>
+    <path d="${D}" transform="${tf(rim,1.06)}" fill="none" stroke="#4a5360" stroke-width="${W}" vector-effect="non-scaling-stroke"/>`;
 }
 function pansSVG(c, mode, bakeP=0){
   const P='p'+(++cakeSeq)+'_', defs=new Map(), D=SHAPES[c.shape], RING=D+scalePath(D,.925);
@@ -1782,7 +1783,7 @@ function pansSVG(c, mode, bakeP=0){
       defs.set('k'+i,`<mask id="${P}k${i}" maskUnits="userSpaceOnUse" x="-100" y="-100" width="800" height="600"><rect x="-100" y="-100" width="800" height="600" fill="#fff"/><path d="${D}" transform="${tf(cakeTop,.98)}" fill="#000"/></mask>`);
       out += `<g mask="url(#${P}k${i})">${below}</g>${above}`;
       out += `<path d="${RING}" fill-rule="evenodd" transform="${tf(rim,1.06)}" fill="#f4f7fb" stroke="#56606d" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
-      out += panEdges(p, rim, tf, D, P, i);
+      out += panEdges(p, rim, tf, D, P, i, bot);
       return;
     }
     let f = st.fill;
@@ -1801,7 +1802,7 @@ function pansSVG(c, mode, bakeP=0){
     let below='', above='';
     for (let y=p.bottom; y>=rim; y-=step) (y>level ? (below+=ring(y)) : (above+=ring(y)));
     out += below;
-    if (mode==='pour'){ const gy=p.bottom-.6*p.H; if (gy<level || f<=0) out += `<path d="${D}" transform="${tf(gy,.98)}" fill="none" stroke="#ff6f9b" stroke-width="2" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/>`; }
+
     if (f>0){
       out += `<path d="${D}" transform="${tf(level,.98)}" fill="${surf}"/>`;
       if (mode==='oven'){
@@ -1817,6 +1818,13 @@ function pansSVG(c, mode, bakeP=0){
     out += above;
     out += `<path d="${RING}" fill-rule="evenodd" transform="${tf(rim,1.06)}" fill="#f4f7fb" stroke="#56606d" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
     out += panEdges(p, rim, tf, D, P, i);
+    if (mode==='pour'){
+      const gy = p.bottom - .6*p.H, ok = f >= .5 && f <= .72;
+      out += `<path d="${D}" transform="${tf(gy,.985)}" fill="none" stroke="#fff" stroke-width="4.5" stroke-dasharray="7 5" vector-effect="non-scaling-stroke" opacity=".8"/>
+        <path d="${D}" transform="${tf(gy,.985)}" fill="none" stroke="${ok ? '#2fb36a' : '#ff4f86'}" stroke-width="2.4" stroke-dasharray="7 5" vector-effect="non-scaling-stroke"/>
+        <g transform="translate(${(p.cx - 23*Math.max(.7,p.s)).toFixed(1)} ${(gy + p.R*K*.985).toFixed(1)})"><rect x="0" y="-9" width="${(46*Math.max(.7,p.s)).toFixed(1)}" height="18" rx="9" fill="${ok ? '#2fb36a' : '#ff4f86'}" stroke="#fff" stroke-width="1.5"/>
+          <text x="${(23*Math.max(.7,p.s)).toFixed(1)}" y="4.5" text-anchor="middle" font-size="${(11*Math.max(.75,p.s)).toFixed(1)}" fill="#fff" font-family="Jua,sans-serif">${ok ? '딱 좋아요' : '여기까지'}</text></g>`;
+    }
     if (f>1 && mode!=='oven'){
       const fx=p.cx+p.R*.2, fy=rim+p.R*K*1.02;
       out += `<path d="M${fx-10*p.s} ${fy} q2 ${30*p.s} ${10*p.s} ${p.H*.9} q8 ${-10*p.s} ${10*p.s} ${-p.H*.9}Z" fill="${bat}"/>`;
@@ -2715,7 +2723,7 @@ function frostHUD(){
     setHint((c.dollops.length ? '누른 채 움직이면 테두리를 따라 크림이 줄줄이 짜져요' : '짤주머니를 꾹 누르고 있으면 크림이 나와요 (오래 누를수록 커져요)') + turn);
     setMeter(null); return;
   }
-  setHint(!c.frost ? '아래에서 크림 색을 골라요' : !c.frostFull ? '스패출러로 케이크 구석구석을 문질러 크림을 발라요! 뒤쪽은 케이크를 돌려서 발라요' + turn : '크림 완성! 짤주머니로 테두리를 짜 보세요 ▶');
+  setHint(!c.frost ? '아래에서 크림 색을 골라요' : !c.frostFull ? '스패출러를 대고 있으면 돌림판이 돌아서 뒤쪽까지 발라져요!' + turn : '크림 완성! 짤주머니로 테두리를 짜 보세요 ▶');
   setMeter(c.frost ? `${FROST[c.frost].n} 바르기` : null, c.cover);
 }
 /* ---------- 3D: 스패출러로 바르기 · 짤주머니로 짜기 ---------- */
@@ -2727,12 +2735,23 @@ function frostDown3(e){
   if (!h) return;
   G.spreading = true; G.lastE = {x:e.clientX, y:e.clientY}; $('#view').setPointerCapture(e.pointerId);
   C3D.paintHit(c, h); frostHUD();
+  // 진짜 케이크 돌림판처럼: 스패출러를 대고 있으면 케이크가 천천히 돌아서 뒤쪽까지 크림이 발려요
+  let last = performance.now();
+  const spin = now => {
+    if (!G || !G.spreading || G.step !== 3) return;
+    const dt = Math.min(50, now - last); last = now;
+    C3D.turn(dt*.0011);
+    const hh = C3D.hit({clientX:G.lastE.x, clientY:G.lastE.y}); if (hh) C3D.paintHit(c, hh);
+    if (Math.random() < .08) frostHUD();
+    requestAnimationFrame(spin);
+  };
+  requestAnimationFrame(spin);
 }
 function frostMove3(e){
   const c=G.cake, p=svgPt(e);
   if (G.tool==='bag'){
     const q=G.squeeze;
-    if (q && Math.hypot(p.x-q.last.x, p.y-q.last.y) >= (q.d.shell?13:18)*Math.max(.75,q.size)){
+    if (q && Math.hypot(p.x-q.last.x, p.y-q.last.y) >= (q.d.shell?13:26)*Math.max(.75,q.size)){
       const d = pipeNew3(e, Math.max(.6,q.size));
       if (d){ q.d = d; q.last = p; }
     }
@@ -2770,7 +2789,7 @@ function pipeDown3(e){
 function squeezeFrame3(now){
   if (!G || !G.squeeze) return;
   const q=G.squeeze, dt=Math.min(50,now-q.t); q.t=now;
-  if (q.d.s < 1.35){ q.d.s = Math.min(1.35, q.d.s + dt/600); q.size = q.d.s; C3D.sync(G.cake, ['dollops']); $('#fx').innerHTML = bagSVG(q.cur||q.last, FROST[G.bagCol].c, true); }
+  if (q.d.s < 1.35){ q.d.s = Math.min(1.35, q.d.s + dt/(q.d.base ? 600 : 1400)); q.size = q.d.s; C3D.sync(G.cake, ['dollops']); $('#fx').innerHTML = bagSVG(q.cur||q.last, FROST[G.bagCol].c, true); }
   requestAnimationFrame(squeezeFrame3);
 }
 function trayFrost(){
@@ -2854,7 +2873,7 @@ function pipeDown(e){
 function squeezeFrame(now){
   if (!G || !G.squeeze) return;
   const q=G.squeeze, dt=Math.min(50,now-q.t); q.t=now;
-  if (q.d.s < 1.35){ q.d.s = Math.min(1.35, q.d.s + dt/600); q.size = q.d.s; viewFrost(); $('#fx').innerHTML = bagSVG(q.cur||q.last, FROST[G.bagCol].c, true); }
+  if (q.d.s < 1.35){ q.d.s = Math.min(1.35, q.d.s + dt/(q.d.base ? 600 : 1400)); q.size = q.d.s; viewFrost(); $('#fx').innerHTML = bagSVG(q.cur||q.last, FROST[G.bagCol].c, true); }
   requestAnimationFrame(squeezeFrame);
 }
 function frostDown(e){
@@ -3701,7 +3720,7 @@ function strawberry(s=1){
     lf.rotation.set(-Math.PI/2 + .35, 0, 0); const holder = new THREE.Group(); holder.add(lf); holder.rotation.y = -a + Math.PI/2; holder.position.y = .44; g.add(holder); }
   const stem = new THREE.Mesh(new THREE.CylinderGeometry(.012, .018, .07, 8), std('stemG', {color:0x5a8a2a})); stem.position.y = .47; g.add(stem);
   g.rotation.x = Math.PI; g.position.y = .445;
-  const w = new THREE.Group(); w.add(g); w.scale.setScalar(.42*s); return w;
+  const w = new THREE.Group(); w.add(g); w.scale.setScalar(.27*s); return w;
 }
 const MODELS = {
   straw: () => strawberry(),
@@ -3726,7 +3745,13 @@ const MODELS = {
       for (let k=0;k<cnt && n<60;k++){ const a = k/cnt*Math.PI*2 + row*.5; P.set(Math.cos(a)*r, y, Math.sin(a)*r); S.setScalar(.85 + rndSeeded()*.3); M.compose(P, Q, S); im.setMatrixAt(n, M);
         im.setColorAt(n, col(['#b0103a','#c8174a','#d92055','#a50c33'][n%4])); n++; } }
     im.count = n; im.castShadow = true; g.add(im); return g; },
-  kiwi: () => { const g = slice('kiwi', .17, .035, '#6b4a22', .95); g.rotation.set(.75, 0, 0); g.position.set(0, .13, -.04); const w = new THREE.Group(); w.add(g); return w; },
+  kiwi: () => { const t = TEX.kiwi || (TEX.kiwi = sliceTex.kiwi()), g = new THREE.Group();
+    const skin = std('kiwiSkin', {color:0x6e4e26, roughness:1, bumpMap:creamBump, bumpScale:6});
+    const face = phys('kiwiFace', {map:t, roughness:.4, clearcoat:.3, clearcoatRoughness:.3});
+    g.add(mesh(new THREE.SphereGeometry(1, 28, 16, 0, Math.PI*2, 0, Math.PI/2), skin, m => m.rotation.x = -Math.PI/2));   // 둥근 겉(뒤쪽)
+    g.add(mesh(new THREE.CircleGeometry(.985, 40), face, m => m.position.z = .002));                                      // 자른 단면(앞쪽)
+    g.scale.set(.12, .115, .1); g.rotation.x = -1.1; g.position.set(0, .06, 0);
+    const w = new THREE.Group(); w.add(g); return w; },
   orange: () => { const g = slice('orange', .17, .035, '#f07c10', .45); g.rotation.set(.75, 0, 0); g.position.set(0, .13, -.04); const w = new THREE.Group(); w.add(g); return w; },
   banana: () => { const g = slice('banana', .12, .045, '#f2e4ae', .6); g.rotation.set(.6, 0, 0); g.position.set(0, .09, -.03); const w = new THREE.Group(); w.add(g); return w; },
   // 복숭아 조각: 과육은 노란 주황, 껍질 쪽은 붉은 빛
