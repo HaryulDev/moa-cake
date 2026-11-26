@@ -1535,13 +1535,18 @@ function samplePts(shape,n){
 }
 
 /* ---------- 케이크 그리기 ---------- */
-function newCake(){ return {ing:{}, flavor:null, mix:0, shape:'round', tiers:1, bake:null, frost:null, cover:0, strokes:[], frostFull:false, dollops:[], decos:[], sprinkles:[[],[],[]], text:''}; }
+function newCake(){ return {ing:{}, flavor:null, flavors:[], mix:0, shape:'round', tiers:1, bake:null, frost:null, cover:0, strokes:[], frostFull:false, dollops:[], decos:[], sprinkles:[[],[],[]], text:''}; }
 const hasFrost = c => !!c.frost && (c.frostFull || c.strokes.length>0 || c.cover>0);
 /* 3D 케이크를 쓸 수 있으면 true (Three.js를 못 불러오면 예전 2D 그림으로 그려요) */
 const use3D = () => !!(window.C3D && C3D.ok);
-function batterColor(c){ const fl=c.flavor?FLAVORS[c.flavor].c:'#f2cf86'; return mixHex('#f8f0dc', mixHex(fl,'#fff8e8',.15), Math.min(1,c.mix)); }
+const MAX_FLAVORS = 3;
+const flavList = c => (c.flavors && c.flavors.length) ? c.flavors : (c.flavor ? [c.flavor] : []);
+function flavorHex(c, def){ const l = flavList(c); if (!l.length) return def; let r=0,g=0,b=0;
+  l.forEach(k => { const [R,G2,B] = hexRGB(FLAVORS[k].c); r+=R; g+=G2; b+=B; }); return rgbHex(r/l.length, g/l.length, b/l.length); }
+const flavorLabel = c => flavList(c).map(k => icon(FLAVORS[k].ic)+' '+FLAVORS[k].n).join(' + ');
+function batterColor(c){ const fl=flavorHex(c,'#f2cf86'); return mixHex('#f8f0dc', mixHex(fl,'#fff8e8',.15), Math.min(1,c.mix)); }
 function spongeColor(c){
-  const base = FLAVORS[c.flavor||'vanilla'].c, b = c.bake;
+  const base = flavorHex(c, FLAVORS.vanilla.c), b = c.bake;
   if (b == null) return mixHex(base,'#fff4dc',.5);
   if (b < .55) return mixHex(base,'#fff4dc',Math.min(.62,(.58-b)*1.15));   // 덜 익음: 허옇고 창백
   if (b > .72) return mixHex(base,'#140904',Math.min(.95,(b-.72)*3.4));    // 탈수록 새까맣게
@@ -2036,7 +2041,7 @@ function renderCard(){
       <div class="bubble">오늘은 주문이 없는 날! 내가 먹고 싶은 케이크를 마음껏 만들어 볼까?</div>
       <ul class="tips"><li>재료를 그릇으로 끌어다 넣고 섞기</li><li>그릇을 기울여 틀에 붓기</li><li>오븐에서 알맞게 구워 틀에서 빼기</li><li>스패출러로 크림 바르기</li><li>토핑을 끌어다 꾸미기</li></ul>
       <ul class="ord">
-        <li><b>맛</b>${c.flavor?icon(FLAVORS[c.flavor].ic)+' '+FLAVORS[c.flavor].n:'-'}</li>
+        <li><b>맛</b>${flavList(c).length?flavorLabel(c):'-'}</li>
         <li><b>모양</b>${SHAPE_N[c.shape]} · ${c.tiers}단</li>
         <li><b>토핑</b>${c.decos.length}개</li>
       </ul></div>`;
@@ -2051,7 +2056,7 @@ function renderCard(){
     <div class="cust"><div class="face" id="custFace">${personSVG(o.person,'happy')}</div><div class="cname">${o.person.name} 손님<br><span style="font-size:13px;color:#b98">${o.person.age} · ${o.occasion}</span></div></div>
     <div class="bubble" id="bubble">모아야! ${o.occasion}에 쓸 케이크를 부탁해요. 주문서대로 만들어 줄래요?</div>
     <ul class="ord">
-      <li><b>맛</b>${icon(FLAVORS[o.flavor].ic)} ${FLAVORS[o.flavor].n}${chk(c.flavor===o.flavor, !!c.flavor)}</li>
+      <li><b>맛</b>${icon(FLAVORS[o.flavor].ic)} ${FLAVORS[o.flavor].n}${chk(flavList(c).includes(o.flavor), !!flavList(c).length)}</li>
       ${o.extra?`<li><b>추가</b>${icon(POUR[o.extra].ic)} ${EXTRAS.find(x=>x.id===o.extra).n}도 넣어 주세요${c.ing[o.extra]?'<i class="ok">✓</i>':''}</li>`:''}
       <li><b>모양</b><svg class="ic" viewBox="-1.25 -1.25 2.5 2.5"><path d="${SHAPES[o.shape]}" fill="#ff8fb1"/></svg> ${SHAPE_N[o.shape]}${chk(c.shape===o.shape, poured)}</li>
       <li><b>단수</b>${o.tiers}단${chk(c.tiers===o.tiers, poured)}</li>
@@ -2141,7 +2146,7 @@ function blobSVG(b,L,grow=1,fade=1,flat=1){
     case 'fruit': if (grow < .999) return ''; { const kf = Math.max(.9, k); s = FRUIT_SPOTS.map(([dx,dy,r]) => { const fx = x+dx*kf*1.3, fy = y+dy*kf*1.3;
         return `<ellipse cx="${fx.toFixed(1)}" cy="${(fy+12*k).toFixed(1)}" rx="${(17*k).toFixed(1)}" ry="${(4.5*k).toFixed(1)}" fill="rgba(90,40,20,.2)"/>${iconAt(b.ic||'straw', fx, fy, 42*kf, r)}`; }).join(''); } break;
   }
-  return `<g opacity="${fade.toFixed(2)}">${s}</g>`;
+  return `<g data-x="${x.toFixed(1)}" data-y="${y.toFixed(1)}" opacity="${fade.toFixed(2)}">${s}</g>`;
 }
 /* 지금 넣고 있는 재료들 (여러 개를 동시에 넣을 수 있어요) */
 const pouring = () => (G && G.anims) || [];
@@ -2185,12 +2190,20 @@ function viewMix(){
     <path d="M160 232Q172 318 246 342" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".55"/>
     <path d="M430 236Q424 286 398 318" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".45"/>
     <ellipse cx="300" cy="360" rx="78" ry="8" fill="none" stroke="#b7cbe2" stroke-width="2" opacity=".7"/>`;
-  layer(s);
+  layer(s); spinBlobs();
   mixHUD(c, anims);
 }
 /* 섞기 빠른 길: 반죽 색 · 소용돌이 회전 · 재료가 녹아드는 정도만 고쳐요 */
-function mixFlat(sy, flat){ const f = .3 + .7*flat, a = ((G && G.swirl)||0)*.55;   // 재료도 반죽을 따라 타원을 그리며 빙글 돌아요
-  return `translate(300 ${sy}) scale(1 .3) rotate(${(a%360).toFixed(1)}) scale(1 3.333) translate(-300 ${-sy}) translate(0 ${(sy*(1-f)).toFixed(1)}) scale(1 ${f.toFixed(3)})`; }
+function mixFlat(sy, flat){ const f = .3 + .7*flat;
+  return `translate(0 ${(sy*(1-f)).toFixed(1)}) scale(1 ${f.toFixed(3)})`; }
+/* 재료도 반죽을 따라 타원을 그리며 빙글 돌아요 (모양은 찌그러지지 않고 자리만 옮겨요) */
+function spinBlobs(){
+  const bl = document.getElementById('mxBlobs'); if (!bl) return;
+  const sy = +bl.dataset.sy, a = ((G && G.swirl)||0)*.55*Math.PI/180, ca = Math.cos(a), sa = Math.sin(a);
+  for (const g of bl.children){ const x = +g.dataset.x, y = +g.dataset.y; if (isNaN(x)) continue;
+    const dx = x-300, dy = (y-sy)/.3, nx = 300 + dx*ca - dy*sa, ny = sy + (dx*sa + dy*ca)*.3;
+    g.setAttribute('transform', `translate(${(nx-x).toFixed(1)} ${(ny-y).toFixed(1)})`); }
+}
 function mixUpdate(c, L, fade, flat){
   const list = G.bowl.map(b=>[b,ITEM_VOL[b.kind]||1]);
   const col = mixHex(contentsCol(list), batterColor(c), Math.min(1,c.mix*1.3));
@@ -2199,7 +2212,7 @@ function mixUpdate(c, L, fade, flat){
   const sw = document.getElementById('mxSwirl');
   if (sw){ sw.setAttribute('transform', sw.dataset.base + ' rotate(' + (G.swirl%360).toFixed(1) + ')'); sw.setAttribute('stroke', shade(col,-.14)); sw.setAttribute('opacity', Math.min(.8,c.mix*2).toFixed(3)); }
   const bl = document.getElementById('mxBlobs');
-  if (bl){ bl.setAttribute('opacity', fade.toFixed(3)); bl.setAttribute('transform', mixFlat(+bl.dataset.sy, flat)); bl.style.display = fade < .01 ? 'none' : ''; }
+  if (bl){ bl.setAttribute('opacity', fade.toFixed(3)); bl.setAttribute('transform', mixFlat(+bl.dataset.sy, flat)); spinBlobs(); bl.style.display = fade < .01 ? 'none' : ''; }
 }
 function mixHUD(c, anims){
   const nIng = BASE_ING.filter(x=>c.ing[x.id]).length;
@@ -2209,7 +2222,7 @@ function mixHUD(c, anims){
     setMeter(`${anims.length>1 ? anims.length+'가지 재료' : names} 넣는 중`, Math.min(...anims.map(a=>clamp((a.t-.22)/.62,0,1))));
     return;
   }
-  setHint(!nIng ? '재료를 그릇 위로 끌어다 놓아 넣어요 (눌러도 돼요)' : nIng<5 ? `재료를 더 넣어요 (${nIng}/5)` : !c.flavor ? '케이크 맛 재료를 하나 넣어요!' :
+  setHint(!nIng ? '재료를 그릇 위로 끌어다 놓아 넣어요 (눌러도 돼요)' : nIng<5 ? `재료를 더 넣어요 (${nIng}/5)` : !c.flavor ? `케이크 맛 재료를 넣어요! (${MAX_FLAVORS}가지까지 섞을 수 있어요)` :
           c.mix<1 ? '거품기로 그릇 안을 꾹 누른 채 빙글빙글 섞어요!' : '반죽 완성! 다음 단계로 ▶');
   setMeter(c.mix>0||(nIng&&c.flavor) ? '섞기' : null, c.mix);
 }
@@ -2217,7 +2230,7 @@ function trayMix(){
   const c=G.cake;
   return `<div class="rows">
     <div class="row"><b>재료</b>${BASE_ING.map(i=>`<button class="tb sm drag" data-ing="${i.id}">${icon(i.id)}<small>${i.n}</small>${c.ing[i.id]?`<span class="cnt">${c.ing[i.id]}</span>`:''}</button>`).join('')}<span class="sep" title="추가 재료"></span>${EXTRAS.map(i=>`<button class="tb sm drag" data-ing="${i.id}" title="추가 재료 (선택)">${icon(POUR[i.id].ic)}<small>${i.n}</small>${c.ing[i.id]?`<span class="cnt">${c.ing[i.id]}</span>`:''}</button>`).join('')}</div>
-    <div class="row"><b>맛</b>${Object.entries(FLAVORS).map(([k,f])=>`<button class="tb sm drag ${c.flavor===k?'sel':''}" data-fl="${k}">${icon(f.ic)}<small>${f.n}</small></button>`).join('')}</div>
+    <div class="row"><b>맛</b>${Object.entries(FLAVORS).map(([k,f])=>`<button class="tb sm drag ${flavList(c).includes(k)?'sel':''}" data-fl="${k}">${icon(f.ic)}<small>${f.n}</small></button>`).join('')}</div>
   </div><button class="next" id="next" ${c.mix>=1?'':'disabled'}>다음 ▶</button>`;
 }
 const MAX_POURS = 4;   // 한꺼번에 넣을 수 있는 재료 수
@@ -2225,9 +2238,9 @@ function tryPour(id, isFlavor){
   const c=G.cake, anims=(G.anims = G.anims || []);
   if (c.mix>0){ toast('이미 섞기 시작했어요!'); sfx.bad(); return; }
   if (anims.length >= MAX_POURS){ toast('손이 모자라요! 조금만 기다려 주세요'); return; }
-  const flavorNow = c.flavor || (anims.find(x=>x.isFlavor)||{}).id;
-  if (isFlavor && flavorNow && flavorNow!==id){ toast('맛 재료는 하나만 넣을 수 있어요!'); sfx.bad(); return; }
-  if (isFlavor && flavorNow===id){ toast('이미 넣었어요!'); return; }
+  const flNow = [...flavList(c), ...anims.filter(x=>x.isFlavor).map(x=>x.id)];
+  if (isFlavor && flNow.includes(id)){ toast('이미 넣었어요!'); return; }
+  if (isFlavor && flNow.length >= MAX_FLAVORS){ toast(`맛 재료는 ${MAX_FLAVORS}가지까지 넣을 수 있어요!`); sfx.bad(); return; }
   const item = POUR[id];
   const parts = [...Array(item.kind==='powder'?90:46)].map((_,i)=>({ts: item.kind==='drops' ? .4+(i%6)*.07 : .32+Math.random()*.48, dx:rnd(-1,1), jx:rnd(-4,4), r:rnd(.9,2.2)}));
   // 볼 안에 놓일 자리 (다른 재료와 겹치지 않게)
@@ -2407,7 +2420,7 @@ function animFrame(now){
   });
   done.forEach(a => {
     G.anims.splice(G.anims.indexOf(a),1);
-    if (a.isFlavor) c.flavor=a.id; else { c.ing[a.id]=(c.ing[a.id]||0)+1; if (c.ing[a.id]>1) toast(`${a.item.label}을(를) 또 넣었어요!`); }
+    if (a.isFlavor){ c.flavors = [...flavList(c), a.id]; c.flavor = c.flavors[0]; } else { c.ing[a.id]=(c.ing[a.id]||0)+1; if (c.ing[a.id]>1) toast(`${a.item.label}을(를) 또 넣었어요!`); }
     G.bowl.push(a.blob);
   });
   let front = '';
@@ -3108,7 +3121,7 @@ function scoreCake(c,o){
   const exMiss = o.extra && !c.ing[o.extra];
   const exName = o.extra ? EXTRAS.find(x=>x.id===o.extra).n : '';
   rows.push(['반죽 재료', miss?`${miss}가지 빠짐`:extra?'너무 많이 넣음':exMiss?`${exName}을(를) 안 넣었어요`:'정확해요', Math.max(0,10-miss*4-extra*2-(exMiss?4:0)), 10]);
-  rows.push(['맛', FLAVORS[c.flavor].n, c.flavor===o.flavor?10:0, 10]);
+  { const fl = flavList(c); rows.push(['맛', fl.map(k=>FLAVORS[k].n).join('+'), fl.includes(o.flavor) ? (fl.length===1 ? 10 : 7) : 0, 10]); }
   rows.push(['모양', SHAPE_N[c.shape], c.shape===o.shape?10:0, 10]);
   rows.push(['단수', c.tiers+'단', c.tiers===o.tiers?10:Math.abs(c.tiers-o.tiers)===1?4:0, 10]);
   const pq = G.pans.reduce((a,p)=>a+pourQuality(p.fill),0)/G.pans.length;
@@ -3134,7 +3147,7 @@ function finish(){
     $('#modal').innerHTML = `<div class="panel result">${cakeSvg('love','present','짜잔! 완성!')}<div class="rinfo">
       <div class="cust"><div class="face">${bomiSVG('love')}</div><div class="cname" style="font-size:24px">모아의 케이크 완성!</div></div>
       <div class="bubble" style="font-size:20px">세상에 하나뿐인 내 케이크가 완성됐어! 할머니께도 보여 드리고 싶다!</div>
-      <ul class="ord"><li><b>맛</b>${icon(FLAVORS[c.flavor].ic)} ${FLAVORS[c.flavor].n}</li><li><b>모양</b>${SHAPE_N[c.shape]} · ${c.tiers}단</li>
+      <ul class="ord"><li><b>맛</b>${flavorLabel(c)}</li><li><b>모양</b>${SHAPE_N[c.shape]} · ${c.tiers}단</li>
         <li><b>굽기</b>${bakeLabel(c.bake)}</li><li><b>크림</b>${c.frost?FROST[c.frost].n+' '+Math.round(c.cover*100)+'%':'없음'}</li><li><b>토핑</b>${c.decos.length}개${c.text?` · "${esc(c.text)}"`:''}</li></ul>
       <div class="rbtns"><button class="next" id="again">${icon('palette')} 새로 만들기</button><button class="next small" id="toHome">${icon('home')} 처음으로</button></div></div></div>`;
     $('#modal').classList.add('on'); sfx.fanfare(); confetti(30);
