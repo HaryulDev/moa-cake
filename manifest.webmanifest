@@ -1,0 +1,20 @@
+{
+  "name": "모아의 케이크 만들기",
+  "short_name": "모아 케이크",
+  "description": "꼬마 파티시에 모아와 함께 반죽부터 3D 케이크 장식까지 직접 만드는 케이크 만들기 게임",
+  "lang": "ko",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "background_color": "#ffd6e3",
+  "theme_color": "#ff8fb1",
+  "categories": ["games", "kids"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
