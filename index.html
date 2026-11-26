@@ -3207,10 +3207,13 @@ const curSteps = () => isCakeR() ? STEPS : PSTEPS;
 
 /* 레시피 고르기 (잠긴 레시피는 레벨이 오르면 열려요) */
 function showRecipes(mode){
-  const x = xpInfo();
-  $('#modal').innerHTML = `<div class="panel rbook"><h2>${icon('note')} 무엇을 만들까요?</h2>
+  const x = xpInfo(), order = mode === 'order';
+  // 손님 주문은 열린 레시피만 (하나뿐이면 바로 시작)
+  const list = Object.entries(RECIPES).filter(([k]) => !order || unlocked(k));
+  if (order && list.length === 1){ save.recipe = list[0][0]; persist(); startGame(mode); return; }
+  $('#modal').innerHTML = `<div class="panel rbook"><h2>${icon('note')} ${order ? '어떤 주문을 받을까요?' : '무엇을 만들까요?'}</h2>
     <div class="rlv">Lv.${x.lv} <span class="xpbar"><i style="width:${(x.p*100).toFixed(0)}%"></i></span> ${x.hi ? `다음 레벨까지 경험치 ${x.hi - x.xp}` : '최고 레벨!'}</div>
-    <div class="rgrid">${Object.entries(RECIPES).map(([k,r]) => { const ok = unlocked(k);
+    <div class="rgrid">${list.map(([k,r]) => { const ok = unlocked(k);
       return `<button class="rcard ${ok?'':'lock'} ${save.recipe===k?'sel':''}" data-r="${k}" ${ok?'':'disabled'}>
         <span class="ric">${icon(r.ic)}</span><b>${r.n}</b><small>${ok ? r.desc : `Lv.${r.lv}이 되면 열려요`}</small>${ok?'':`<span class="rlock">${icon('lock')}</span>`}</button>`; }).join('')}</div>
     <div class="rbtns"><button class="next small" id="rClose">${icon('home')} 돌아가기</button></div></div>`;
