@@ -2481,7 +2481,7 @@ function mixDown(e){
   if (((p.x-300)/175)**2 + ((p.y-210)/70)**2 > 1.3) return;
   if (pouring().length){ toast('재료가 다 들어갈 때까지 기다려 주세요!'); return; }
   if (!Object.keys(c.ing).length || !c.flavor){ toast('재료와 맛을 먼저 넣어주세요!'); sfx.bad(); return; }
-  G.mixing = true; G.last = p; $('#view').setPointerCapture(e.pointerId);
+  G.mixing = true; G.last = p; G.mv = null; $('#view').setPointerCapture(e.pointerId);
   if (c.mix===0) renderTray();
 }
 /* 손가락 움직임(1초에 120번까지)마다 그리지 않고, 화면 한 프레임에 한 번만 그려요 */
@@ -2513,12 +2513,15 @@ function mixMove(e){
   }
   if (!G.mixing){ drawMixFrame(whisk, false); return; }
   const d = Math.hypot(p.x-G.last.x, p.y-G.last.y);
-  // 그릇 가운데를 기준으로 손가락이 돈 각도만큼 소용돌이도 같은 방향으로 돌아요 (반죽 표면이 납작한 타원이라 세로를 펴서 계산)
-  const CY0 = 236, a0 = Math.atan2((G.last.y-CY0)/.3, G.last.x-300), a1 = Math.atan2((p.y-CY0)/.3, p.x-300);
-  let da = a1 - a0; if (da > Math.PI) da -= 2*Math.PI; if (da < -Math.PI) da += 2*Math.PI;
+  if (d < 1.5){ drawMixFrame(whisk, false); return; }
+  // 손가락이 그리는 원이 크든 작든: 움직이는 방향이 꺾인 만큼 소용돌이도 같은 방향으로 돌아요
+  const mx = p.x-G.last.x, my = p.y-G.last.y;
+  let da = 0;
+  if (G.mv){ da = Math.atan2(G.mv.x*my - G.mv.y*mx, G.mv.x*mx + G.mv.y*my); da = clamp(da, -1.1, 1.1); }
+  G.mv = {x:mx, y:my};
   G.last = p;
   const was = c.mix;
-  c.mix = Math.min(1, c.mix + d/2600); const dd = da*180/Math.PI*1.6; G.swirl += dd; G.swirlVel = lerp(G.swirlVel||0, dd, .5);
+  c.mix = Math.min(1, c.mix + d/2200 + Math.abs(da)*.005); const dd = da*180/Math.PI*1.6; G.swirl += dd; G.swirlVel = lerp(G.swirlVel||0, dd, .5);
   if (Math.random()<.04) beep(rnd(300,420),.05,'triangle',.02);
   drawMixFrame(whisk, true);
   if (was<1 && c.mix>=1){ sfx.ok(); toast('반죽 완성!'); renderTray(); }
