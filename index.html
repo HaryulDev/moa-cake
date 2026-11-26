@@ -390,7 +390,7 @@ body{background:#2b1620 radial-gradient(1100px 700px at 50% 42%,#5d2c40 0,#2b162
 #game.fluid #bomi{width:54px;height:61px}
 #game.fluid #help{left:50px;top:16px;width:26px;height:26px;font-size:15px;border-width:2px}
 #game.fluid #hint{left:84px;top:8px;max-width:calc(100% - 96px);font-size:13px;padding:6px 10px}
-#game.fluid #meter{right:8px;top:auto;bottom:8px;width:118px;font-size:12px;padding:4px 8px}
+#game.fluid #meter{right:auto;left:50%;transform:translateX(-50%);top:6px;bottom:auto;width:118px;font-size:12px;padding:4px 8px}
 #game.fluid #toast{font-size:17px;padding:9px 16px}
 #game.fluid #tray{height:auto;flex-wrap:wrap;padding:10px;gap:8px}
 #game.fluid .rows{flex:1 1 100%}
@@ -1750,7 +1750,7 @@ function overCake(c,x,y){
 
 /* ---------- 케이크 틀 ---------- */
 function panLayout(c){
-  const n=c.tiers, s=[1,.72,.56][n-1], gap=30*s;
+  const n=c.tiers, s=[.86,.66,.52][n-1], gap=30*s;
   const Rs=[...Array(n)].map((_,i)=>TR[i]*s*1.06);
   const total=Rs.reduce((a,r)=>a+2*r,0)+gap*(n-1);
   let x=300-total/2;
@@ -2524,7 +2524,7 @@ function viewPour(){
       }
     }
     s += bowlTilted(bx,by,G.tilt,c,amount);
-    if (cur>=0){ const q=L[cur]; s += `<text x="${q.cx}" y="${Math.min(392,q.bottom+q.R*K+22)}" text-anchor="middle" font-size="15" fill="#c0577c" font-family="Jua,sans-serif">▲ ${G.pans.length>1?(cur+1)+'번 틀':'여기에 부어요'}</text>`; }
+    if (cur>=0){ const q=L[cur]; s += `<text x="${q.cx}" y="${(q.bottom-q.H-q.R*K*1.06-10).toFixed(1)}" text-anchor="middle" font-size="15" fill="#c0577c" stroke="#fff" stroke-width="4" paint-order="stroke" font-family="Jua,sans-serif">▼ ${G.pans.length>1?(cur+1)+'번 틀':'여기에 부어요'}</text>`; }
   } else {
     s += bowlTilted(520,92,-12,c,amount);
   }
@@ -2582,7 +2582,7 @@ function pourFrame(now){
   }
   if (G.pouring && i>=0 && F.head>=1 && F.tail===0){
     const st=G.pans[i], was=st.fill;
-    st.fill = Math.min(1.12, st.fill + dt/2600);
+    st.fill = Math.min(1.12, st.fill + dt/4600);   // 천천히 차올라요
     if (was<1 && st.fill>=1){ toast('넘쳐요!!'); sfx.bad(); }
     if (Math.random()<.08) beep(rnd(150,230),.06,'sine',.03);
   }
