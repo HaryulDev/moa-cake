@@ -6,8 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="모아 케이크">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#ff8fb1">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffc2d6">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
@@ -18,6 +18,7 @@
 :root{--pink:#ff8fb1;--pink-d:#e85d8a;--cream:#fff7ec;--ink:#6a3a4c}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none}
+html{background:#ffd6e3;color-scheme:light}
 body{font-family:"Jua","Malgun Gothic","Apple SD Gothic Neo",sans-serif;color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation;
   -webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;position:fixed;inset:0;
   background:#ffe3ec radial-gradient(circle at 12px 12px,#ffd0df 5px,transparent 6px) 0 0/44px 44px}
@@ -426,6 +427,25 @@ body{background:#2b1620 radial-gradient(1100px 700px at 50% 42%,#5d2c40 0,#2b162
 #game.fluid #tray{margin-top:16px}
 #game.fluid #tMusic{position:absolute;right:12px;top:max(12px,env(safe-area-inset-top,0px))}
 #game.fluid #hdr .home{padding:5px 8px;font-size:13px}
+/* 휴대폰 타이틀 한 화면 */
+#game.fluid #title{gap:6px 0;padding:max(12px,env(safe-area-inset-top,0px)) 14px max(12px,env(safe-area-inset-bottom,0px));min-height:100%;align-content:flex-start}
+#game.fluid #titleBg{position:absolute;inset:0;width:100%;height:100%}
+#game.fluid #tbCakes{display:none}
+#game.fluid #title h1{font-size:clamp(28px,8.6vw,40px);line-height:1.05}
+#game.fluid #title .sub{display:none}
+#game.fluid #title .rank{order:3;font-size:12px;padding:2px 10px}
+#game.fluid #titleSay{order:4;flex:1 1 calc(100% - 150px);min-width:0;max-width:none;margin:0 0 0 8px;font-size:12.5px;padding:6px 10px;line-height:1.35}
+#game.fluid #titleSay:after{display:none}
+#game.fluid #titleBomi{order:5;flex:0 0 34%;width:34%;max-height:30vh}
+#game.fluid #titleCake{order:6;flex:0 0 60%;width:60%;max-height:32vh;margin-left:4%}
+#game.fluid #titleBomi,#game.fluid #titleCake{align-self:center}
+#game.fluid #title .menu{order:7;gap:8px;margin-top:4px}
+#game.fluid #title .menu button{font-size:18px;padding:10px 14px}
+#game.fluid #title .stat{order:8;font-size:12px;margin-top:2px}
+/* 휴대폰 도구 칸: 버튼이 넓은 줄(모양·단수 등)은 칸을 넓게 — 아이콘·글자가 겹치지 않게 */
+#game.fluid .row.wide{grid-template-columns:30px repeat(auto-fill,minmax(62px,1fr))}
+#game.fluid .row.wide .tb{width:auto;height:46px}
+#game.fluid .tb small,#game.fluid .sw small,#game.fluid .card .ord li{overflow:hidden;text-overflow:ellipsis;max-width:100%}
 /* 휴대폰: 레시피(주문서)를 작업대 위에 작게 모아서 늘 보이게 */
 #game.fluid #play.on{display:flex;flex-direction:column}
 #game.fluid #hdr{order:0}
@@ -475,7 +495,8 @@ body{background:#2b1620 radial-gradient(1100px 700px at 50% 42%,#5d2c40 0,#2b162
 #game.fluid #tray{margin-top:6px;padding:8px;gap:6px}
 #game.fluid .row{display:grid;grid-template-columns:26px repeat(auto-fill,minmax(36px,1fr));gap:3px;align-items:center}
 #game.fluid .row .sep{display:none}
-#game.fluid .row>b{width:26px;font-size:12px}
+#game.fluid .row>b{width:26px;font-size:12px;overflow:hidden}
+#game.fluid .row>b svg.ic{font-size:22px}
 #game.fluid .tb.sm{width:auto;height:44px}
 #game.fluid .tb small{font-size:9.5px;letter-spacing:-.5px}
 #game.fluid .next{padding:9px;font-size:17px}
@@ -1732,6 +1753,14 @@ function panLayout(c){
 }
 function pourQuality(f){ if (f>=.5 && f<=.72) return 1; const d=f<.5?.5-f:f-.72; return Math.max(0,1-d/.3); }
 function pourLabel(f){ return f<.35?'반죽이 너무 적어요':f<.5?'조금 적어요':f<=.72?'딱 알맞아요!':f<=1?'조금 많아요':'넘쳐 버렸어요!'; }
+/* 틀 테두리: 양옆 세로선 + 바닥 앞쪽 곡선 (뒤쪽 바닥은 가려지니 그리지 않아요) */
+function panEdges(p, rim, tf, D, P, i){
+  const pts = samplePts(G.cake.shape, 90), xs = pts.map(q => q[0]), R = p.R*1.06;
+  const xl = p.cx + Math.min(...xs)*R, xr = p.cx + Math.max(...xs)*R;
+  return `<clipPath id="${P}bf${i}"><rect x="${p.cx-p.R*2}" y="${p.bottom}" width="${p.R*4}" height="${p.R*2}"/></clipPath>
+    <path d="${D}" transform="${tf(p.bottom,1.06)}" fill="none" stroke="#56606d" stroke-width="2" vector-effect="non-scaling-stroke" clip-path="url(#${P}bf${i})"/>
+    <path d="M${xl.toFixed(1)} ${rim.toFixed(1)} V${p.bottom.toFixed(1)} M${xr.toFixed(1)} ${rim.toFixed(1)} V${p.bottom.toFixed(1)}" stroke="#56606d" stroke-width="2"/>`;
+}
 function pansSVG(c, mode, bakeP=0){
   const P='p'+(++cakeSeq)+'_', defs=new Map(), D=SHAPES[c.shape], RING=D+scalePath(D,.925);
   defs.set('m',`<linearGradient id="${P}metal" x1="0" x2="1"><stop offset="0" stop-color="#8f99a6"/><stop offset=".35" stop-color="#eef2f7"/><stop offset=".6" stop-color="#c3cbd5"/><stop offset="1" stop-color="#7f8996"/></linearGradient>`);
@@ -1752,7 +1781,8 @@ function pansSVG(c, mode, bakeP=0){
       for (let y=bot; y>=rim; y-=step) (y>cakeTop ? (below+=ring(y)) : (above+=ring(y)));
       defs.set('k'+i,`<mask id="${P}k${i}" maskUnits="userSpaceOnUse" x="-100" y="-100" width="800" height="600"><rect x="-100" y="-100" width="800" height="600" fill="#fff"/><path d="${D}" transform="${tf(cakeTop,.98)}" fill="#000"/></mask>`);
       out += `<g mask="url(#${P}k${i})">${below}</g>${above}`;
-      out += `<path d="${RING}" fill-rule="evenodd" transform="${tf(rim,1.06)}" fill="#f4f7fb" stroke="#9aa5b2" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+      out += `<path d="${RING}" fill-rule="evenodd" transform="${tf(rim,1.06)}" fill="#f4f7fb" stroke="#56606d" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+      out += panEdges(p, rim, tf, D, P, i);
       return;
     }
     let f = st.fill;
@@ -1785,7 +1815,8 @@ function pansSVG(c, mode, bakeP=0){
       } else out += `<path d="${D}" transform="${tf(level-1,.6)}" fill="${shade(surf,.18)}" opacity=".5"/>`;
     }
     out += above;
-    out += `<path d="${RING}" fill-rule="evenodd" transform="${tf(rim,1.06)}" fill="#f4f7fb" stroke="#9aa5b2" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="${RING}" fill-rule="evenodd" transform="${tf(rim,1.06)}" fill="#f4f7fb" stroke="#56606d" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+    out += panEdges(p, rim, tf, D, P, i);
     if (f>1 && mode!=='oven'){
       const fx=p.cx+p.R*.2, fy=rim+p.R*K*1.02;
       out += `<path d="M${fx-10*p.s} ${fy} q2 ${30*p.s} ${10*p.s} ${p.H*.9} q8 ${-10*p.s} ${10*p.s} ${-p.H*.9}Z" fill="${bat}"/>`;
@@ -2063,7 +2094,7 @@ function bowlHalf(y){  // 볼 안쪽 곡선(194→354)에서 높이 y의 반지�
   return best;
 }
 function bowlLevel(vol){ const sy=Math.max(236, 350-vol*15), rx=Math.max(18, bowlHalf(sy)*.97); return {sy, rx, ry:rx*.27}; }
-const bowlVol = items => items.reduce((a,b)=>a+(ITEM_VOL[b.kind]||1),0);
+const bowlVol = items => items.reduce((a,b)=>a+(b.flavor ? 0 : (ITEM_VOL[b.kind]||1)),0);
 function itemCol(b){ return b.kind==='egg' ? '#ffe39a' : b.kind==='drop' ? '#ffe27a' : b.col; }
 function contentsCol(list){
   let w=0,r=0,g=0,bl=0;
@@ -2106,7 +2137,7 @@ function blobSVG(b,L,grow=1,fade=1,flat=1){
 }
 /* 지금 넣고 있는 재료들 (여러 개를 동시에 넣을 수 있어요) */
 const pouring = () => (G && G.anims) || [];
-const pendingVol = () => pouring().reduce((s,a) => s + (ITEM_VOL[a.item.kind]||1)*(a.prog||0), 0);
+const pendingVol = () => pouring().reduce((s,a) => s + (a.isFlavor ? 0 : (ITEM_VOL[a.item.kind]||1)*(a.prog||0)), 0);
 function viewMix(){
   const c=G.cake, anims=pouring();
   let vol = bowlVol(G.bowl) + pendingVol();
@@ -2148,7 +2179,8 @@ function viewMix(){
   mixHUD(c, anims);
 }
 /* 섞기 빠른 길: 반죽 색 · 소용돌이 회전 · 재료가 녹아드는 정도만 고쳐요 */
-function mixFlat(sy, flat){ const f = .3 + .7*flat; return `translate(0 ${(sy*(1-f)).toFixed(1)}) scale(1 ${f.toFixed(3)})`; }
+function mixFlat(sy, flat){ const f = .3 + .7*flat, a = ((G && G.swirl)||0)*.55;   // 재료도 반죽을 따라 타원을 그리며 빙글 돌아요
+  return `translate(300 ${sy}) scale(1 .3) rotate(${(a%360).toFixed(1)}) scale(1 3.333) translate(-300 ${-sy}) translate(0 ${(sy*(1-f)).toFixed(1)}) scale(1 ${f.toFixed(3)})`; }
 function mixUpdate(c, L, fade, flat){
   const list = G.bowl.map(b=>[b,ITEM_VOL[b.kind]||1]);
   const col = mixHex(contentsCol(list), batterColor(c), Math.min(1,c.mix*1.3));
@@ -2194,7 +2226,7 @@ function tryPour(id, isFlavor){
   for (let i=0;i<14;i++){ const u=rnd(-.5,.5), v=rnd(-.3,.35);
     const d=Math.min(9, ...taken.map(b=>Math.hypot(b.u-u,(b.v-v)*1.6)));
     if (d>bd){ bd=d; best={u,v}; } }
-  const blob = {kind:item.kind, col:item.col||'#fff', sparkle:item.sparkle, ic:item.ic, u:best.u, v:best.v, seed:Math.floor(rnd(1,1e6))};
+  const blob = {kind:item.kind, col:item.col||'#fff', sparkle:item.sparkle, ic:item.ic, u:best.u, v:best.v, seed:Math.floor(rnd(1,1e6)), flavor:isFlavor};
   // 동시에 넣는 재료끼리 손(용기)이 겹치지 않게 자리를 나눠요
   const used = anims.map(x=>x.lane), lane = [0,1,2,3].find(k=>!used.includes(k)) ?? 0;
   anims.push({id, isFlavor, item, t0:performance.now(), parts, sounded:false, blob, t:0, prog:0, lane});
@@ -2417,7 +2449,7 @@ function mixMove(e){
   let da = a1 - a0; if (da > Math.PI) da -= 2*Math.PI; if (da < -Math.PI) da += 2*Math.PI;
   G.last = p;
   const was = c.mix;
-  c.mix = Math.min(1, c.mix + d/2600); G.swirl += da*180/Math.PI;
+  c.mix = Math.min(1, c.mix + d/2600); const dd = da*180/Math.PI*1.6; G.swirl += dd; G.swirlVel = lerp(G.swirlVel||0, dd, .5);
   if (Math.random()<.04) beep(rnd(300,420),.05,'triangle',.02);
   drawMixFrame(whisk, true);
   if (was<1 && c.mix>=1){ sfx.ok(); toast('반죽 완성!'); renderTray(); }
@@ -2476,8 +2508,8 @@ function viewPour(){
 function trayPour(){
   const c=G.cake, locked=G.pans.some(p=>p.fill>0), allDone=curPan()<0;
   return `<div class="rows">
-    <div class="row"><b>모양</b>${Object.keys(SHAPES).map(k=>`<button class="tb ${c.shape===k?'sel':''}" data-shape="${k}" ${locked?'disabled':''}><svg viewBox="-1.25 -1.25 2.5 2.5" width="22" height="22"><path d="${SHAPES[k]}" fill="#ff8fb1"/></svg><small>${SHAPE_N[k]}</small></button>`).join('')}</div>
-    <div class="row"><b>단수</b>${[1,2,3].map(n=>`<button class="tb ${c.tiers===n?'sel':''}" data-tier="${n}" ${locked?'disabled':''}><span style="font-size:17px">${n}단</span></button>`).join('')}</div>
+    <div class="row wide"><b>모양</b>${Object.keys(SHAPES).map(k=>`<button class="tb ${c.shape===k?'sel':''}" data-shape="${k}" ${locked?'disabled':''}><svg viewBox="-1.25 -1.25 2.5 2.5" width="22" height="22"><path d="${SHAPES[k]}" fill="#ff8fb1"/></svg><small>${SHAPE_N[k]}</small></button>`).join('')}</div>
+    <div class="row wide"><b>단수</b>${[1,2,3].map(n=>`<button class="tb ${c.tiers===n?'sel':''}" data-tier="${n}" ${locked?'disabled':''}><span style="font-size:17px">${n}단</span></button>`).join('')}</div>
   </div>
   ${allDone ? `<button class="next" id="next">다음 ▶</button>` : `<button class="next mint" id="hold">${icon('bowl')} 꾹 눌러 붓기</button>`}`;
 }
@@ -3020,6 +3052,8 @@ window.addEventListener('pointerup', e => {
   if (G.unm) unmoldUp();
   if (G.squeeze){ G.squeeze = null; if (G.step===3){ sfx.pop(); renderTray(); viewFrost(); } }
   if (G.spreading && use3D() && G.step===3){ C3D.measure(G.cake); frostHUD(); }
+  if (G.mixing && Math.abs(G.swirlVel||0) > .3){ const spin = () => { if (!G || G.mixing || G.step!==0) return; G.swirlVel *= .9; G.swirl += G.swirlVel;
+      drawMixFrame('', true); if (Math.abs(G.swirlVel) > .2) requestAnimationFrame(spin); else G.swirlVel = 0; }; requestAnimationFrame(spin); }
   G.turning = null;
   G.mixing = false; G.spreading = false;
   setBomi('happy');
