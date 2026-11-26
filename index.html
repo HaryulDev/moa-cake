@@ -441,11 +441,13 @@ html.fluid #stage{bottom:auto;height:100%;min-height:100dvh}
 #game.fluid #title .rank{order:3;font-size:12px;padding:2px 10px}
 #game.fluid #titleSay{order:4;flex:1 1 calc(100% - 150px);min-width:0;max-width:none;margin:0 0 0 8px;font-size:12.5px;padding:6px 10px;line-height:1.35}
 #game.fluid #titleSay:after{display:none}
-#game.fluid #titleBomi{order:5;flex:0 0 34%;width:34%;max-height:30vh}
-#game.fluid #titleCake{order:6;flex:0 0 60%;width:60%;max-height:32vh;margin-left:4%}
+#game.fluid #titleBomi{order:5;flex:0 0 34%;width:34%;max-height:30vh;max-height:21dvh}
+#game.fluid #titleCake{order:6;flex:0 0 60%;width:60%;max-height:32vh;max-height:25dvh;margin-left:4%}
 #game.fluid #titleBomi,#game.fluid #titleCake{align-self:center}
 #game.fluid #title .menu{order:7;gap:8px;margin-top:4px}
-#game.fluid #title .menu button{font-size:18px;padding:10px 14px}
+#game.fluid #title .menu button{font-size:18px;padding:10px 14px;padding:clamp(7px,1.4dvh,12px) 14px}
+/* 낮은 화면(주소창이 있는 휴대폰 브라우저): 제목·버튼을 조금 더 작게 */
+@media (max-height:700px){#game.fluid #title h1{font-size:clamp(24px,7.4vw,34px)}#game.fluid #title .menu{gap:6px}#game.fluid #title .menu button{font-size:16px}#game.fluid #title .stat{font-size:11px}}
 #game.fluid #title .stat{order:8;font-size:12px;margin-top:2px}
 /* 휴대폰 도구 칸: 버튼이 넓은 줄(모양·단수 등)은 칸을 넓게 — 아이콘·글자가 겹치지 않게 */
 #game.fluid .row.wide{grid-template-columns:30px repeat(auto-fill,minmax(62px,1fr))}
@@ -514,7 +516,7 @@ html.fluid #stage{bottom:auto;height:100%;min-height:100dvh}
 .xpgain .xpbar{flex:1;width:auto}
 .xpgain svg.ic{font-size:20px}
 .rankup.unlock{background:#e6fff1;color:#1f7a4a}
-.rbook{width:min(620px,94vw);max-height:92vh;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.rbook{width:min(620px,94vw);max-height:92vh;max-height:92dvh;overflow:auto;display:flex;flex-direction:column;gap:10px}
 .rbook h2{margin:0;font-size:26px;color:var(--ol);display:flex;align-items:center;gap:8px}
 .rbook .rlv{font-size:15px;color:#a0566e;display:flex;align-items:center;gap:6px}
 .rbook .rlv .xpbar{flex:0 0 140px}
