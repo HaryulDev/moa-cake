@@ -3140,6 +3140,13 @@ function goHome(){
 /* 3D를 다 불러오면: 진열장 작은 케이크를 3D 사진으로 바꾸고, 지금 화면의 케이크도 3D로 */
 let TITLE_CAKE = null, MINI_CAKES = [];
 window.on3DReady = () => {
+  // 과일 아이콘을 3D 과일 사진으로 바꿔요 (토핑과 아이콘이 똑같아 보이게). 3D가 없으면 그림 아이콘 그대로.
+  try {
+    ['straw','cherry','blue','rasp','kiwi','peach','banana','orange','grape','mint'].forEach(t => {
+      const url = C3D.iconShot(t); if (url) ICONS[t] = `<image href="${url}" x="-8" y="-8" width="116" height="116"/>`;
+    });
+    if (G && $('#play').classList.contains('on') && STEPS[G.step]){ renderTray(); renderCard(); }
+  } catch(e){ console.warn(e); }
   try {
     const at = [[90,120,.3],[220,122,.32],[350,122,.3]];
     $('#tbCakes').innerHTML = MINI_CAKES.map((m,i) => { const [x,y,s] = at[i], w = 400*s;
@@ -3628,7 +3635,7 @@ const sliceTex = {
     for (let t=0;t<6*Math.PI;t+=.05){ const rr = r*t/(6*Math.PI); g.lineTo(Math.cos(t)*rr, Math.sin(t)*rr); } g.stroke(); }),
 };
 const slice = (kind, r, h, rimCol, rough=.5) => { const g = new THREE.Group(), t = TEX[kind] || (TEX[kind] = sliceTex[kind]());
-  const face = phys('sf'+kind, {map:t, roughness:.28, clearcoat:.7, clearcoatRoughness:.15}), side = phys('ss'+kind, {color:col(rimCol), roughness:rough});
+  const face = phys('sf'+kind, {map:t, roughness:.42, clearcoat:.25, clearcoatRoughness:.3}), side = phys('ss'+kind, {color:col(rimCol), roughness:rough});
   g.add(mesh(new THREE.CylinderGeometry(1, 1, 1, 48), [side, face, face], m => { m.scale.set(r, h, r); m.position.y = h/2; })); return g; };
 // 세로 높이에 따라 색이 바뀌는 열매 (아래→위)
 function gradeColors(geo, stops){
@@ -3854,6 +3861,21 @@ C3D.snapshot = (c, w, h) => {
   kind = 'result'; yaw = -.5; root.rotation.y = yaw; C3D.sync(c);
   renderer.render(scene, camera); const url = canvas.toDataURL('image/png');
   kind = keep.kind; yaw = keep.yaw; if (keep.cur) C3D.sync(keep.cur); size();
+  return url;
+};
+/* 과일 아이콘 사진: 3D 과일 모형 하나만 투명 배경에 찍어요 (토핑 칸·재료 칸 아이콘으로 써요) */
+C3D.iconShot = (type, px = 160) => {
+  const make = MODELS[type]; if (!make) return null;
+  const groups = Object.values(parts), vis = groups.map(g => g.visible);
+  groups.forEach(g => g.visible = false); ground.visible = false;
+  const m = make({}, 0); m.scale.setScalar(1.6); root.add(m); root.rotation.y = -.4; root.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(m), ctr = box.getCenter(new THREE.Vector3()), rad = box.getBoundingSphere(new THREE.Sphere()).radius;
+  const cam = new THREE.PerspectiveCamera(30, 1, .01, 50), dist = rad/Math.sin(15*Math.PI/180)*.8;
+  cam.position.set(ctr.x, ctr.y + dist*.5, ctr.z + dist*.87); cam.lookAt(ctr);
+  const ex = renderer.toneMappingExposure; renderer.toneMappingExposure = .88;   // 아이콘은 색을 조금 더 진하게
+  renderer.setPixelRatio(1); renderer.setSize(px, px, false); renderer.render(scene, cam);
+  const url = canvas.toDataURL('image/png'); renderer.toneMappingExposure = ex;
+  root.remove(m); groups.forEach((g, i) => g.visible = vis[i]); ground.visible = true; root.rotation.y = yaw; size(); dirty = true;
   return url;
 };
 
