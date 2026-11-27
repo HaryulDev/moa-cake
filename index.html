@@ -818,20 +818,19 @@ const ICONS = (() => {
   const I = {};
   /* ---- 진짜 케이크 위 과일처럼: 그라데이션(전역 defs의 fg-*) + 광택(나파주 코팅) + 세밀한 결 ---- */
   // 딸기: 반질반질한 통딸기, 움푹 들어간 씨, 초록 꼭지
-  I.straw = `<path d="M50 94 C27 84 13 61 17 42 C20 28 36 24 50 30 C64 24 80 28 83 42 C87 61 73 84 50 94Z" fill="url(#fg-straw)" stroke="#8e0b26" stroke-width="1.2"/>
+  // 딸기: 꼭지를 떼고 뒤집어 얹은 모양 (뾰족한 끝이 위, 꼭지 뗀 자리가 아래)
+  I.straw = `<g transform="rotate(180 50 60)"><path d="M50 94 C27 84 13 61 17 42 C20 28 36 24 50 30 C64 24 80 28 83 42 C87 61 73 84 50 94Z" fill="url(#fg-straw)" stroke="#8e0b26" stroke-width="1.2"/>
     <path d="M50 94 C66 84 79 66 81 48 C76 66 64 82 50 94Z" fill="#7a0820" opacity=".35"/>
-    ${[[32,44],[44,41],[56,41],[68,44],[26,55],[38,53],[50,52],[62,53],[74,55],[31,66],[43,65],[56,65],[68,66],[38,77],[50,77],[61,76],[45,87],[55,86]].map(([x,y])=>
-      `<ellipse cx="${x}" cy="${y+.6}" rx="2.4" ry="3.2" fill="#a30d2c" opacity=".55"/><path d="M${x} ${y-2.6} Q${x+1.6} ${y} ${x} ${y+2.4} Q${x-1.6} ${y} ${x} ${y-2.6}Z" fill="#ffe08a"/>`).join('')}
-    <ellipse cx="34" cy="50" rx="5" ry="11" fill="#fff" opacity=".6" transform="rotate(-24 34 50)"/><ellipse cx="44" cy="37" rx="4.5" ry="2.2" fill="#fff" opacity=".85"/><circle cx="64" cy="47" r="1.8" fill="#fff" opacity=".8"/><circle cx="58" cy="72" r="1.4" fill="#fff" opacity=".6"/>
-    <path d="M50 34 C44 32 30 35 23 28 C33 25 42 26 46 28 C40 22 35 16 35 9 C44 15 48 21 50 26 C52 21 56 15 65 9 C65 16 60 22 54 28 C58 26 67 25 77 28 C70 35 56 32 50 34Z" fill="url(#fg-leaf)" stroke="#2a6e2e" stroke-width="1"/>
-    <path d="M50 30 L31 29 M50 30 L40 15 M50 30 L60 15 M50 30 L69 29" stroke="#2a6e2e" stroke-width=".8" opacity=".6"/>
-    <path d="M50 27 Q51 18 55 11" stroke="#3e8e41" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+    ${[[32,44],[44,41],[56,41],[68,44],[26,55],[38,53],[50,52],[62,53],[74,55],[31,66],[43,65],[56,65],[68,66],[38,77],[50,77],[61,76],[45,87],[55,86]].map(([x,y])=>`<ellipse cx="${x}" cy="${y+.6}" rx="2.4" ry="3.2" fill="#a30d2c" opacity=".55"/><path d="M${x} ${y-2.6} Q${x+1.6} ${y} ${x} ${y+2.4} Q${x-1.6} ${y} ${x} ${y-2.6}Z" fill="#ffe08a"/>`).join('')}</g>
+    <ellipse cx="50" cy="88" rx="27" ry="6" fill="#ffd6dc" stroke="#c8203f" stroke-width="1.4"/><ellipse cx="50" cy="88" rx="14" ry="3" fill="#fff3f4"/>
+    <ellipse cx="36" cy="62" rx="5" ry="11" fill="#fff" opacity=".55" transform="rotate(24 36 62)"/><ellipse cx="46" cy="40" rx="3" ry="5" fill="#fff" opacity=".8" transform="rotate(20 46 40)"/><circle cx="62" cy="55" r="1.8" fill="#fff" opacity=".8"/>`;
   // 체리: 꼭지 달린 체리 한 알, 깊은 빨강 + 강한 광택
-  // 체리: 꼭지를 떼고 뒤집어 얹은 모양 (꼭지 자리 오목한 쪽이 아래로)
-  I.cherry = `<g transform="rotate(180 50 66)"><path d="M50 46 C34 38 15 48 15 66 C15 83 32 91 50 86 C68 91 85 83 85 66 C85 48 66 38 50 46Z" fill="url(#fg-cherry)" stroke="#4e0310" stroke-width="1.2"/>
-    <path d="M43 48.5 Q50 53 57 48.5" stroke="#5e0414" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>
-    <ellipse cx="34" cy="58" rx="7" ry="12" fill="#fff" opacity=".7" transform="rotate(32 34 58)"/><circle cx="44" cy="50" r="2.8" fill="#fff" opacity=".95"/>
-    <path d="M70 80 Q80 74 82 62" stroke="#ff8a9a" stroke-width="2.4" fill="none" opacity=".5" stroke-linecap="round"/>`;
+  I.cherry = `<path d="M50 50 Q51 26 66 6" stroke="#5a7a2a" stroke-width="3.6" fill="none" stroke-linecap="round"/><path d="M51 44 Q53 26 64 10" stroke="#9cc45a" stroke-width="1.2" fill="none" opacity=".8"/>
+    <path d="M64 8 Q78 0 90 10 Q78 18 64 8Z" fill="url(#fg-leaf)" stroke="#2a6e2e" stroke-width="1"/><path d="M66 8 Q77 7 87 10" stroke="#2a6e2e" stroke-width=".8" fill="none"/>
+    <path d="M50 52 C34 44 15 54 15 72 C15 89 32 97 50 92 C68 97 85 89 85 72 C85 54 66 44 50 52Z" fill="url(#fg-cherry)" stroke="#4e0310" stroke-width="1.2"/>
+    <path d="M43 54.5 Q50 59 57 54.5" stroke="#5e0414" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <ellipse cx="31" cy="66" rx="6.5" ry="11" fill="#fff" opacity=".7" transform="rotate(-32 31 66)"/><circle cx="41" cy="59" r="2.6" fill="#fff" opacity=".95"/>
+    <path d="M68 87 Q79 80 80 68" stroke="#ff8a9a" stroke-width="2.4" fill="none" opacity=".5" stroke-linecap="round"/>`;
   // 블루베리: 하얀 분(가루)이 살짝 낀 진한 남색 + 별 모양 꽃받침
   const berry = (x,y,r) => { let star=''; for (let i=0;i<10;i++){ const a=-Math.PI/2+i*Math.PI/5, rr=i%2?r*.12:r*.3; star+=(i?'L':'M')+(x+Math.cos(a)*rr).toFixed(1)+' '+(y-r*.18+Math.sin(a)*rr*.75).toFixed(1); }
     return `<circle cx="${x}" cy="${y}" r="${r}" fill="url(#fg-blue)" stroke="#161b48" stroke-width="1"/>
