@@ -553,7 +553,31 @@ html.fluid #stage{bottom:auto;height:100%}
 .rbook .rgrid::-webkit-scrollbar-thumb{background:#ff8fb1;border-radius:8px}
 .rbook .rcard{touch-action:pan-y}
 .rbook .rbtns{flex:none}
-#game.fluid .rbook{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px)}
+#game.fluid .rbook{max-height:76vh;max-height:76dvh;margin:max(12px,env(safe-area-inset-top,0px)) auto auto;gap:8px;padding:12px}
+#game.fluid .rbook h2{font-size:20px}
+#game.fluid .rbook .rlv{font-size:12px}
+#game.fluid .rbook .rgrid{gap:8px}
+#game.fluid .rbook .rcard{padding:7px 6px;gap:2px;border-radius:14px;box-shadow:0 3px 0 var(--ol)}
+#game.fluid .rbook .rcard b{font-size:16px}
+#game.fluid .rbook .rcard small{font-size:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#game.fluid .rbook .rcard .ric svg.ic{font-size:30px}
+#game.fluid .rbook .rcard .rq{width:30px;height:30px;font-size:18px;border-width:2px}
+#game.fluid .rbook .rcard .rlock svg.ic{font-size:18px}
+#game.fluid .rbook .rbtns .next{padding:8px;font-size:16px}
+.topgrid.dishes .top.dish{background:radial-gradient(ellipse 46% 40% at 50% 46%,#fff 0 78%,#f6dbe4 82% 90%,transparent 92%),linear-gradient(#fffafc,#ffeef4);
+  border-color:#ffc9d8;flex-direction:column;justify-content:flex-start;padding-top:2px;height:48px;width:52px}
+.topgrid.dishes .top.dish .dk{display:block;line-height:0}
+.topgrid.dishes .top.dish .dk svg.ic{font-size:27px;filter:drop-shadow(0 2px 1px rgba(107,42,60,.28))}
+.topgrid.dishes .top.dish.sel{background:radial-gradient(ellipse 46% 40% at 50% 46%,#fff 0 78%,#ffd36e 82% 90%,transparent 92%),linear-gradient(#fff6d6,#ffe39a);border-color:var(--gold)}
+.topgrid.dishes .top.dish:active{transform:scale(.93)}
+#game.fluid .topgrid.dishes{grid-template-columns:repeat(auto-fill,minmax(48px,1fr))}
+#game.fluid .topgrid.dishes .top.dish{height:50px;width:auto}
+.sw.cb{width:48px;border-radius:12px;padding:2px 0 3px;transition:transform .12s}
+.sw.cb svg{display:block;margin:0 auto;filter:drop-shadow(0 2px 0 rgba(107,42,60,.18))}
+.sw.cb.sel{background:linear-gradient(#fff6d6,#ffe39a);box-shadow:0 0 0 2px var(--gold),0 0 0 4px var(--ol);transform:translateY(-2px)}
+.sw.cb:active{transform:scale(.94)}
+#game.fluid .sw.cb{width:auto}
+#game.fluid .sw.cb svg{width:100%;max-width:44px;height:auto}
 .tb.hold{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .tb.hold.on,.tb.on{background:linear-gradient(#fff6d6,#ffe39a)!important;transform:translateY(2px)}
 .rcard .rq{display:inline-flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:50%;background:#f3e6ea;border:3px dashed #c9a3b1;color:#b58a99;font-size:32px;line-height:1}
@@ -1694,6 +1718,7 @@ function candleSVG(x,y,sc,i){
 }
 
 /* 케이크 위에 눕혀 놓는 자른 과일 → 단면 두께(옆면) 색 */
+const GLOSSY = new Set(['straw','cherry','blue','rasp','grape','candy','pearl','lolli']);   // 반질반질 빛나는 토핑
 const FLAT_TOP = {kiwi:'#5f7f22', orange:'#e07800', banana:'#d9bf6a', peach:'#e0703a'};
 /* 별깍지 로제트 (예전 3D 크림처럼): 8개의 골이 소용돌이치며 위로 갈수록 뾰족해지는 크림.
    색·모양마다 한 번만 그려 두고 <use>로 다시 써요 (케이크를 다시 그릴 때 가벼워요) */
@@ -1858,11 +1883,11 @@ function renderCake(c, {cx=CAKE_X, baseY=CAKE_Y, sc=1, plate=true, pick=false, o
       const x=t.cx+d.u*t.R, lift=(d.lift||0)*sc, y=t.ty+d.v*t.R*K-lift;   // lift: 크림 위에 얹으면 그만큼 위로
       const attr = pick ? ` data-i="${idx}" style="cursor:grab"` : '';
       const flat = FLAT_TOP[d.type];       // 자른 과일은 케이크 위에 눕혀서 (원근감으로 납작하게)
-      const sz = (flat ? (d.lift ? 40 : 46) : (d.lift ? 36 : 42))*sc;   // 과일 크기
+      const sz = (flat ? (d.lift ? 44 : 50) : (d.lift ? 40 : 47))*sc;   // 과일 크기
       const fruit = flat
         ? `<g transform="translate(${x.toFixed(1)} ${(y-sz*.1).toFixed(1)}) scale(1 .5)">${iconAt(d.type, 0, 0, sz, d.rot||0)}</g>
            <path d="M${(x-sz*.44).toFixed(1)} ${(y-sz*.1).toFixed(1)} Q${x} ${(y-sz*.1+sz*.3).toFixed(1)} ${(x+sz*.44).toFixed(1)} ${(y-sz*.1).toFixed(1)}" stroke="${FLAT_TOP[d.type]}" stroke-width="${(2.4*sc).toFixed(1)}" fill="none" opacity=".75"/>`
-        : iconAt(d.type, x, y-sz*.37, sz, d.rot||0);
+        : iconAt(d.type, x, y-sz*.37, sz, d.rot||0) + (GLOSSY.has(d.type) ? `<ellipse cx="${(x-sz*.16).toFixed(1)}" cy="${(y-sz*.62).toFixed(1)}" rx="${(sz*.07).toFixed(1)}" ry="${(sz*.11).toFixed(1)}" fill="#fff" opacity=".75" transform="rotate(-25 ${(x-sz*.16).toFixed(1)} ${(y-sz*.62).toFixed(1)})"/><circle cx="${(x+sz*.12).toFixed(1)}" cy="${(y-sz*.72).toFixed(1)}" r="${(sz*.03).toFixed(1)}" fill="#fff" opacity=".9"/>` : '');
       items.push({v:d.v, svg: d.type==='candle' ? `<g${attr}>${candleSVG(x,y,sc,idx)}</g>`
         : `<g${attr}>${d.lift ? `<ellipse cx="${x}" cy="${y+1.5*sc}" rx="${(flat?16:10)*sc}" ry="${3*sc}" fill="rgba(60,20,20,.22)" filter="url(#fg-soft)"/>` : `<ellipse cx="${x+2*sc}" cy="${y+(flat?1:2)*sc}" rx="${(flat?20:15)*sc}" ry="${(flat?5:4.6)*sc}" fill="rgba(60,20,20,.24)" filter="url(#fg-soft)"/>`}${fruit}${d.lift && d.creamCol && !flat ? `<path d="M${(x-10*sc).toFixed(1)} ${(y-1.5*sc).toFixed(1)} Q${x} ${(y+4*sc).toFixed(1)} ${(x+10*sc).toFixed(1)} ${(y-1.5*sc).toFixed(1)} Q${x} ${(y+1.2*sc).toFixed(1)} ${(x-10*sc).toFixed(1)} ${(y-1.5*sc).toFixed(1)}Z" fill="${FROST[d.creamCol].c}" stroke="${shade(FROST[d.creamCol].c,-.15)}" stroke-width=".5"/>` : ''}</g>`});
     });
@@ -3054,11 +3079,32 @@ function squeezeFrame3(now){
   if (q.d.s < 1.35){ q.d.s = Math.min(1.35, q.d.s + dt/(q.d.base ? 600 : 1400)); q.size = q.d.s; C3D.sync(G.cake, ['dollops']); $('#fx').innerHTML = bagSVG(q.cur||q.last, FROST[G.bagCol].c, true); }
   requestAnimationFrame(squeezeFrame3);
 }
+/* 크림 고르기: 스패출러용은 크림을 담은 작은 보울, 짤주머니용은 크림을 채운 작은 짤주머니 */
+function creamBowlSVG(col){
+  const d = shade(col,-.18), l = shade(col,.45);
+  return `<svg viewBox="0 0 60 48" width="44" height="35"><ellipse cx="30" cy="44" rx="22" ry="3.5" fill="rgba(90,40,50,.18)"/>
+    <path d="M10 18 L50 4" stroke="#9aa9bb" stroke-width="3" stroke-linecap="round"/><rect x="44" y="-1" width="13" height="7" rx="3.5" fill="#ff8fb1" transform="rotate(-19 50 3)"/>
+    <path d="M7 20 Q8 22 10 22 C12 12 18 8 24 10 C26 3 36 2 38 9 C44 7 50 12 50 22 Q52 22 53 20 Z" fill="${col}" stroke="${d}" stroke-width="1.2"/>
+    <path d="M22 12 C26 8 32 7 36 10 M28 6 Q31 3 34 6" stroke="${l}" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".9"/>
+    <path d="M14 18 C16 14 20 12 24 13" stroke="${d}" stroke-width="1" fill="none" opacity=".6"/>
+    <path d="M4 21 Q30 28 56 21 Q54 43 30 43 Q6 43 4 21Z" fill="#eef4fb" stroke="#9fb4cc" stroke-width="2"/>
+    <path d="M4 21 Q30 28 56 21" fill="none" stroke="#fff" stroke-width="2.4"/><path d="M10 27 Q12 36 20 39" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".85"/>
+    <path d="M18 33 h24" stroke="#ffb3c8" stroke-width="2.4" stroke-linecap="round" opacity=".7"/></svg>`;
+}
+function miniBagSVG(col){
+  const d = shade(col,-.15), l = shade(col,.4);
+  return `<svg viewBox="0 0 60 48" width="44" height="35"><g transform="rotate(-28 30 24)">
+    <path d="M27 44 L33 44 L35 37 L25 37Z" fill="#c3cbd5" stroke="#6f7884" stroke-width="1.2"/>
+    <path d="M25 37 L12 10 Q30 4 48 10 L35 37Z" fill="${col}" stroke="${d}" stroke-width="1.2"/>
+    <path d="M25 37 L11 9 Q30 2 49 9 L35 37Z" fill="rgba(255,255,255,.18)" stroke="#c9d2dc" stroke-width="1.6"/>
+    <path d="M18 12 L26 31" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".8"/><path d="M30 10 L32 24" stroke="${l}" stroke-width="2" stroke-linecap="round"/>
+    <path d="M11 9 Q20 0 30 4 Q40 0 49 9" fill="#f4f7fb" stroke="#c9d2dc" stroke-width="1.4"/><rect x="25" y="0" width="10" height="4" rx="2" fill="#ff6f9b"/></g></svg>`;
+}
 function trayFrost(){
   const c=G.cake, bag=G.tool==='bag';
   return `<div class="rows">
-    <div class="row"><b title="스패출러로 크림 바르기">${icon('spatula')}</b>${Object.entries(FROST).map(([k,f])=>`<button class="sw ${!bag&&c.frost===k?'sel':''}" data-frost="${k}" title="스패출러 · ${f.n}"><i style="background:${f.c}">${icon(f.ic)}</i><small>${f.s}</small></button>`).join('')}</div>
-    <div class="row"><b title="짤주머니로 크림 짜기">${icon('pipebag')}</b>${Object.entries(FROST).map(([k,f])=>`<button class="sw ${bag&&G.bagCol===k?'sel':''}" data-bag="${k}" title="짤주머니 · ${f.n}"><i style="background:${f.c}">${icon(f.ic)}</i><small>${f.s}</small></button>`).join('')}</div>
+    <div class="row"><b title="스패출러로 크림 바르기">${icon('spatula')}</b>${Object.entries(FROST).map(([k,f])=>`<button class="sw cb ${!bag&&c.frost===k?'sel':''}" data-frost="${k}" title="스패출러 · ${f.n}">${creamBowlSVG(f.c)}<small>${f.s}</small></button>`).join('')}</div>
+    <div class="row"><b title="짤주머니로 크림 짜기">${icon('pipebag')}</b>${Object.entries(FROST).map(([k,f])=>`<button class="sw cb ${bag&&G.bagCol===k?'sel':''}" data-bag="${k}" title="짤주머니 · ${f.n}">${miniBagSVG(f.c)}<small>${f.s}</small></button>`).join('')}</div>
   </div><div class="tool"><button class="tb wide" id="undoPipe" ${c.dollops.length?'':'disabled'}>${icon('undo')} 하나 지우기</button></div>
   <button class="next" id="next">다음 ▶</button>`;
 }
@@ -3282,7 +3328,7 @@ function trayDeco(){
   const c=G.cake;
   const cat = G.topCat||0;
   return `<div class="topwrap"><div class="tabs">${TOP_CATS.map((n,i)=>`<button class="tab ${i===cat?'on':''}" data-cat="${i}">${n}</button>`).join('')}</div>
-    <div class="topgrid">${TOPPINGS.filter(t=>t.cat===cat).map(t=>`<div class="top ${G.stamp===t.id?'sel':''}" data-top="${t.id}" title="${t.n}">${icon(t.id)}</div>`).join('')}</div></div>
+    <div class="topgrid dishes">${TOPPINGS.filter(t=>t.cat===cat).map(t=>`<div class="top dish ${G.stamp===t.id?'sel':''}" data-top="${t.id}" title="${t.n}"><span class="dk">${icon(t.id)}</span><small class="gname">${t.n}</small></div>`).join('')}</div></div>
     <div class="decoCtl"><input id="msg" maxlength="10" placeholder="케이크 문구 쓰기" value="${esc(c.text)}">
       <button class="tb wide" id="undo">${icon('undo')} 되돌리기</button></div>
     <button class="next" id="next">완성! ▶</button>`;
