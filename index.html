@@ -270,6 +270,27 @@ html.fluid #stage{bottom:auto;height:100%}
   box-shadow:0 0 0 3px var(--ol),inset 0 3px 0 rgba(255,255,255,.55),inset 0 -6px 0 rgba(120,60,20,.22),0 7px 0 3px rgba(0,0,0,.15);border-radius:16px}
 #game:not(.fluid) #tray{height:91px}
 #game:not(.fluid) .topgrid .top{height:28px}
+/* 넓은 화면(PC·가로): 작업대를 꽉 차게 키우고, 고르는 옵션은 오른쪽 칸에 */
+#game.wide:not(.fluid){width:1120px}
+#game.wide:not(.fluid) #work{width:762px}
+#game.wide:not(.fluid) #viewWrap{transform:scale(1.27);transform-origin:0 0}
+#game.wide:not(.fluid) #side{left:794px;width:310px;height:250px}
+#game.wide:not(.fluid) #side .card{overflow-y:auto;overflow-x:hidden}
+#game.wide:not(.fluid) #tray{position:absolute;left:778px;top:268px;width:310px;height:240px;margin:0;flex-direction:column;align-items:stretch;justify-content:flex-start;
+  overflow-y:auto;overflow-x:hidden;padding:10px 10px 12px;gap:8px}
+#game.wide:not(.fluid) #tray::-webkit-scrollbar{width:8px}#game.wide:not(.fluid) #tray::-webkit-scrollbar-thumb{background:#ff9ab8;border-radius:4px}
+#game.wide:not(.fluid) #tray .rows{flex:none}
+#game.wide:not(.fluid) #tray .row{flex-wrap:wrap}
+#game.wide:not(.fluid) #tray .tb{width:auto;min-width:52px;padding:0 6px}
+#game.wide:not(.fluid) #tray .row>b{width:100%;display:flex;align-items:center;gap:4px}
+#game.wide:not(.fluid) #tray .next{width:100%;margin-top:auto}
+#game.wide:not(.fluid) #tray .msg{flex:none;font-size:15px}
+#game.wide:not(.fluid) #tray .gauge{flex:none}
+#game.wide:not(.fluid) #tray .topwrap{width:100%}
+#game.wide:not(.fluid) #tray .topgrid{grid-template-columns:repeat(5,minmax(0,1fr));width:100%}
+#game.wide:not(.fluid) #tray .topgrid .top{width:auto;min-width:0;height:40px}
+#game.wide:not(.fluid) #tray .decoCtl{width:100%;flex-direction:row}
+#game.wide:not(.fluid) #tray .decoCtl input{flex:1}
 .row>b{color:var(--ol);text-shadow:0 1px 0 rgba(255,255,255,.8)}
 .msg{color:var(--ol)}
 /* 아이템 칸 */
@@ -806,12 +827,11 @@ const ICONS = (() => {
     <path d="M50 30 L31 29 M50 30 L40 15 M50 30 L60 15 M50 30 L69 29" stroke="#2a6e2e" stroke-width=".8" opacity=".6"/>
     <path d="M50 27 Q51 18 55 11" stroke="#3e8e41" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
   // 체리: 꼭지 달린 체리 한 알, 깊은 빨강 + 강한 광택
-  I.cherry = `<path d="M50 50 Q51 26 66 6" stroke="#5a7a2a" stroke-width="3.6" fill="none" stroke-linecap="round"/><path d="M51 44 Q53 26 64 10" stroke="#9cc45a" stroke-width="1.2" fill="none" opacity=".8"/>
-    <path d="M64 8 Q78 0 90 10 Q78 18 64 8Z" fill="url(#fg-leaf)" stroke="#2a6e2e" stroke-width="1"/><path d="M66 8 Q77 7 87 10" stroke="#2a6e2e" stroke-width=".8" fill="none"/>
-    <path d="M50 52 C34 44 15 54 15 72 C15 89 32 97 50 92 C68 97 85 89 85 72 C85 54 66 44 50 52Z" fill="url(#fg-cherry)" stroke="#4e0310" stroke-width="1.2"/>
-    <path d="M43 54.5 Q50 59 57 54.5" stroke="#5e0414" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-    <ellipse cx="31" cy="66" rx="6.5" ry="11" fill="#fff" opacity=".7" transform="rotate(-32 31 66)"/><circle cx="41" cy="59" r="2.6" fill="#fff" opacity=".95"/>
-    <path d="M68 87 Q79 80 80 68" stroke="#ff8a9a" stroke-width="2.4" fill="none" opacity=".5" stroke-linecap="round"/>`;
+  // 체리: 꼭지를 떼고 뒤집어 얹은 모양 (꼭지 자리 오목한 쪽이 아래로)
+  I.cherry = `<g transform="rotate(180 50 66)"><path d="M50 46 C34 38 15 48 15 66 C15 83 32 91 50 86 C68 91 85 83 85 66 C85 48 66 38 50 46Z" fill="url(#fg-cherry)" stroke="#4e0310" stroke-width="1.2"/>
+    <path d="M43 48.5 Q50 53 57 48.5" stroke="#5e0414" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>
+    <ellipse cx="34" cy="58" rx="7" ry="12" fill="#fff" opacity=".7" transform="rotate(32 34 58)"/><circle cx="44" cy="50" r="2.8" fill="#fff" opacity=".95"/>
+    <path d="M70 80 Q80 74 82 62" stroke="#ff8a9a" stroke-width="2.4" fill="none" opacity=".5" stroke-linecap="round"/>`;
   // 블루베리: 하얀 분(가루)이 살짝 낀 진한 남색 + 별 모양 꽃받침
   const berry = (x,y,r) => { let star=''; for (let i=0;i<10;i++){ const a=-Math.PI/2+i*Math.PI/5, rr=i%2?r*.12:r*.3; star+=(i?'L':'M')+(x+Math.cos(a)*rr).toFixed(1)+' '+(y-r*.18+Math.sin(a)*rr*.75).toFixed(1); }
     return `<circle cx="${x}" cy="${y}" r="${r}" fill="url(#fg-blue)" stroke="#161b48" stroke-width="1"/>
@@ -1035,6 +1055,7 @@ const ICONS = (() => {
     <circle cx="74" cy="34" r="5" fill="#fff" opacity=".9"/><circle cx="66" cy="30" r="3" fill="#fff" opacity=".9"/>`;
   I.croissant = `<path d="M8 66 Q14 26 50 22 Q86 26 92 66 Q80 54 70 62 Q50 46 30 62 Q20 54 8 66Z" fill="#d48a3a" stroke="#7a3e10" stroke-width="3" stroke-linejoin="round"/>
     <path d="M30 30 Q34 46 30 62 M50 23 Q52 40 50 50 M70 30 Q66 46 70 62" stroke="#8a4a14" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M28 30 Q50 22 70 28" stroke="#fff" stroke-width="3.5" fill="none" opacity=".4" stroke-linecap="round"/>`;
+  I.saltbread = `<ellipse cx="50" cy="72" rx="44" ry="10" fill="#eebd5c"/><path d="M14 70 Q8 40 34 32 Q50 26 66 32 Q92 40 86 70 Q50 80 14 70Z" fill="#d9944a" stroke="#9a5a22" stroke-width="2.5"/><path d="M32 34 Q42 50 36 72 M50 30 Q60 50 52 74 M68 34 Q76 50 70 72" stroke="#b0702e" stroke-width="3" fill="none" opacity=".6"/><ellipse cx="38" cy="42" rx="12" ry="4" fill="#fff" opacity=".4"/>${[[40,38],[56,36],[62,44],[46,46],[70,50]].map(([a,b]) => `<rect x="${a}" y="${b}" width="4" height="4" fill="#fff" transform="rotate(30 ${a} ${b})"/>`).join('')}`;
   I.cinroll = `<ellipse cx="50" cy="62" rx="40" ry="26" fill="#c98a3f" stroke="#7a3e10" stroke-width="3"/><ellipse cx="50" cy="54" rx="38" ry="24" fill="#e8b06a" stroke="#7a3e10" stroke-width="2.5"/>
     <path d="M50 54 m0 0 q6 -2 6 3 q-1 7 -9 6 q-10 -2 -9 -11 q2 -12 15 -12 q16 1 16 15 q-1 17 -22 17 q-22 -2 -22 -20" stroke="#8a4a20" stroke-width="4" fill="none" stroke-linecap="round"/>
     <path d="M24 48 Q30 40 40 40" stroke="#fff" stroke-width="4" fill="none" opacity=".7" stroke-linecap="round"/>`;
@@ -1719,6 +1740,7 @@ function candleSVG(x,y,sc,i){
 }
 
 /* 케이크 위에 눕혀 놓는 자른 과일 → 단면 두께(옆면) 색 */
+const TOP_SZ = {stick:1.7, lolli:1.3, candy:1.1, macaron:1.15, cookie:1.15, donut:1.15};   // 케이크 위에서 작아 보이던 토핑은 크게
 const GLOSSY = new Set(['straw','cherry','blue','rasp','grape','candy','pearl','lolli']);   // 반질반질 빛나는 토핑
 const FLAT_TOP = {orange:'#e07800', banana:'#d9bf6a', peach:'#e0703a'};
 /* 별깍지 로제트 (예전 3D 크림처럼): 8개의 골이 소용돌이치며 위로 갈수록 뾰족해지는 크림.
@@ -1888,7 +1910,7 @@ function renderCake(c, {cx=CAKE_X, baseY=CAKE_Y, sc=1, plate=true, pick=false, o
       const x=t.cx+d.u*t.R, lift=(d.lift||0)*sc, y=t.ty+d.v*t.R*K-lift;   // lift: 크림 위에 얹으면 그만큼 위로
       const attr = pick ? ` data-i="${idx}" style="cursor:grab"` : '';
       const flat = FLAT_TOP[d.type];       // 자른 과일은 케이크 위에 눕혀서 (원근감으로 납작하게)
-      const sz = (flat ? (d.lift ? 44 : 50) : (d.lift ? 40 : 47))*sc;   // 과일 크기
+      const sz = (flat ? (d.lift ? 44 : 50) : (d.lift ? 40 : 47))*sc*(TOP_SZ[d.type]||1);   // 과일 크기
       const fruit = flat
         ? `<g transform="translate(${x.toFixed(1)} ${(y-sz*.1).toFixed(1)}) scale(1 .5)">${iconAt(d.type, 0, 0, sz, d.rot||0)}</g>
            <path d="M${(x-sz*.44).toFixed(1)} ${(y-sz*.1).toFixed(1)} Q${x} ${(y-sz*.1+sz*.3).toFixed(1)} ${(x+sz*.44).toFixed(1)} ${(y-sz*.1).toFixed(1)}" stroke="${FLAT_TOP[d.type]}" stroke-width="${(2.4*sc).toFixed(1)}" fill="none" opacity=".75"/>`
@@ -2156,7 +2178,7 @@ function startGame(mode){
 /* 화면 전환: 분홍 원이 화면을 덮었다가 걷히는 사이에 바꿔요 */
 let booted = false;
 function showScreen(id){
-  const swap = () => document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on', s.id===id));
+  const swap = () => { document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on', s.id===id)); const g = $('#game'), w = id === 'play'; if (g.classList.contains('wide') !== w){ g.classList.toggle('wide', w); fit(); } };
   FX.ambient = id==='title'; if (FX.ambient) FX.run(); else FX.parts = FX.parts.filter(p=>p.kind!=='bokeh');
   if (!booted){ swap(); return; }
   const w=$('#wipe'); w.classList.remove('run'); void w.offsetWidth; w.classList.add('run');
@@ -3396,7 +3418,7 @@ function trayDeco(){
   const c=G.cake;
   const cat = G.topCat||0;
   return `<div class="topwrap"><div class="tabs">${TOP_CATS.map((n,i)=>`<button class="tab ${i===cat?'on':''}" data-cat="${i}">${n}</button>`).join('')}</div>
-    <div class="topgrid dishes">${TOPPINGS.filter(t=>t.cat===cat).map(t=>`<div class="top dish ${G.stamp===t.id?'sel':''}" data-top="${t.id}" title="${t.n}"><span class="dk">${icon(t.id)}</span><small class="gname">${t.n}</small></div>`).join('')}</div></div>
+    <div class="topgrid dishes">${TOPPINGS.filter(t=>t.cat===cat).map(t=>`<div class="top dish ${G.stamp===t.id?'sel':''}" data-top="${t.id}" title="${t.n}"><span class="dk">${icon(t.id)}</span></div>`).join('')}</div></div>
     <div class="decoCtl"><input id="msg" maxlength="10" placeholder="케이크 문구 쓰기" value="${esc(c.text)}">
       <button class="tb wide" id="undo">${icon('undo')} 되돌리기</button></div>
     <button class="next" id="next">완성! ▶</button>`;
@@ -3556,7 +3578,7 @@ window.addEventListener('pointerup', e => {
 });
 
 /* ================= 레시피 · 경험치 · 구움과자 ================= */
-const LEVELS = [0, 80, 200, 360, 560, 800, 1080, 1400, 1760, 2160, 2600, 3080, 3600, 4160];   // 레벨이 오르는 누적 경험치
+const LEVELS = [0, 80, 200, 360, 560, 800, 1080, 1400, 1760, 2160, 2600, 3080, 3600, 4160, 4760];   // 레벨이 오르는 누적 경험치
 const RECIPES = {
   cake:      {n:'케이크',   lv:1, ic:'cake',      ing:['flour','egg','sugar','butter','milk'],        desc:'반죽 → 붓기 → 굽기 → 크림 → 장식'},
   cookie:    {n:'버터 쿠키', lv:2, ic:'cookie',    ing:['flour','butter','sugar','egg'],               kind:'cookie', desc:'반죽을 밀어서 쿠키 틀로 콕콕 찍어요'},
@@ -3572,7 +3594,8 @@ const RECIPES = {
   eggtart:   {n:'에그타르트', lv:11, ic:'eggtart', ing:['egg','sugar','milk','cream'],                kind:'mold',   desc:'바삭한 타르트 컵에 달걀 크림을 채워요'},
   choux:     {n:'슈크림',   lv:12, ic:'choux',    ing:['flour','butter','egg','milk'],                kind:'mold',   pan:'sheet', desc:'동그랗게 짜면 속이 텅 빈 슈가 빵빵하게 부풀어요'},
   croissant: {n:'크루아상', lv:13, ic:'croissant', ing:['flour','butter','yeast','milk','sugar'],     kind:'cookie', cut:['crescent'], sheet:true, desc:'버터 결이 겹겹이 살아 있는 초승달 빵'},
-  cinnamon:  {n:'시나몬롤', lv:14, ic:'cinroll',  ing:['flour','yeast','butter','sugar','cinnamon'],  kind:'cookie', cut:['swirl'], sheet:true, desc:'시나몬 설탕을 돌돌 말아 구워요'}
+  cinnamon:  {n:'시나몬롤', lv:14, ic:'cinroll',  ing:['flour','yeast','butter','sugar','cinnamon'],  kind:'cookie', cut:['swirl'], sheet:true, desc:'시나몬 설탕을 돌돌 말아 구워요'},
+  saltbread: {n:'소금빵',   lv:15, ic:'saltbread', ing:['flour','yeast','butter','milk','sugar'],     kind:'cookie', cut:['crescent'], sheet:true, desc:'버터 막대를 돌돌 말아 굽고 굵은 소금을 톡톡'}
 };
 /* 과자마다 쓰는 모양 (쿠키 틀·빵 모양). 케이크 모양(SHAPES)은 그대로 두고 따로 써요 */
 const PSHAPES = Object.assign({}, SHAPES, {
@@ -3583,7 +3606,7 @@ const PSHAPES = Object.assign({}, SHAPES, {
 });
 Object.assign(SHAPE_N, {tri:'세모', ring:'링', ball:'동글', crescent:'초승달', swirl:'돌돌'});
 const cutsOf = r => (r || recipe()).cut || Object.keys(SHAPES);
-const PIECES = 6;
+const PIECES = 6, CUT_MAX = 9, MIN_PCS = 3;   // 틀은 6칸(원하는 만큼만 채워도 돼요), 찍는 과자는 최대 9개
 if (save.xp == null) save.xp = (save.served||0)*30;
 if (!RECIPES[save.recipe]) save.recipe = 'cake';
 const lvOf = xp => LEVELS.filter(t => xp >= t).length;
@@ -3708,6 +3731,15 @@ function extraPieceSVG(r, c, pc, col, dk, lt, b, rise, inMold, f){
       let s = puffSVG(PSHAPES.round, x, y, sc, h, raw ? shade(col,-.12) : mixHex(gold,'#fff0d0',.3), top, raw ? shade(col,-.3) : crust);
       s += `<path d="${spiralD(x, cy, 2.6, 2, sc*.88, .78)}" stroke="#8a4a20" stroke-width="${raw ? 2.6 : 3.2}" fill="none" stroke-linecap="round" opacity=".85"/>`;
       return s + (raw ? '' : `<ellipse cx="${x-6}" cy="${cy-6}" rx="8" ry="3.5" fill="#fff" opacity=".3"/>`); }
+    case 'saltbread': {   // 소금빵: 통통하게 말린 빵 + 바닥에 녹아 바삭해진 버터 + 굵은 소금
+      const sc = raw ? 1 : 1 + rise*.14, top = raw ? col : mixHex(gold, '#b0641c', .3), edge = raw ? shade(col,-.3) : crust, F = n => n.toFixed(1);
+      let s2 = `<ellipse cx="${x}" cy="${y+11}" rx="${F(40*sc)}" ry="7" fill="rgba(80,40,10,.16)"/>`;
+      if (!raw) s2 += `<ellipse cx="${x}" cy="${y+8}" rx="${F(46*sc)}" ry="8" fill="#eebd5c" opacity=".9"/><path d="M${F(x-44*sc)} ${y+8} Q${x} ${y+18} ${F(x+44*sc)} ${y+8}" stroke="#c88a2a" stroke-width="1.6" fill="none"/>`;
+      s2 += `<path d="M${F(x-36*sc)} ${y+6} Q${F(x-40*sc)} ${F(y-14*sc)} ${F(x-14*sc)} ${F(y-20*sc)} Q${x} ${F(y-25*sc)} ${F(x+14*sc)} ${F(y-20*sc)} Q${F(x+40*sc)} ${F(y-14*sc)} ${F(x+36*sc)} ${y+6} Q${x} ${y+13} ${F(x-36*sc)} ${y+6}Z" fill="${top}" stroke="${edge}" stroke-width="1.4"/>`;
+      [-1,0,1].forEach(k => { s2 += `<path d="M${F(x+k*15*sc-5)} ${F(y-19*sc)} Q${F(x+k*15*sc+4)} ${F(y-6*sc)} ${F(x+k*15*sc-2)} ${y+7}" stroke="${shade(top,-.22)}" stroke-width="1.8" fill="none" opacity=".6"/>`; });
+      s2 += `<ellipse cx="${F(x-12*sc)}" cy="${F(y-14*sc)}" rx="${F(12*sc)}" ry="${F(3.5*sc)}" fill="#fff" opacity="${raw ? .25 : .4}"/>`;
+      if (!raw){ const R = seeded((pc.seed||3)+17); for (let q=0;q<9;q++) s2 += `<rect x="${F(x-20*sc+R()*40*sc)}" y="${F(y-20*sc+R()*12*sc)}" width="2.8" height="2.8" fill="#fff" stroke="#ddd" stroke-width=".4" transform="rotate(${F(R()*90)} ${x} ${y})"/>`; }
+      return s2; }
     case 'brownie': {
       if (raw){ if (inMold && f <= 0) return ''; const k = inMold ? .2 + .8*Math.min(f,1) : 1, w = 40*k, h = 24*k;
         return `<rect x="${x-w}" y="${y-h}" width="${w*2}" height="${h*2}" rx="${4*k}" fill="${col}" stroke="${shade(col,-.25)}" stroke-width="1"/><ellipse cx="${x-8}" cy="${y-6}" rx="${w*.5}" ry="${h*.25}" fill="#fff" opacity=".12"/>`; }
@@ -3753,6 +3785,7 @@ const PAREA = {
   donut:    pc => ({cx:pc.x, cy:pc.y-8, w:22, h:17, ell:true}),
   croissant:pc => ({cx:pc.x, cy:pc.y-8, w:12, h:9, ell:true}),
   cinnamon: pc => ({cx:pc.x, cy:pc.y-10, w:20, h:15, ell:true}),
+  saltbread:pc => ({cx:pc.x, cy:pc.y-9, w:20, h:8, ell:true}),
   brownie:  pc => ({cx:pc.x, cy:pc.y-8, w:34, h:13, ell:false}),
   eggtart:  pc => ({cx:pc.x, cy:pc.y-3, w:20, h:11, ell:true}),
   macaron:  pc => ({cx:pc.x, cy:pc.y-4, w:18, h:10, ell:true}),
@@ -3810,7 +3843,7 @@ function pieceSVG(r, c, pc, {b=null, rise=0, inMold=false, deco=false}={}){
     case 'muffin': {
       const cupT = y-8, lvl = cupT + 24 - Math.min(f,1.15)*24, domeH = b == null ? 0 : 3 + 22*rise*Math.min(1.2, f/.78);
       top = Math.min(lvl, cupT) - domeH;
-      const lc = (c.liners && c.liners[pc.idx]) || "#ff9cbd", cup = `<path d="M${x-30} ${cupT} L${x+30} ${cupT} L${x+22} ${y+26} L${x-22} ${y+26}Z" fill="${lc}" stroke="${shade(lc,-.25)}" stroke-width="1.5"/>
+      const lc = pc.liner || "#ff9cbd", cup = `<path d="M${x-30} ${cupT} L${x+30} ${cupT} L${x+22} ${y+26} L${x-22} ${y+26}Z" fill="${lc}" stroke="${shade(lc,-.25)}" stroke-width="1.5"/>
         ${[-20,-10,0,10,20].map(dx => `<path d="M${x+dx} ${cupT} L${x+dx*.74} ${y+26}" stroke="${shade(lc,-.12)}" stroke-width="2"/>`).join('')}`;
       if (b == null) s += cup + `<ellipse cx="${x}" cy="${cupT+1}" rx="30" ry="7" fill="#f7dbe4" stroke="#d76a91" stroke-width="1.2"/>` +
         (f > 0 ? `<ellipse cx="${x}" cy="${(lvl+1).toFixed(1)}" rx="${(27 - (lvl-cupT)*.3).toFixed(1)}" ry="6" fill="${col}" stroke="${shade(col,-.2)}"/>` : '');
@@ -3934,7 +3967,7 @@ function prepShapeP(){
   const c = G.cake;
   if (!c.pieces) c.pieces = [];
   if (c.pieces.length) return;
-  if (recipe().kind !== 'cookie') c.pieces = MOLD_POS.map(([x,y], i) => ({x, y, fill:0, done:false, seed:i*7+3}));
+  if (recipe().kind !== 'cookie') c.pieces = MOLD_POS.map(([x,y], i) => ({x, y, fill:0, done:false, seed:i*7+3, liner:(c.liners||[])[i]}));
   if (!cutsOf().includes(G.cutter)) G.cutter = cutsOf()[0];
 }
 function viewShapeP(){
@@ -3942,7 +3975,7 @@ function viewShapeP(){
   let s = piecesSVG(c, 'shape');
   if (cookie){
     const n = c.pieces.length;
-    setHint(n < PIECES ? (recipe().sheet ? `판을 누르면 반죽을 ${SHAPE_N[G.cutter]} 빚어서 올려요! (${n}/${PIECES})` : `반죽을 눌러서 ${recipe().n} 틀로 콕 찍어요! (${n}/${PIECES})`) : '다 됐어요! 오븐으로 ▶');
+    setHint(n < CUT_MAX ? (recipe().sheet ? `판을 누르면 반죽을 ${SHAPE_N[G.cutter]} 빚어서 올려요! (${n}개 · 최대 ${CUT_MAX}개)` : `반죽을 눌러서 ${recipe().n} 틀로 콕 찍어요! (${n}/${PIECES})`) : '다 됐어요! 오븐으로 ▶');
     setMeter(null);
   } else {
     const cur = G.pipe ? c.pieces[G.pipe.i] : null, left = c.pieces.filter(p => !p.done).length, mf = G.recipe === 'muffin';
@@ -3951,18 +3984,18 @@ function viewShapeP(){
       ? `<ellipse cx="${pc.x}" cy="${(pc.y-8+24-FILL_GOAL*24+1).toFixed(1)}" rx="24" ry="5.5" fill="none" stroke="#ff4f86" stroke-width="2" stroke-dasharray="5 4"/>`
       : G.recipe === 'eggtart' ? `<ellipse cx="${pc.x}" cy="${(pc.y+3-FILL_GOAL*5).toFixed(1)}" rx="${(10+15*FILL_GOAL).toFixed(1)}" ry="${(6+8.5*FILL_GOAL).toFixed(1)}" fill="none" stroke="#ff4f86" stroke-width="2" stroke-dasharray="5 4"/>`
       : (q => `<path d="${q.d}" transform="translate(${pc.x} ${pc.y}) scale(${(q.s*(.2+.8*FILL_GOAL)).toFixed(3)} ${(q.s*(q.sy||1)*(.2+.8*FILL_GOAL)).toFixed(3)})" fill="none" stroke="#ff4f86" stroke-width="2" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/>`)(GUIDE[G.recipe] || GUIDE.financier); });
-    setHint(left ? `칸을 꾹 누르고 있으면 반죽이 짜져요. 분홍 점선까지 채워요! (남은 칸 ${left})` : '다 짰어요! 오븐으로 ▶');
+    setHint(left ? `칸을 꾹 누르고 있으면 반죽이 짜져요. 분홍 점선까지! 원하는 만큼만 짜도 돼요 (${c.pieces.length-left}개)` : '다 짰어요! 오븐으로 ▶');
     if (cur) setMeter('반죽 양', cur.fill, [FILL_LO, FILL_HI]); else setMeter(null);
   }
   layer(s);
 }
 function trayShapeP(){
   const c = G.cake, cookie = recipe().kind === 'cookie';
-  const ready = cookie ? c.pieces.length >= 3 : c.pieces.length && c.pieces.every(p => p.done);
+  const ready = cookie ? c.pieces.length >= MIN_PCS : c.pieces.filter(p => p.done).length >= MIN_PCS && !G.pipe;
   if (cookie) return `<div class="rows"><div class="row wide"><b>${recipe().sheet ? '모양' : '틀'}</b>${cutsOf().map(k=>`<button class="tb ${G.cutter===k?'sel':''}" data-cut="${k}"><svg viewBox="-1.25 -1.25 2.5 2.5" width="22" height="22"><path d="${PSHAPES[k]}" fill="#fff4e0" stroke="#8a95a3" stroke-width=".2"/></svg><small>${SHAPE_N[k]}</small></button>`).join('')}
       <button class="tb" id="cutUndo">${icon('undo')}<small>되돌리기</small></button></div></div>
     <button class="next" id="next" ${ready?'':'disabled'}>오븐으로 ▶</button>`;
-  return `<div class="msg">${recipe().n} 틀 ${PIECES}칸에 반죽을 짜 넣어요.<br><span style="font-size:13px;color:#b98">칸을 꾹 누르고, 분홍 점선까지 차면 손을 떼요</span></div>
+  return `<div class="msg">${recipe().n}를 몇 개 만들까요? 원하는 칸만 짜요 (${MIN_PCS}칸 이상)<br><span style="font-size:13px;color:#b98">칸을 꾹 누르고, 분홍 점선까지 차면 손을 떼요 · 지금 ${c.pieces.filter(p=>p.done).length}개</span></div>
     <button class="next" id="next" ${ready?'':'disabled'}>오븐으로 ▶</button>`;
 }
 function bindShapeP(){
@@ -3974,8 +4007,8 @@ function shapeDownP(e){
   const c = G.cake, p = svgPt(e);
   if (recipe().kind === 'cookie'){
     if (p.x < 162 || p.x > 438 || p.y < 232 || p.y > 334) return;
-    if (c.pieces.length >= PIECES){ toast(`${PIECES}개를 다 찍었어요!`); return; }
-    if (c.pieces.some(q => Math.hypot(q.x-p.x, q.y-p.y) < 60)){ toast('다른 쿠키랑 겹쳐요!'); sfx.bad(); return; }
+    if (c.pieces.length >= CUT_MAX){ toast(`${CUT_MAX}개까지 만들 수 있어요!`); return; }
+    if (c.pieces.some(q => Math.hypot(q.x-p.x, q.y-p.y) < 54)){ toast('다른 쿠키랑 겹쳐요!'); sfx.bad(); return; }
     c.pieces.push({x:Math.round(p.x), y:Math.round(p.y), shape:G.cutter, fill:1, done:true, seed:Math.floor(rnd(1,999))});
     sfx.pop(); beep(520,.06,'triangle',.05);
     viewShapeP(); renderTray(); renderCard();
@@ -4112,11 +4145,12 @@ const PFLOW = {
   roll:['mix','knead','shape','proof','bake','deco'],
   donut:['mix','knead','shape','fry','deco'],
   brownie:['melt','mix','shape','bake','deco'],
-  macaron:['meringue','mix','shape','bake','deco'],
+  macaron:['meringue','mix','shape','bake','mfill','deco'],
   eggtart:['press','mix','shape','bake','deco'],
   choux:['mix','shape','bake','fill','deco'],
-  croissant:['mix','fold','shape','bake','deco'],
-  cinnamon:['mix','spread','shape','bake','deco']
+  croissant:['mix','fold','cutroll','bake','deco'],
+  cinnamon:['mix','spread','slice','bake','deco'],
+  saltbread:['mix','knead','bcut','broll','bake','deco']
 };
 const PBASE_TIP = {mix:'재료를 그릇으로 끌어다 넣고 섞기', bake:'오븐에서 알맞게 굽기', deco:'코팅·토핑·아이싱 펜으로 꾸미기'};
 function pSteps(){
@@ -4416,13 +4450,126 @@ const SX = {
 };
 
 
+/* ---- 자르고 말아서 직접 반죽 조각 만들기 (크루아상 · 시나몬롤 · 소금빵) ---- */
+// 만든 개수만큼 판 위에 가지런히 놓을 자리
+function pcsLayout(n){ const out = []; for (let i=0;i<n;i++){ const row = Math.floor(i/4), nc = Math.min(4, n - row*4), col = i%4; out.push([Math.round(300 + (col - (nc-1)/2)*86), 252 + row*72]); } return out; }
+function makePieces(n, shape){ G.cake.pieces = pcsLayout(n).map(([x,y], i) => ({x, y, shape, fill:1, done:true, seed:i*11+5})); }
+// 끈 선(선분)을 따라 쓱 그었는지: 시작·끝이 선 가까이에 있고 충분히 길게
+function swipedLine(a, b, L, tol=24){
+  const segD = (p) => { const vx = L[2]-L[0], vy = L[3]-L[1], t = clamp(((p.x-L[0])*vx + (p.y-L[1])*vy)/(vx*vx+vy*vy), 0, 1); return [Math.hypot(p.x-(L[0]+vx*t), p.y-(L[1]+vy*t)), t]; };
+  const [da, ta] = segD(a), [db, tb] = segD(b); return da < tol && db < tol && Math.abs(ta - tb) > .6;
+}
+const KNIFE_IC = `<svg class="ic" viewBox="0 0 100 100"><path d="M10 60 L70 30 Q86 26 80 40 L22 70Z" fill="#e8edf3" stroke="#7f8996" stroke-width="4"/><rect x="66" y="22" width="30" height="14" rx="6" fill="#ff8fb1" transform="rotate(-26 80 30)"/></svg>`;
+Object.assign(SX, {
+  /* 마카롱: 꼬끄에 필링 짜서 샌드하기 */
+  mfill:{n:'필링 샌드', tip:'꼬끄 위에 필링을 짜고 다른 꼬끄로 덮기', init(){ return {f:(G.cake.pieces||[]).map(() => 0), fin:[], cur:-1, col:'#fff1c8'}; },
+    draw(x){ const c = G.cake, r = G.recipe; let s = `<rect x="112" y="196" width="376" height="180" rx="16" fill="#fff6ee" stroke="#f0cdd9" stroke-width="4"/>`;
+      (c.pieces||[]).forEach((pc, i) => { const f = x.f[i], done = x.fin.includes(i), k = done ? Math.min(1, (performance.now() - (pc.capAt||0))/350) : 0;
+        s += pieceSVG(r, c, pc, {b:c.bake, rise:1});
+        if (f > 0){ const rr = 6 + Math.min(1.2, f)*16; s += `<ellipse cx="${pc.x}" cy="${f1(pc.y-6)}" rx="${f1(rr)}" ry="${f1(rr*.55)}" fill="${x.col}" stroke="${shade(x.col,-.18)}" stroke-width="1.2"/><ellipse cx="${pc.x-4}" cy="${f1(pc.y-9)}" rx="${f1(rr*.4)}" ry="${f1(rr*.15)}" fill="#fff" opacity=".6"/>`; }
+        if (done) s += `<g transform="translate(0 ${f1(-14 - (1-k)*40)})" opacity="${f1(.3+.7*k)}">${pieceSVG(r, c, pc, {b:c.bake, rise:1})}</g>`;
+        if (f > 0 && !done || i === x.cur) s += `<rect x="${pc.x-22}" y="${pc.y+22}" width="44" height="7" rx="3.5" fill="#fff" stroke="#e57c9f" stroke-width="1.2"/><rect x="${f1(pc.x-22+44*.62)}" y="${pc.y+22}" width="${f1(44*.22)}" height="7" fill="#bff0cf"/><rect x="${pc.x-22}" y="${pc.y+22}" width="${f1(44*Math.min(1.2, f)/1.2)}" height="7" rx="3.5" fill="${f > 1 ? '#ff4f86' : '#ffd36e'}"/>`; });
+      if (x.cur >= 0){ const pc = c.pieces[x.cur]; s += bagSVG({x:pc.x, y:pc.y - 10}, x.col, true, {round:true, lift:24}); }
+      else if (!x.done && !x.fin.length && c.pieces && c.pieces[0]) s += arrowSVG(c.pieces[0].x, c.pieces[0].y - 22, '꼬끄를 꾹!');
+      return s; },
+    hud(x){ const v = x.cur >= 0 ? x.f[x.cur] : 0; setMeter('필링 양', Math.min(1, v/1.2), [.75/1.2, 1/1.2]); setHint(x.done ? '알록달록 마카롱 완성! 장식하러 가요 ▶' : `꼬끄를 꾹 누르고 있으면 필링이 짜져요. 알맞게 짜고 손을 떼면 위에 꼬끄를 덮어요 (${x.fin.length}/${x.f.length})`); },
+    btns: x => [['#fff1c8','바닐라'],['#ffb3c8','딸기'],['#7a4a2c','초코'],['#b9e3a0','피스타치오']].map(([c,n]) => `<button class="tb ${x.col===c?'sel':''}" data-sx="${c}" ${x.done?'disabled':''}><span class="gdot" style="background:${c}"></span><small>${n}</small></button>`).join(''),
+    act(x, c){ x.col = c; sfx.pop(); renderTray(); sxView(); },
+    down(e, x){ if (x.done) return; const pts = (G.cake.pieces||[]).map(pc => [pc.x, pc.y]), i = nearestIdx(svgPt(e), pts, 44); if (i < 0 || x.fin.includes(i)) return;
+      x.cur = i; x.drag = {}; $('#view').setPointerCapture(e.pointerId);
+      sxLoop(x, dt => { if (x.cur !== i) return false; x.f[i] = Math.min(1.3, x.f[i] + dt/1.3); if (x.f[i] >= 1.3){ SX.mfill.up(x); x.drag = null; sxView(); return false; } }); },
+    up(x){ const i = x.cur; if (i < 0) return; x.cur = -1; const pc = G.cake.pieces[i]; pc.capAt = performance.now(); pc.filling = x.col; x.fin.push(i); sxAnimate(380);
+      const f = x.f[i]; toast(f < .75 ? '필링이 조금 적어요' : f <= 1 ? '꼭 맞게 샌드!' : '필링이 삐져나왔어요!'); beep(600,.06,'triangle',.05); renderTray();
+      if (x.fin.length >= x.f.length) setTimeout(() => sxFinish(x.f.reduce((a,v) => a + qZone(v, .75, 1, .35), 0)/x.f.length, '마카롱을 다 샌드했어요!'), 400); } },
+
+  /* 크루아상: 반죽을 세모로 자르고 돌돌 말기 */
+  cutroll:{n:'자르고 말기', tip:'반죽을 점선대로 세모나게 자르고, 하나씩 돌돌 말기', init(){ return {cut:[], rolled:[], at:[]}; },
+    T: [140,220,300,380,460], B: [180,260,340,420], Y0: 214, Y1: 330,
+    lines(){ const S = SX.cutroll, L = []; for (let i=0;i<4;i++){ L.push([S.T[i], S.Y0, S.B[i], S.Y1]); L.push([S.B[i], S.Y1, S.T[i+1], S.Y0]); } return L; },
+    tris(){ const S = SX.cutroll, out = []; for (let i=0;i<4;i++) out.push([[S.T[i],S.Y0],[S.T[i+1],S.Y0],[S.B[i],S.Y1]]); for (let i=0;i<3;i++) out.push([[S.B[i],S.Y1],[S.B[i+1],S.Y1],[S.T[i+1],S.Y0]]); return out; },
+    draw(x){ const S = SX.cutroll, dc = batterColor(G.cake), L = S.lines(), allCut = x.cut.length >= L.length; let s = boardSVG();
+      if (!allCut){ s += `<rect x="140" y="214" width="320" height="116" rx="6" fill="${shade(dc,-.2)}" transform="translate(0 5)"/><rect x="140" y="214" width="320" height="116" rx="6" fill="${dc}" stroke="${shade(dc,-.3)}" stroke-width="2"/>`;
+        for (let k=0;k<5;k++) s += `<path d="M146 ${222+k*24} H454" stroke="#ffe38a" stroke-width="1.6" opacity=".45"/>`;
+        L.forEach((l, j) => { const cut = x.cut.includes(j); s += `<path d="M${l[0]} ${l[1]} L${l[2]} ${l[3]}" stroke="${cut ? shade(dc,-.45) : '#ff4f86'}" stroke-width="${cut ? 3 : 2.5}" stroke-dasharray="${cut ? '' : '7 5'}"/>`; });
+        const nx = L.findIndex((_, j) => !x.cut.includes(j)); if (nx >= 0 && !x.drag) s += arrowSVG((L[nx][0]+L[nx][2])/2, (L[nx][1]+L[nx][3])/2 - 10, x.cut.length ? '' : '점선을 쓱!');
+      } else S.tris().forEach((t, i) => { const cx = (t[0][0]+t[1][0]+t[2][0])/3, cy = (t[0][1]+t[1][1]+t[2][1])/3;
+        if (x.rolled.includes(i)){ const k = Math.min(1, (performance.now() - x.at[i])/450); s += `<g transform="translate(${f1(cx)} ${f1(cy)}) scale(${f1(.4+.45*k)}) translate(${f1(-cx)} ${f1(-cy)})">${pieceSVG('croissant', G.cake, {x:cx, y:cy}, {b:null})}</g>`; }
+        else { const sp = 1.06; s += `<path d="M${t.map(p => f1(cx + (p[0]-cx)*sp*.88) + ' ' + f1(cy + (p[1]-cy)*sp*.88)).join(' L')}Z" fill="${dc}" stroke="${shade(dc,-.3)}" stroke-width="2"/>`; } });
+      if (allCut && !x.rolled.length) { const t = S.tris()[0]; s += arrowSVG((t[0][0]+t[1][0]+t[2][0])/3, 228, '콕 눌러 말아요!'); }
+      if (x.drag && x.drag.a && x.drag.b) s += knifeSVG(x.drag.b.x - 26, x.drag.b.y, 0);
+      return s; },
+    hud(x){ const L = SX.cutroll.lines(); setMeter(x.cut.length < L.length ? '자르기' : '말기', x.cut.length < L.length ? x.cut.length/L.length : x.rolled.length/7, null);
+      setHint(x.done ? `크루아상 ${x.rolled.length}개를 말았어요! 오븐으로 ▶` : x.cut.length < L.length ? `칼로 분홍 점선을 따라 쓱 그어 세모나게 잘라요 (${x.cut.length}/${L.length})` : `세모 반죽을 콕 눌러 넓은 쪽부터 돌돌 말아요. 원하는 만큼 말고 "다 말았어요"! (${x.rolled.length}개)`); },
+    btns: x => x.cut.length >= SX.cutroll.lines().length ? sxBtn('ok', icon('croissant'), '다 말았어요', x.rolled.length < MIN_PCS || x.done) : '',
+    act(x){ makePieces(x.rolled.length, 'crescent'); sxFinish(1, `크루아상 ${x.rolled.length}개 완성!`); },
+    down(e, x){ if (x.done) return; const p = svgPt(e), S = SX.cutroll;
+      if (x.cut.length < S.lines().length){ x.drag = {a:p, b:p}; $('#view').setPointerCapture(e.pointerId); return; }
+      const ts = S.tris(), i = nearestIdx(p, ts.map(t => [(t[0][0]+t[1][0]+t[2][0])/3, (t[0][1]+t[1][1]+t[2][1])/3]), 46);
+      if (i < 0 || x.rolled.includes(i)) return; if (x.rolled.length >= 8) return;
+      x.rolled.push(i); x.at[i] = performance.now(); beep(500,.06,'sine',.05); beep(700,.06,'sine',.04,.08); sxAnimate(460); renderTray(); },
+    move(e, x){ if (!x.drag) return; x.drag.b = svgPt(e); sxView(); },
+    up(x){ const L = SX.cutroll.lines(); L.forEach((l, j) => { if (!x.cut.includes(j) && swipedLine(x.drag.a, x.drag.b, l)){ x.cut.push(j); beep(rnd(700,900), .05, 'triangle', .04); } });
+      if (x.cut.length >= L.length){ toast('세모 반죽 7개!'); renderTray(); } } },
+
+  /* 시나몬롤: 말아 둔 반죽을 썰기 */
+  slice:{n:'썰기', tip:'돌돌 만 반죽을 점선대로 썰어 시나몬롤 만들기', init:{cut:[]}, G:[190,230,270,310,350,390,430],
+    draw(x){ const dc = batterColor(G.cake), g = SX.slice.G; let s = boardSVG();
+      const cuts = [150, ...x.cut.map(i => g[i]).sort((a,b) => a-b), 450];
+      for (let k=0;k<cuts.length-1;k++){ const a = cuts[k] + (k ? 3 : 0), b = cuts[k+1] - (k < cuts.length-2 ? 3 : 0), off = (k - (cuts.length-2)/2)*4;
+        s += `<rect x="${f1(a+off)}" y="250" width="${f1(b-a)}" height="60" rx="${k === 0 || k === cuts.length-2 ? 26 : 6}" fill="${dc}" stroke="${shade(dc,-.3)}" stroke-width="2"/><path d="M${f1(a+off+4)} 262 H${f1(b+off-4)}" stroke="#fff" stroke-width="3" opacity=".3"/>
+          ${k ? `<g transform="translate(${f1(a+off)} 280)"><ellipse rx="5" ry="29" fill="${shade(dc,.08)}" stroke="${shade(dc,-.3)}"/><path d="M0 -20 Q4 -6 0 4 Q-3 12 0 20" stroke="#9a5a2a" stroke-width="2" fill="none"/></g>` : ''}`; }
+      g.forEach((gx, i) => { if (!x.cut.includes(i)) s += `<path d="M${gx} 238 V322" stroke="#ff4f86" stroke-width="2.5" stroke-dasharray="6 5"/>`; });
+      if (!x.cut.length) s += arrowSVG(g[0], 236, '위에서 아래로 쓱!');
+      if (x.drag && x.drag.b) s += `<g transform="rotate(90 ${f1(x.drag.b.x)} ${f1(x.drag.b.y)})">${knifeSVG(x.drag.b.x - 26, x.drag.b.y, 0)}</g>`;
+      return s; },
+    hud(x){ setMeter(null); setHint(x.done ? `시나몬롤 ${x.cut.length+1}개! 오븐으로 ▶` : `칼로 분홍 점선을 위에서 아래로 쓱 그어 썰어요. 원하는 만큼 썰고 "다 썰었어요"! (${x.cut.length+1}조각)`); },
+    btns: x => sxBtn('ok', KNIFE_IC, '다 썰었어요', x.cut.length + 1 < MIN_PCS || x.done),
+    act(x){ makePieces(Math.min(8, x.cut.length + 1), 'swirl'); sxFinish(1, `시나몬롤 ${Math.min(8, x.cut.length + 1)}개 완성!`); },
+    down(e, x){ if (x.done) return; x.drag = {a:svgPt(e), b:null}; $('#view').setPointerCapture(e.pointerId); },
+    move(e, x){ if (!x.drag) return; x.drag.b = svgPt(e); sxView(); },
+    up(x){ if (!x.drag.b) return; SX.slice.G.forEach((gx, i) => { if (!x.cut.includes(i) && swipedLine(x.drag.a, x.drag.b, [gx, 238, gx, 322], 22)){ x.cut.push(i); beep(rnd(600,800), .05, 'triangle', .04); } }); renderTray(); } },
+
+  /* 소금빵: 버터 막대 자르기 */
+  bcut:{n:'버터 자르기', tip:'버터 덩어리를 점선대로 잘라 막대 만들기', init:{cut:[]}, G:[228,256,284,312,340,368],
+    draw(x){ let s = boardSVG(); const g = SX.bcut.G, cuts = [200, ...x.cut.map(i => g[i]).sort((a,b)=>a-b), 396];
+      for (let k=0;k<cuts.length-1;k++){ const a = cuts[k] + (k ? 2 : 0), b = cuts[k+1] - (k < cuts.length-2 ? 2 : 0), off = (k - (cuts.length-2)/2)*5;
+        s += `<rect x="${f1(a+off)}" y="244" width="${f1(b-a)}" height="62" rx="4" fill="#fff0a0" stroke="#d9b440" stroke-width="2"/><rect x="${f1(a+off)}" y="290" width="${f1(b-a)}" height="16" fill="#f0d870" opacity=".6"/>`; }
+      g.forEach((gx, i) => { if (!x.cut.includes(i)) s += `<path d="M${gx} 232 V318" stroke="#ff4f86" stroke-width="2.5" stroke-dasharray="6 5"/>`; });
+      if (!x.cut.length) s += arrowSVG(g[0], 230, '위에서 아래로 쓱!');
+      if (x.drag && x.drag.b) s += `<g transform="rotate(90 ${f1(x.drag.b.x)} ${f1(x.drag.b.y)})">${knifeSVG(x.drag.b.x - 26, x.drag.b.y, 0)}</g>`;
+      return s; },
+    hud(x){ setMeter(null); setHint(x.done ? `버터 막대 ${x.cut.length+1}개! 반죽에 넣고 말러 가요 ▶` : `칼로 점선을 쓱 그어 버터 막대를 만들어요. 막대 수만큼 소금빵이 돼요 (${x.cut.length+1}개)`); },
+    btns: x => sxBtn('ok', KNIFE_IC, '다 잘랐어요', x.cut.length + 1 < MIN_PCS || x.done),
+    act(x){ G.cake.butterN = x.cut.length + 1; sxFinish(1, `버터 막대 ${x.cut.length + 1}개!`); },
+    down(e, x){ if (x.done) return; x.drag = {a:svgPt(e), b:null}; $('#view').setPointerCapture(e.pointerId); },
+    move(e, x){ if (!x.drag) return; x.drag.b = svgPt(e); sxView(); },
+    up(x){ if (!x.drag.b) return; SX.bcut.G.forEach((gx, i) => { if (!x.cut.includes(i) && swipedLine(x.drag.a, x.drag.b, [gx, 232, gx, 318], 18)){ x.cut.push(i); beep(rnd(600,800), .05, 'triangle', .04); } }); renderTray(); } },
+
+  /* 소금빵: 버터를 넣고 돌돌 말아 소금 뿌리기 */
+  broll:{n:'말고 소금 뿌리기', tip:'반죽에 버터 막대를 올려 돌돌 말고 소금을 톡톡', init(){ const n = Math.min(8, G.cake.butterN || 4); return {n, rolled:[], at:[], salt:false}; },
+    draw(x){ const dc = batterColor(G.cake), P = pcsLayout(x.n); let s = boardSVG();
+      P.forEach(([px, py], i) => { if (x.rolled.includes(i)){ const k = Math.min(1, (performance.now() - x.at[i])/420);
+          s += `<g transform="translate(${px} ${py}) scale(${f1(.55+.45*k)}) translate(${-px} ${-py})">${pieceSVG('saltbread', G.cake, {x:px, y:py, seed:i}, {b:null})}</g>`;
+          if (x.salt) { const R = seeded(i+3); for (let q=0;q<9;q++) s += `<rect x="${f1(px-18+R()*36)}" y="${f1(py-20+R()*12)}" width="2.6" height="2.6" fill="#fff" stroke="#e0e0e0" stroke-width=".4" transform="rotate(${f1(R()*90)} ${f1(px)} ${f1(py)})"/>`; } }
+        else s += `<path d="M${px-34} ${py+16} L${px+34} ${py+16} L${px} ${py-30}Z" fill="${dc}" stroke="${shade(dc,-.3)}" stroke-width="2"/><rect x="${px-22}" y="${py+4}" width="44" height="9" rx="3" fill="#fff0a0" stroke="#d9b440" stroke-width="1.4"/>`; });
+      if (!x.rolled.length) s += arrowSVG(P[0][0], P[0][1] - 34, '콕 눌러 말아요!');
+      else if (x.rolled.length >= x.n && !x.salt) s += arrowSVG(300, 220, '소금을 톡톡!');
+      return s; },
+    hud(x){ setMeter(null); setHint(x.done ? '소금빵 반죽 완성! 오븐으로 ▶' : x.rolled.length < x.n ? `버터를 올린 세모 반죽을 콕 눌러 넓은 쪽부터 돌돌 말아요 (${x.rolled.length}/${x.n})` : '판을 콕 눌러 굵은 소금을 톡톡 뿌려요'); },
+    down(e, x){ if (x.done) return; const p = svgPt(e), P = pcsLayout(x.n);
+      if (x.rolled.length >= x.n){ if (p.y > 196){ x.salt = true; [0,1,2].forEach(k => beep(1500+k*200,.03,'square',.02,k*.04)); makePieces(x.n, 'crescent'); sxFinish(1, '짭짤한 소금빵 반죽 완성!'); } return; }
+      const i = nearestIdx(p, P, 46); if (i < 0 || x.rolled.includes(i)) return;
+      x.rolled.push(i); x.at[i] = performance.now(); beep(500,.06,'sine',.05); beep(700,.06,'sine',.04,.08); sxAnimate(440); sxView(); }
+  }
+});
+
 /* ---------- 구움과자 주문 · 채점 · 완성 ---------- */
 function newPastryOrder(rid){
   let pi; do { pi = Math.floor(Math.random()*PEOPLE.length); } while (pi===lastPerson);
   lastPerson = pi;
   return { person: PEOPLE[pi], occasion: pick(OCCASIONS), recipe: rid,
     flavor: pick(Object.keys(FLAVORS)), shape: pick(cutsOf(RECIPES[rid])), glaze: pick(Object.keys(GLAZE)),
-    top: {id: pick(PTOPS.filter(k => !PSCATTER[k])), n: 3 + Math.floor(Math.random()*4)} };
+    top: {id: pick(PTOPS.filter(k => !PSCATTER[k])), n: 3 + Math.floor(Math.random()*4)}, count: RECIPES[rid].kind === 'cookie' ? 3 + Math.floor(Math.random()*6) : 3 + Math.floor(Math.random()*4) };
 }
 function cardPastry(){
   const c = G.cake, r = recipe(), cookie = r.kind === 'cookie', made = c.pieces ? c.pieces.length : 0;
@@ -4436,8 +4583,8 @@ function cardPastry(){
   return `<div class="card"><div class="cust"><div class="face" id="custFace">${personSVG(o.person,'happy')}</div><div class="cname">${o.person.name} 손님<br><span style="font-size:13px;color:#b98">${o.person.age} · ${o.occasion}</span></div></div>
     <div class="bubble" id="bubble">모아야! ${o.occasion}에 먹을 ${r.n}를 부탁해요!</div>
     <ul class="ord"><li><b>맛</b>${icon(FLAVORS[o.flavor].ic)} ${FLAVORS[o.flavor].n}${chk(flavList(c).includes(o.flavor), !!flavList(c).length)}</li>
-      ${cookie?`<li><b>모양</b><svg class="ic" viewBox="-1.25 -1.25 2.5 2.5"><path d="${PSHAPES[o.shape]}" fill="#ff8fb1"/></svg> ${SHAPE_N[o.shape]} ${PIECES}개 <span style="color:#aaa;font-size:13px">(지금 ${nShape})</span>${nShape===PIECES?'<i class="ok">✓</i>':''}</li>`:`<li><b>개수</b>${PIECES}칸 모두 알맞게</li>`}
-      <li><b>코팅</b><span class="chip" style="background:${GLAZE[o.glaze].c}"></span>${GLAZE[o.glaze].n} <span style="color:#aaa;font-size:13px">(${nGl}/${PIECES})</span>${nGl===PIECES?'<i class="ok">✓</i>':''}</li>
+      ${cookie?`<li><b>모양</b><svg class="ic" viewBox="-1.25 -1.25 2.5 2.5"><path d="${PSHAPES[o.shape]}" fill="#ff8fb1"/></svg> ${SHAPE_N[o.shape]} ${o.count||PIECES}개 <span style="color:#aaa;font-size:13px">(지금 ${nShape})</span>${nShape===(o.count||PIECES)&&made===nShape?'<i class="ok">✓</i>':''}</li>`:`<li><b>개수</b>${o.count||PIECES}개 알맞게 <span style="color:#aaa;font-size:13px">(지금 ${(c.pieces||[]).filter(p=>p.done&&p.fill>0).length})</span>${(c.pieces||[]).filter(p=>p.done&&p.fill>0).length===(o.count||PIECES)?'<i class="ok">✓</i>':''}</li>`}
+      <li><b>코팅</b><span class="chip" style="background:${GLAZE[o.glaze].c}"></span>${GLAZE[o.glaze].n} <span style="color:#aaa;font-size:13px">(${nGl}/${o.count||PIECES})</span>${nGl>=(o.count||PIECES)?'<i class="ok">✓</i>':''}</li>
       <li><b>토핑</b>${icon(o.top.id)} ${TOP[o.top.id].n} ${o.top.n}개 <span style="color:#aaa;font-size:13px">(지금 ${nTop})</span>${nTop===o.top.n?'<i class="ok">✓</i>':''}</li></ul>
     <div class="pat">손님의 인내심<div class="bar"><i id="patBar"></i></div></div></div>`;
 }
@@ -4446,11 +4593,12 @@ function scorePastry(c, o){
   const miss = ing.filter(id => !c.ing[id]).length, extra = ing.reduce((s,id)=>s+Math.max(0,(c.ing[id]||0)-1),0);
   rows.push(['반죽 재료', miss?`${miss}가지 빠짐`:extra?'너무 많이 넣음':'정확해요', Math.max(0,10-miss*4-extra*2), 10]);
   { const fl = flavList(c); rows.push(['맛', fl.map(k=>FLAVORS[k].n).join('+'), fl.includes(o.flavor) ? (fl.length===1?10:7) : 0, 10]); }
-  if (cookie){ const ok = c.pieces.filter(p => p.shape === o.shape).length; rows.push(['모양', `${SHAPE_N[o.shape]} ${ok}/${PIECES}개`, Math.round(15*Math.min(1, ok/PIECES)), 15]); }
-  else { const q = c.pieces.reduce((a,p)=>a+pourQuality(p.fill),0)/PIECES; rows.push(['틀 채우기', `알맞게 ${c.pieces.filter(p=>pourQuality(p.fill)>=1).length}/${PIECES}칸`, Math.round(15*q), 15]); }
+  const want = o.count || PIECES, cntQ = Math.max(0, 1 - Math.abs(c.pieces.length - want)*.2);
+  if (cookie){ const ok = c.pieces.filter(p => p.shape === o.shape).length; rows.push(['모양 · 개수', `${SHAPE_N[o.shape]} ${ok}/${want}개${c.pieces.length !== want ? ` (만든 개수 ${c.pieces.length})` : ''}`, Math.round(15*Math.min(1, ok/want)*cntQ), 15]); }
+  else { const q = c.pieces.length ? c.pieces.reduce((a,p)=>a+pourQuality(p.fill),0)/c.pieces.length : 0; rows.push(['틀 채우기 · 개수', `알맞게 ${c.pieces.filter(p=>pourQuality(p.fill)>=1).length}개 / ${c.pieces.length}개 (주문 ${want}개)`, Math.round(15*q*cntQ), 15]); }
   rows.push(['굽기', bakeLabel(c.bake), Math.round(20*bakeQuality(c.bake)), 20]);
   const gl = c.pieces.filter(p => p.glaze === o.glaze).length;
-  rows.push(['코팅', `${GLAZE[o.glaze].n} ${gl}/${PIECES}개`, Math.round(20*Math.min(1, gl/PIECES)), 20]);
+  rows.push(['코팅', `${GLAZE[o.glaze].n} ${gl}/${o.count||PIECES}개`, Math.round(20*Math.min(1, gl/(o.count||PIECES))), 20]);
   const nt = c.decos.filter(d => d.type === o.top.id).length;
   const sxIds = (PFLOW[G.recipe]||[]).filter(id => SX[id]), tTop = sxIds.length ? 15 : 25;
   rows.push(['토핑', `${TOP[o.top.id].n} ${nt}/${o.top.n}`, Math.round(tTop*Math.max(0, 1-Math.abs(nt-o.top.n)/o.top.n)), tTop]);
@@ -4625,6 +4773,7 @@ function machineSVG(cf, brewing, pf=true){
     <circle cx="232" cy="80" r="16" fill="#fff6f9" stroke="#c4517a" stroke-width="3"/><path d="M232 80 L${f1(232 + Math.cos(ang)*11)} ${f1(80 + Math.sin(ang)*11)}" stroke="#d24d7a" stroke-width="3" stroke-linecap="round"/>
     <rect x="352" y="68" width="40" height="22" rx="6" fill="#4a3a40"/><text x="372" y="84" text-anchor="middle" font-size="13" fill="#9fffb0" font-family="monospace">${brewing && G.brew ? Math.floor(G.brew.t) + 's' : '--'}</text>
     <rect x="196" y="110" width="208" height="190" rx="10" fill="#f7d6df" stroke="#c4517a" stroke-width="3"/>
+    <g transform="translate(372 150)"><circle r="20" fill="#c4517a"/><circle r="17" cy="${brewing ? 1 : -2}" fill="${brewing ? '#ff4f86' : '#ff8fb1'}" stroke="#fff" stroke-width="2.5"/>${brewing ? `<circle r="${(22 + Math.sin(t*8)*3).toFixed(1)}" fill="none" stroke="#ff6f9b" stroke-width="2" opacity=".7"/>` : ''}<text y="${brewing ? 6 : 3}" text-anchor="middle" font-size="12" fill="#fff" font-family="Jua,sans-serif">${brewing ? '멈춤' : '샷'}</text></g>
     <rect x="270" y="110" width="60" height="48" fill="#c3cbd5" stroke="#6f7884" stroke-width="2.5"/>
     ${pf ? `<path d="M262 158 H338 L330 178 H270Z" fill="#c3cbd5" stroke="#6f7884" stroke-width="2.5"/>
     <path d="M330 168 L404 180 Q414 182 412 190 Q410 196 400 194 L328 182Z" fill="#2c2c34" stroke="#111" stroke-width="2"/>
@@ -4936,6 +5085,8 @@ function viewBean(){
     else if (cf.pf === 'grinder' && cf.grind >= GRIND_LO - .5) s += arrowSVG(PF.mat.x, PF.mat.y - 6, '탬핑 매트로 옮겨요!') + pulse(PF.mat.x, PF.mat.y+10, 66, 22);
     else if (cf.pf === 'mat' && cf.grind < 1) s += arrowSVG(PF.grinder.x, PF.grinder.y - 22, '그라인더로!');
     else if (cf.pf === 'mat' && !cf.tamperOn) s += arrowSVG(TAMPER_REST.x, TAMPER_REST.y - 66, '탬퍼를 잡아요!') + pulse(PF.mat.x, PF.mat.y - 2, 50, 14);
+    else if (cf.pf === 'mat' && cf.tamperOn) s += arrowSVG(PF.mat.x, pfCoffeeTop(cf, PF.mat.y) - 76, '탬퍼를 꾹!');
+    else if (cf.pf === 'grinder' && cf.bean && cf.grind < GRIND_LO - .5) s += arrowSVG(260, 196, cf.grind < .1 ? '그라인더를 꾹!' : '');
   }
   if (G.tDrag) s += pulse(PF.mat.x, pfCoffeeTop(cf, PF.mat.y), 50, 14);
   s += cfAnimSVG(260, 110, 140);
@@ -4946,39 +5097,43 @@ function viewBean(){
   layer(s);
   if (cf.tamped){ setMeter('탬핑 힘', Math.min(1, cf.tamp/1.1), [TAMP_LO/1.1, TAMP_HI/1.1]); setHint(`탬핑 완료! ${qZone(cf.tamp, TAMP_LO, TAMP_HI, .35) >= 1 ? '반듯하게 잘 눌렀어요' : cf.tamp < TAMP_LO ? '조금 약하게 눌렀어요' : '너무 세게 눌렀어요'} · 샷을 내리러 가요 ▶`); return; }
   if (cf.pf === 'mat' && cf.grind >= 1){ setMeter('탬핑 힘', Math.min(1, cf.tamp/1.1), [TAMP_LO/1.1, TAMP_HI/1.1]);
-    setHint(cf.tamperOn ? '탬핑 버튼을 꾹 누르고 있다가 <b style="color:#3cb371">초록 칸</b>에서 손을 떼요!' : '오른쪽 <b>탬퍼</b>를 잡고 포터필터 위에 올려요'); return; }
+    setHint(cf.tamperOn ? '<b>탬퍼</b>를 꾹 누르고 있다가 <b style="color:#3cb371">초록 칸</b>에서 손을 떼요!' : '오른쪽 <b>탬퍼</b>를 잡고 포터필터 위에 올려요'); return; }
   setMeter('원두 양', Math.min(1, cf.grind/28), [GRIND_LO/28, GRIND_HI/28]);
   setHint(cf.pf === 'machine' ? '머신에 끼워진 <b>포터필터 손잡이</b>를 잡고 그라인더 아래로 끌어 옮겨요'
     : !cf.bean ? '아래에서 <b>원두</b>를 골라 그라인더에 담아요'
     : cf.pf !== 'grinder' ? (cf.grind < 1 ? '포터필터를 그라인더 아래로 옮겨요' : '포터필터를 탬핑 매트로 옮겨요')
-    : cf.grind < 1 ? `${BEANS[cf.bean].n}! 갈기 버튼을 꾹 누르면 원두가 갈려서 담겨요`
-    : cf.grind < GRIND_LO ? `원두 ${cf.grind.toFixed(1)}g · 알맞은 양은 ${GRIND_LO}~${GRIND_HI}g이에요` : `원두 ${cf.grind.toFixed(1)}g · 이제 포터필터를 <b>탬핑 매트</b>로 옮겨요`);
+    : cf.grind < 1 ? `${BEANS[cf.bean].n}! <b>그라인더</b>를 꾹 누르고 있으면 원두가 갈려서 담겨요`
+    : cf.grind < GRIND_LO ? `원두 ${cf.grind.toFixed(1)}g · 그라인더를 더 꾹! 알맞은 양은 ${GRIND_LO}~${GRIND_HI}g이에요` : `원두 ${cf.grind.toFixed(1)}g · 이제 포터필터를 <b>탬핑 매트</b>로 옮겨요`);
 }
 const BIN_IC = `<svg class="ic" viewBox="0 0 100 100"><rect x="16" y="18" width="68" height="12" rx="5" fill="#ff8fb1" stroke="#c4517a" stroke-width="3"/><path d="M42 18 V10 H58 V18" stroke="#c4517a" stroke-width="4" fill="none"/><path d="M24 32 H76 L70 90 H30Z" fill="#dfe6ee" stroke="#6f7884" stroke-width="4"/><path d="M40 44 V80 M60 44 V80" stroke="#8a97a6" stroke-width="4" stroke-linecap="round"/></svg>`;
 function trayBean(){
   const cf = G.cf, busy = !!G.cfAnim;
   return `<div class="rows"><div class="row wide"><b>원두</b>${Object.entries(BEANS).map(([k,v]) => `<button class="tb ${cf.bean===k?'sel':''}" data-bean="${k}" ${cf.grind>0||busy?'disabled':''}><svg viewBox="0 0 30 22" width="26" height="20"><ellipse cx="10" cy="11" rx="6" ry="8" fill="${v.c}" transform="rotate(30 10 11)"/><ellipse cx="20" cy="12" rx="6" ry="8" fill="${shade(v.c,.1)}" transform="rotate(-20 20 12)"/><path d="M10 4 Q12 11 10 18 M20 5 Q18 12 20 19" stroke="${shade(v.c,.4)}" stroke-width="1" fill="none"/></svg><small>${v.s}</small></button>`).join('')}</div>
     <div class="row wide"><b>${icon('bean')}</b>
-      <button class="tb hold ${G.hold&&G.hold.k==='grind'?'on':''}" data-hold="grind" ${cf.pf!=='grinder'||!cf.bean||cf.tamped||busy?'disabled':''}>${icon('grinder')}<small>꾹 눌러 갈기</small></button>
-      <button class="tb hold ${G.hold&&G.hold.k==='tamp'?'on':''}" data-hold="tamp" ${cf.pf!=='mat'||cf.grind<1||cf.tamped||!cf.tamperOn?'disabled':''}>${icon('bean')}<small>꾹 눌러 탬핑</small></button>
       <button class="tb" id="cfReset" ${cf.grind<=0?'disabled':''}>${BIN_IC}<small>버리기</small></button></div></div>
     <button class="next" id="next" ${cf.tamped?'':'disabled'}>샷 내리기 ▶</button>`;
 }
 /* 잡아 옮기기: 포터필터(머신 → 그라인더 → 탬핑 매트 / 머신에 끼우기), 탬퍼(포터필터 위로) */
 const hitPf = (p, P) => Math.hypot(p.x-P.x, p.y-(P.y+12)) < 56 || (p.x > P.x+30 && p.x < P.x+126 && Math.abs(p.y-(P.y+10)) < 26);
 function pfDown(e){
-  const cf = G.cf; if (G.hold || G.brew || G.cfAnim) return;
-  const p = svgPt(e);
+  const cf = G.cf, p = svgPt(e);
+  if (G.step === 1 && Math.hypot(p.x - (372 + SHOT_X), p.y - 150) < 28 && !G.cfAnim){ if (!cf.mounted){ toast('포터필터를 먼저 머신에 끼워요!'); return; } startBrew(); return; }
+  if (G.hold || G.brew || G.cfAnim) return;
   if (G.step === 0){
     if (cf.tamped) return;
     // 탬퍼 잡기
     const tp = cf.tamperOn && cf.pf === 'mat' ? {x:PF.mat.x, y:pfCoffeeTop(cf, PF.mat.y) - 7} : TAMPER_REST;
+    if (cf.tamperOn && cf.pf === 'mat' && Math.abs(p.x - tp.x) < 40 && p.y > tp.y - 70 && p.y < tp.y + 14){ startHold('tamp'); $('#view').setPointerCapture(e.pointerId); return; }
+    if (cf.pf === 'grinder' && p.x > 212 && p.x < 308 && p.y > 100 && p.y < 280){
+      if (!cf.bean){ toast('먼저 아래에서 원두를 골라요!'); return; }
+      startHold('grind'); $('#view').setPointerCapture(e.pointerId); return; }
     if (Math.abs(p.x - tp.x) < 36 && p.y > tp.y - 64 && p.y < tp.y + 8){
       G.tDrag = {dx:tp.x-p.x, dy:tp.y-p.y, x:tp.x, y:tp.y}; cf.tamperOn = false;
       $('#view').setPointerCapture(e.pointerId); beep(420,.05,'triangle',.04); viewBean(); renderTray(); return; }
     if (cf.pf === 'machine'){ if (Math.hypot(p.x-PF_MINI.x, p.y-PF_MINI.y) > 48) return; G.pfDrag = {dx:-70, dy:-14}; }
     else { const P = PF[cf.pf]; if (!hitPf(p, P)) return; G.pfDrag = {dx:P.x-p.x, dy:P.y-p.y}; if (cf.tamperOn) cf.tamperOn = false; }
   } else if (G.step === 1){
+    if (Math.hypot(p.x - (372 + SHOT_X), p.y - 150) < 28){ if (!cf.mounted){ toast('포터필터를 먼저 머신에 끼워요!'); return; } startBrew(); return; }
     if (cf.mounted || !hitPf(p, PF.counter)) return;
     G.pfDrag = {dx:PF.counter.x-p.x, dy:PF.counter.y-p.y};
   } else return;
@@ -5033,16 +5188,16 @@ function viewShot(){
   if (!cf.mounted){
     if (G.pfDrag) s += `<ellipse cx="${PF.head.x}" cy="${PF.head.y+10}" rx="46" ry="16" fill="none" stroke="#ff4f86" stroke-width="3" stroke-dasharray="7 5" opacity="${(.55+.45*Math.sin(t*6)).toFixed(2)}"/>` + portafilterSVG(cf, G.pfDrag.x, G.pfDrag.y);
     else s += `<rect x="388" y="352" width="190" height="10" rx="5" fill="rgba(120,70,40,.15)"/>` + portafilterSVG(cf, PF.counter.x, PF.counter.y) + arrowSVG(PF.head.x, PF.head.y - 6, '여기에 끼워요!');
-  }
+  } else if (!b && cf.shots.length < (G.order ? G.order.shots : 1)) s += arrowSVG(372 + SHOT_X, 126, cf.shots.length ? '한 잔 더!' : '샷 버튼!');
   layer(s);
   const n = cf.shots.length;
-  if (b){ setMeter('추출 시간', Math.min(1, b.t/45), [SHOT_LO/45, SHOT_HI/45]); setHint(`샷이 컵에 쪼르륵… <b style="color:#3cb371">${SHOT_LO}~${SHOT_HI}초</b>에 멈춰요! 색이 옅어지면 너무 오래 내린 거예요 (${Math.floor(b.t)}초)`); }
-  else { setMeter(null); setHint(!cf.mounted ? '탬핑한 포터필터를 잡고 머신에 철컥 끼워요 (매장/테이크아웃 컵도 골라요)' : n ? `샷 ${n}잔 완료! (${cf.shots.map(q => Math.round(q.t) + '초').join(', ')})${n < 3 ? ' · 샷을 더 넣어도 돼요' : ''}` : '매장용·테이크아웃 컵을 고르고, 샷 내리기를 눌러요'); }
+  if (b){ setMeter('추출 시간', Math.min(1, b.t/45), [SHOT_LO/45, SHOT_HI/45]); setHint(`샷이 컵에 쪼르륵… <b style="color:#3cb371">${SHOT_LO}~${SHOT_HI}초</b>에 머신 버튼을 눌러 멈춰요! 색이 옅어지면 너무 오래 내린 거예요 (${Math.floor(b.t)}초)`); }
+  else { setMeter(null); setHint(!cf.mounted ? '탬핑한 포터필터를 잡고 머신에 철컥 끼워요 (매장/테이크아웃 컵도 골라요)' : n ? `샷 ${n}잔 완료! (${cf.shots.map(q => Math.round(q.t) + '초').join(', ')})${n < 3 ? ' · 샷을 더 넣어도 돼요' : ''}` : '매장용·테이크아웃 컵을 고르고, 머신의 <b>샷 버튼</b>을 눌러요. 다시 누르면 멈춰요'); }
 }
 function trayShot(){
   const cf = G.cf, b = G.brew, n = cf.shots.length, ck = cupKind(cf);
   return `<div class="rows"><div class="row wide"><b>컵</b>${Object.entries(CUPS).map(([k,v]) => `<button class="tb ${ck===k?'sel':''}" data-cup="${k}" ${n||b?'disabled':''}>${CUP_IC[k]}<small>${v.s}</small></button>`).join('')}</div>
-    <div class="row wide"><b>${icon('shot')}</b><button class="tb ${b?'on':''}" id="brew" ${(n>=3&&!b)||!cf.mounted?'disabled':''}>${icon('shot')}<small>${b ? '멈추기!' : n ? '샷 추가' : '샷 내리기'}</small></button></div></div>
+</div>
     <button class="next" id="next" ${n&&!b?'':'disabled'}>${DRINK_NEXT()} ▶</button>`;
 }
 const DRINK_NEXT = () => '물·우유 붓기';
@@ -5055,6 +5210,7 @@ function startBrew(){
 }
 function brewFrame(now){
   if (!G || !G.brew) return;
+  if (G.step !== 1){ stopBrew(); return; }
   const b = G.brew, dt = Math.min(50, now - b.last); b.last = now;
   const speed = 1 + (GRIND_LO + 1.5 - G.cf.grind)*.05 - (G.cf.tamp - .7)*.6;   // 원두가 적거나 약하게 누르면 빨리 내려와요
   b.t += dt/1000*5.2*clamp(speed, .6, 1.6);
@@ -5073,6 +5229,28 @@ function stopBrew(){
 }
 
 /* ---------- 2단계: 정수기 물 · 얼음 · 우유 (스팀 · 라떼아트) ---------- */
+function pitcherPose(cf, k, CX, cupTop){
+  const e = ease(k), x = lerp(170, CX - 80, e), y = lerp(310, cupTop - 26, e), a = e*72, rad = a*Math.PI/180;
+  // 주둥이(왼쪽 위 -40,-58)가 기울어진 뒤의 위치
+  const sx = x + 40*Math.cos(rad) + 58*Math.sin(rad), sy = y + 40*Math.sin(rad) - 58*Math.cos(rad);   // 거울처럼 뒤집어 주둥이가 컵 쪽(오른쪽)
+  return {x, y, a, sx, sy};
+}
+function cfDown2(e){
+  const cf = G.cf; if (G.hold || G.cfAnim) return;
+  const p = svgPt(e), CX = 330, cupTop = cupTopY(cf, 330, 1.25);
+  if (cf.ice && !(cf.iceN > 0) && p.x > 55 && p.x < 225 && p.y > 280 && p.y < 360){ $('#addIce') ? $('#addIce').onclick() : 0; return; }
+  if (p.x > 466 && p.x < 584 && p.y > 66 && p.y < 324 && (cf.base !== 'milk')){   // 정수기
+    if (!cf.base){ cf.base = 'water'; G.cfPhase = 'pour'; renderTray(); renderCard(); }
+    startHold('water'); $('#view').setPointerCapture(e.pointerId); return; }
+  if (cf.base === 'milk' && !cf.ice && G.cfPhase === 'steam'){ if (Math.hypot(p.x-150, p.y-280) < 60){ startHold('steam'); $('#view').setPointerCapture(e.pointerId); } return; }
+  if (cf.base === 'milk'){ const P = pitcherPose(cf, G.pk||0, CX, cupTop);
+    if (Math.hypot(p.x-P.x, p.y-(P.y-14)) < 60){ G.pkDrag = {x0:p.x - (G.pk||0)*160}; startHold('milk'); G.hold.rate = 0; $('#view').setPointerCapture(e.pointerId); } }
+}
+function cfMove2(e){
+  if (!G.pkDrag || !G.hold) return;
+  const p = svgPt(e); G.pk = clamp((p.x - G.pkDrag.x0)/160, 0, 1);
+  G.hold.rate = G.pk > .55 ? (G.pk - .55)/.45 : 0;
+}
 function viewBase(){
   const cf = G.cf, h = G.hold && G.hold.k, CX = 330, CY = 330, SC = 1.25;
   const cupTop = cupTopY(cf, CY, SC), mc = mouthClip(cf, CX, CY, SC), NX = CX - 4, NY = Math.min(130, cupTop - 40);
@@ -5081,17 +5259,24 @@ function viewBase(){
   if (cf.base !== 'milk' || cf.ice) s += purifierSVG(NX, NY, h === 'water', cf.ice);
   s += cupSVG(cf, CX, CY, SC);
   if (h === 'water') s += `${mc.def}<g clip-path="url(#${mc.id})">${streamSVG2(NX, NY + 4, NX + 2, mc.g.sy, cf.ice ? 'rgba(200,232,250,.9)' : 'rgba(220,240,255,.9)', 7, 'water')}</g>`;
-  if (cf.base === 'milk' && !cf.ice && (h === 'steam' || (G.cfPhase === 'steam'))) s += pitcherSVG(150, 300, 0, 1, h === 'steam');
-  if (h === 'milk'){ s += pitcherSVG(CX-58, cupTop-40, 52, 1, false) + `${mc.def}<g clip-path="url(#${mc.id})">${streamSVG2(CX-24, cupTop-26, CX-2, mc.g.sy, '#fbf3e6', G.wiggle ? 7 : 5.5, 'milk')}</g>`; }
+  if (cf.base === 'milk' && !cf.ice && G.cfPhase === 'steam') s += pitcherSVG(150, 300, 0, 1, h === 'steam') + (h ? '' : arrowSVG(150, 236, '우유통을 꾹! 스팀'));
+  else if (cf.base === 'milk'){   // 우유통: 잡고 컵 쪽으로 끌면 기울어지며 부어져요
+    const k = G.pk || 0, P = pitcherPose(cf, k, CX, cupTop);
+    s += `<g transform="translate(${f1(P.x)} 0) scale(-1 1) translate(${f1(-P.x)} 0)">${pitcherSVG(P.x, P.y, -P.a, 1, false)}</g>`;
+    if (h === 'milk' && (G.hold.rate||0) > 0) s += `${mc.def}<g clip-path="url(#${mc.id})">${streamSVG2(P.sx, P.sy, CX-2, mc.g.sy, '#fbf3e6', 3 + 4*G.hold.rate, 'milk')}</g>`;
+    else if (!h && cupTotal(cf)/cupCap(cf) < .78) s += arrowSVG(P.x, P.y - 66, '잡고 컵 쪽으로 기울여요!');
+  }
+  if (cf.base !== 'milk' && !h && !G.cfAnim) s += arrowSVG(505, 102, cf.base === 'water' ? '꾹 눌러 물 받기' : '');
+  if (cf.ice && !(cf.iceN > 0) && !G.cfAnim) s += arrowSVG(140, 276, '얼음 퍼 담기!');
   s += cfAnimSVG(CX, cupTop, cupTop + 20);
   layer(s);
-  if (!cf.base){ setMeter(null); setHint(cf.ice ? '얼음 통에서 얼음을 퍼 담고, 정수기 물이나 우유를 골라요' : '아메리카노는 정수기 뜨거운 물, 라떼는 우유! 무엇을 넣을까요?'); return; }
+  if (!cf.base){ setMeter(null); setHint(cf.ice ? '<b>얼음 통</b>을 눌러 얼음을 퍼 담고, <b>정수기</b>를 꾹 눌러 물을 받거나 우유를 골라요' : '아메리카노는 <b>정수기</b>를 꾹 눌러 뜨거운 물을, 라떼는 아래에서 우유를 골라요'); return; }
   const f = cupTotal(cf)/cupCap(cf);
   if (cf.base === 'milk' && !cf.ice && G.cfPhase === 'steam'){
     setMeter('우유 온도', clamp((cf.temp-20)/60, 0, 1), [(TEMP_LO-20)/60, (TEMP_HI-20)/60]);
-    setHint(`스팀 버튼을 꾹! 우유를 ${TEMP_LO}~${TEMP_HI}도로 데우면 거품이 쫀쫀해져요 (지금 ${Math.round(cf.temp)}도)`); return; }
+    setHint(`<b>우유통</b>을 꾹 누르고 있으면 스팀이 나와요! 우유를 ${TEMP_LO}~${TEMP_HI}도로 데우면 거품이 쫀쫀해져요 (지금 ${Math.round(cf.temp)}도)`); return; }
   setMeter(cf.base === 'water' ? '물 높이' : '우유 높이', Math.min(1, f/1.05), [.78/1.05, .93/1.05]);
-  setHint(cf.base === 'water' ? '정수기 버튼을 꾹 눌러 물을 받아요. <b style="color:#3cb371">초록 칸</b>까지!' : cf.ice ? '차가운 우유를 꾹 눌러 부어요' : `우유를 부어요! ${cf.art ? ARTS[cf.art] + ' 라떼아트를 그려요' : '위에서 라떼아트도 고를 수 있어요'}`);
+  setHint(cf.base === 'water' ? '<b>정수기</b>를 꾹 누르고 있으면 물이 나와요. <b style="color:#3cb371">초록 칸</b>까지!' : cf.ice ? '<b>우유통</b>을 잡고 컵 쪽으로 끌어 기울이면 부어져요' : `<b>우유통</b>을 잡고 컵 쪽으로 끌어 기울여 부어요! ${cf.art ? ARTS[cf.art] + ' 라떼아트를 그려요' : '먼저 라떼아트 모양도 고를 수 있어요'}`);
 }
 function trayBase(){
   const cf = G.cf, h = G.hold && G.hold.k, busy = !!G.cfAnim;
@@ -5102,8 +5287,8 @@ function trayBase(){
     <button class="next" id="next" disabled>다음 ▶</button>`;
   const steamPhase = cf.base === 'milk' && !cf.ice && G.cfPhase === 'steam';
   const btns = steamPhase
-    ? `<button class="tb hold ${h==='steam'?'on':''}" data-hold="steam">${icon('pitcher')}<small>꾹 눌러 스팀</small></button><button class="tb" id="steamDone" ${cf.temp<40?'disabled':''}>${icon('milk')}<small>다 데웠어요</small></button>`
-    : `${iceBtn}<button class="tb hold ${h===cf.base?'on':''}" data-hold="${cf.base}" ${busy?'disabled':''}>${icon(cf.base === 'water' ? 'water' : 'pitcher')}<small>${cf.base === 'water' ? '꾹 눌러 물 받기' : '꾹 눌러 붓기'}</small></button>
+    ? `<button class="tb" id="steamDone" ${cf.temp<40?'disabled':''}>${icon('milk')}<small>다 데웠어요</small></button>`
+    : `${iceBtn}
        ${cf.base === 'milk' && !cf.ice ? Object.entries(ARTS).map(([k,n]) => `<button class="tb ${cf.art===k?'sel':''}" data-art="${k}" ${cf.milk>0?'disabled':''}><svg viewBox="-24 -16 48 32" width="26" height="20"><ellipse rx="23" ry="15" fill="#c08a5a"/>${latteArtSVG(k,0,0,20,13,1)}</svg><small>${n}</small></button>`).join('') : ''}`;
   return `<div class="rows"><div class="row wide"><b>${cf.base === 'water' ? '물' : '우유'}</b>${btns}</div></div>
     <button class="next" id="next" ${cupTotal(cf) > cf.shots.length*30 + 20 ? '' : 'disabled'}>마무리 ▶</button>`;
@@ -5158,13 +5343,14 @@ function holdFrame(now){
   if (h.k === 'grind'){ cf.grind = Math.min(30, cf.grind + dt*9); if (Math.random() < .5) beep(rnd(90,140), .04, 'sawtooth', .015); }
   if (h.k === 'tamp'){ cf.tamp = Math.min(1.2, cf.tamp + dt*.55); }
   if (h.k === 'water'){ cf.water = Math.min(cupCap(cf), cf.water + dt*48); if (Math.random() < .25) beep(rnd(300,500), .03, 'sine', .015); }
-  if (h.k === 'milk'){ cf.milk = Math.min(cupCap(cf), cf.milk + dt*44); G.wiggle = Math.sin(now/90) > 0; if (Math.random() < .2) beep(rnd(300,450), .03, 'sine', .015); }
+  if (h.k === 'milk'){ cf.milk = Math.min(cupCap(cf), cf.milk + dt*48*(h.rate == null ? 1 : h.rate)); G.wiggle = Math.sin(now/90) > 0; if (Math.random() < .2) beep(rnd(300,450), .03, 'sine', .015); }
   if (h.k === 'steam'){ cf.temp = Math.min(95, cf.temp + dt*8.5); cf.foam = Math.min(1, cf.foam + dt*(cf.temp < 50 ? .16 : .04)); if (Math.random() < .5) beep(rnd(2000,3200), .03, 'square', .006); }
   curSteps()[G.step].view();
   requestAnimationFrame(holdFrame);
 }
 function endHold(){
   const h = G.hold; G.hold = null; G.wiggle = false; const cf = G.cf; if (!h) return;
+  if (G.pkDrag){ G.pkDrag = null; const k0 = G.pk||0, t0 = performance.now(); const back = now => { if (!G || G.pkDrag) return; G.pk = k0*(1 - Math.min(1, (now-t0)/300)); if (G.step === 2) viewBase(); if (G.pk > 0) requestAnimationFrame(back); }; requestAnimationFrame(back); }
   if (h.k === 'grind') toast(cf.grind < GRIND_LO ? `원두 ${cf.grind.toFixed(1)}g · 조금 더!` : cf.grind <= GRIND_HI ? `원두 ${cf.grind.toFixed(1)}g · 딱 좋아요!` : `원두 ${cf.grind.toFixed(1)}g · 너무 많아요!`);
   if (h.k === 'tamp'){ cf.tamped = true; const q = qZone(cf.tamp, TAMP_LO, TAMP_HI, .35); toast(q >= 1 ? '반듯하게 꾹! 완벽한 탬핑' : cf.tamp < TAMP_LO ? '조금 약하게 눌렀어요' : '너무 세게 눌렀어요'); q >= 1 ? sfx.ok() : sfx.bad(); }
   if (h.k === 'milk' && cf.art && !cf.ice){ cf.artOk = fillGood(cf) && qZone(cf.temp, TEMP_LO, TEMP_HI, 15) >= .6 && cf.foam > .3;
@@ -5259,7 +5445,7 @@ function finishCoffee(){
 const CSTEPS = [
   {view:viewBean, tray:trayBean, bind:bindCoffee, down:pfDown, move:pfMove},
   {view:viewShot, tray:trayShot, bind:bindCoffee, down:pfDown, move:pfMove},
-  {view:viewBase, tray:trayBase, bind:bindCoffee},
+  {view:viewBase, tray:trayBase, bind:bindCoffee, down:cfDown2, move:cfMove2},
   {view:viewFinish, tray:trayFinish, bind:bindCoffee},
 ];
 
@@ -5285,6 +5471,7 @@ function goNext(){
     sfx.ok();
     const L = pSteps();
     if (G.step >= L.length - 1){ finishPastry(); return; }
+    if (L[G.step].id === 'shape' && G.cake.pieces) G.cake.pieces = G.cake.pieces.filter(p => p.done);
     G.step++; G.sx = null;
     const id = L[G.step].id;
     if (id === 'shape') prepShapeP();
@@ -5541,7 +5728,7 @@ function fit(){
     SCALE = 1; g.style.transform = '';
   } else {
     // PC·가로 화면: 960×600 화면을 통째로 맞춰서 가운데에
-    const W = 960, H = 600, pad = Math.min(w,h) < 500 ? 4 : 30;
+    const W = g.classList.contains('wide') ? 1120 : 960, H = 600, pad = Math.min(w,h) < 500 ? 4 : 30;
     SCALE = Math.max(.1, Math.min((w-pad)/W, (h-pad)/H, 1.6));
     g.style.transform = `translate(${((w-W*SCALE)/2).toFixed(1)}px, ${((h-H*SCALE)/2).toFixed(1)}px) scale(${SCALE})`;
   }
