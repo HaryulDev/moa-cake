@@ -274,16 +274,21 @@ html.fluid #stage{bottom:auto;height:100%}
 #game.wide:not(.fluid){width:1120px}
 #game.wide:not(.fluid) #work{width:762px}
 #game.wide:not(.fluid) #viewWrap{transform:scale(1.27);transform-origin:0 0}
-#game.wide:not(.fluid) #side{left:794px;width:310px;height:250px}
+#game.wide:not(.fluid) #side{left:794px;width:310px;height:208px}
 #game.wide:not(.fluid) #side .card{overflow-y:auto;overflow-x:hidden}
-#game.wide:not(.fluid) #tray{position:absolute;left:778px;top:268px;width:310px;height:240px;margin:0;flex-direction:column;align-items:stretch;justify-content:flex-start;
+#game.wide:not(.fluid) #tray{position:absolute;left:778px;top:224px;width:310px;height:284px;margin:0;flex-direction:column;align-items:stretch;justify-content:flex-start;
   overflow-y:auto;overflow-x:hidden;padding:10px 10px 12px;gap:8px}
 #game.wide:not(.fluid) #tray::-webkit-scrollbar{width:8px}#game.wide:not(.fluid) #tray::-webkit-scrollbar-thumb{background:#ff9ab8;border-radius:4px}
 #game.wide:not(.fluid) #tray .rows{flex:none}
 #game.wide:not(.fluid) #tray .row{flex-wrap:wrap}
-#game.wide:not(.fluid) #tray .tb{width:auto;min-width:52px;padding:0 6px}
-#game.wide:not(.fluid) #tray .row>b{width:100%;display:flex;align-items:center;gap:4px}
-#game.wide:not(.fluid) #tray .next{width:100%;margin-top:auto}
+#game.wide:not(.fluid) #tray .tb{width:auto;min-width:48px;height:38px;padding:0 4px}
+#game.wide:not(.fluid) #tray .tb small{font-size:10px}
+#game.wide:not(.fluid) #tray .row{gap:4px;align-items:flex-start}
+#game.wide:not(.fluid) #tray .row>b{width:26px;font-size:12px;line-height:1.1;text-align:center;padding-top:8px;word-break:keep-all}
+#game.wide:not(.fluid) #tray .row>b svg.ic{font-size:22px}
+#game.wide:not(.fluid) #tray .rows{gap:4px}
+#game.wide:not(.fluid) #tray .next{width:100%;margin-top:auto;position:sticky;bottom:0;z-index:3;flex:none}
+#game.wide:not(.fluid) #tray .gauge+.next,#game.wide:not(.fluid) #tray .msg+.next{margin-top:auto}
 #game.wide:not(.fluid) #tray .msg{flex:none;font-size:15px}
 #game.wide:not(.fluid) #tray .gauge{flex:none}
 #game.wide:not(.fluid) #tray .topwrap{width:100%}
@@ -538,6 +543,8 @@ html.fluid #stage{bottom:auto;height:100%}
 #game.fluid .tb.sm{width:auto;height:44px}
 #game.fluid .tb small{font-size:9.5px;letter-spacing:-.5px}
 #game.fluid .next{padding:9px;font-size:17px}
+/* 화면이 작아도 "다음/완성" 버튼은 늘 화면 아래에 보이게 */
+#game.fluid #tray .next{position:sticky;bottom:max(6px,env(safe-area-inset-bottom,0px));z-index:4;box-shadow:0 4px 0 var(--ol),0 -6px 14px rgba(255,240,245,.9)}
 /* 레벨 · 레시피 북 */
 .xpbar{display:inline-block;vertical-align:middle;width:70px;height:9px;border-radius:6px;background:rgba(255,255,255,.55);border:1.5px solid rgba(107,42,60,.45);overflow:hidden;margin:0 4px}
 .xpbar i{display:block;height:100%;background:linear-gradient(90deg,#ffd36e,#ffb02e)}
@@ -598,6 +605,9 @@ html.fluid #stage{bottom:auto;height:100%}
 .sw.cb.sel{background:linear-gradient(#fff6d6,#ffe39a);box-shadow:0 0 0 2px var(--gold),0 0 0 4px var(--ol);transform:translateY(-2px)}
 .sw.cb:active{transform:scale(.94)}
 #game.fluid .sw.cb{width:auto}
+#game.wide:not(.fluid) #tray .sw.cb{width:33px}
+#game.wide:not(.fluid) #tray .sw.cb svg{width:31px;height:auto}
+#game.wide:not(.fluid) #tray .sw.cb small{font-size:9px}
 #game.fluid .sw.cb svg{width:100%;max-width:44px;height:auto}
 .tb.hold{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .tb.hold.on,.tb.on{background:linear-gradient(#fff6d6,#ffe39a)!important;transform:translateY(2px)}
